@@ -51,9 +51,19 @@ export default function HomeNoir({
 
         {/* ============ STATEMENT ============ */}
         <section className="hn-statement">
-          <div className="lp-container">
-            <span className="hn-kicker reveal">{content.brand.tagline}</span>
-            <h2 className="hn-statement__text reveal" data-delay="100">{content.intro.paragraphs[0]}</h2>
+          <div className={`lp-container${content.about.avatar ? " hn-statement__grid" : ""}`}>
+            <div>
+              <span className="hn-kicker reveal">{content.brand.tagline}</span>
+              <h2 className="hn-statement__text reveal" data-delay="100">{content.intro.paragraphs[0]}</h2>
+            </div>
+            {content.about.avatar && (
+              <a className="hn-statement__profile reveal" data-delay="200" href="#about">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={content.about.avatar} alt={content.about.title} />
+                <span className="hn-statement__name">{content.footer.agentName}</span>
+                <span className="hn-link">Meet {content.footer.agentName.split(" ")[0]}</span>
+              </a>
+            )}
           </div>
         </section>
 
@@ -126,7 +136,7 @@ export default function HomeNoir({
         </section>
 
         {/* ============ ABOUT: split with portrait ============ */}
-        <section className="hn-about">
+        <section className="hn-about" id="about">
           <div className="lp-container hn-about__grid">
             <div className="hn-about__media reveal">
               {/* eslint-disable-next-line @next/next/no-img-element */}

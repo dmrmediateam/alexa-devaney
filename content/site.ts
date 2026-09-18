@@ -198,6 +198,8 @@ export interface SiteContent {
     image: string;
     /** "portrait" (default) = circular headshot; "photo" = wide team photo */
     imageStyle?: "portrait" | "photo";
+    /** Optional square headshot shown beside the homepage statement, linking down to #about */
+    avatar?: string;
     /** Alternate plain paragraphs and bolded lead-ins */
     blocks: { heading?: string; text: string }[];
   };
@@ -589,6 +591,7 @@ export const site: SiteContent = {
     title: "Meet Alexa Devaney",
     subtitle: "Senior Realtor Associate · The Oppenheim Group",
     image: "/photos/alexa-devaney.jpg",
+    avatar: "/photos/alexa-devaney-headshot.jpg",
     blocks: [
       {
         text: "For more than ten years I have helped San Diego families buy and sell with confidence, pairing deep local market knowledge with strategic negotiation and close attention to detail.",

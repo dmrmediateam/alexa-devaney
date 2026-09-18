@@ -208,6 +208,13 @@ ul { list-style: none; }
   margin-top: 5px;
 }
 
+/* Montserrat runs wider than Futura: shrink the wordmark on phones so it fits */
+@media (max-width: 600px) {
+  .header__logo { padding: 0 12px; }
+  .logo-name { font-size: 19px; letter-spacing: 4px; }
+  .logo-tag { font-size: 7.5px; letter-spacing: 2.4px; }
+}
+
 /* scrolled state — solid white, dark text, slides down */
 .navbar.scrolled {
   background-color: var(--white);
@@ -2420,6 +2427,44 @@ a:hover > .hn-link::after,
 
 .hn-statement { padding: 120px 0 40px; }
 
+.hn-statement__grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: clamp(40px, 6vw, 90px);
+  align-items: center;
+}
+
+.hn-statement__profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.hn-statement__profile img {
+  width: clamp(180px, 18vw, 260px);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 183, 155, 0.35);
+  padding: 6px;
+  transition: transform 0.5s ease;
+}
+
+.hn-statement__profile:hover img { transform: scale(1.03); }
+
+.hn-statement__name {
+  font-family: var(--heading-font);
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #f4f1ec;
+}
+
+.hn-about { scroll-margin-top: 80px; }
+
 .hn-statement__text {
   font-family: var(--display-font);
   font-size: clamp(24px, 2.6vw, 38px);
@@ -2605,6 +2650,8 @@ a:hover > .hn-link::after,
   .hn-area__media { aspect-ratio: 16 / 10; }
   .hn-area__text { padding: 40px 25px 54px; }
   .hn-about__grid { grid-template-columns: 1fr; }
+  .hn-statement__grid { grid-template-columns: 1fr; }
+  .hn-statement__profile { align-items: flex-start; }
   .hn-hero__content { padding-bottom: 90px; }
 }
 
