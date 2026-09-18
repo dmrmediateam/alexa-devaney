@@ -98,6 +98,11 @@ export interface SiteContent {
      * `dark` shows on the scrolled white nav and can be reused in the footer.
      */
     logo?: { light: string; dark: string };
+    /**
+     * Brokerage logo shown under the agent name in the header, sized to the
+     * name's width so the brokerage reads as prominently as the agent.
+     */
+    brokerageLogo?: { light: string; dark: string };
     /** Brokerage emblem pinned to the bottom-right of the homepage hero */
     emblem?: string;
     /** Large faint mark used as a background decal on the homepage */
@@ -129,7 +134,12 @@ export interface SiteContent {
     preTitle: string;
     title: string;
     /** Optional background video; the image is used as poster/fallback */
-    video?: { webm?: string; mp4?: string };
+    video?: {
+      webm?: string;
+      mp4?: string;
+      /** Vertical cut served to portrait phones (sharper and lighter than cropping the landscape file) */
+      mobileMp4?: string;
+    };
     image: string;
   };
   searchBar: {
@@ -186,6 +196,8 @@ export interface SiteContent {
     stateCivilRightsAgency?: string;
     lastUpdated?: string;
   };
+  /** Elfsight All-in-One Reviews widget, loaded site-wide (layout is set in the Elfsight dashboard) */
+  reviews?: { elfsightAppId: string };
   /** Optional proof-point band rendered after the intro (e.g. "40+ / Years") */
   stats?: { value: string; label: string }[];
   services: GalleryCard[];
@@ -255,6 +267,7 @@ export const site: SiteContent = {
   brand: {
     name: "Alexa Devaney",
     tagline: "The Oppenheim Group",
+    brokerageLogo: { light: "/brand/og-logo-light.png", dark: "/brand/og-logo-dark.png" },
     emblem: "/brand/og-emblem.png",
     decal: "/brand/og-ring-decal.webp",
   },
@@ -267,7 +280,7 @@ export const site: SiteContent = {
   hero: {
     preTitle: "North County San Diego",
     title: "Coastal Living, Personally Guided",
-    video: { webm: "/video/hero.webm", mp4: "/video/hero.mp4" },
+    video: { mp4: "/video/hero.mp4", mobileMp4: "/video/hero-mobile.mp4" },
     image: "/video/hero-poster.jpg",
   },
   searchBar: {
@@ -529,6 +542,7 @@ export const site: SiteContent = {
       ],
     },
   ],
+  reviews: { elfsightAppId: "9a8f661c-a422-48cb-938c-64944318c827" },
   stats: [
     { value: "10+", label: "Years in San Diego Real Estate" },
     { value: "$60M+", label: "In Closed Sales" },

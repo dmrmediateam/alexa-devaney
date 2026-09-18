@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import Script from "next/script";
 import NewsletterForm from "@/components/leads/NewsletterForm";
 import SiteEffects from "@/components/SiteEffects";
 import type { SiteContent } from "@/content/site";
@@ -58,7 +59,16 @@ export default function SiteChrome({
             ) : (
               <span className="logo-mark">
                 <span className="logo-name">{content.brand.name}</span>
-                <span className="logo-tag">{content.brand.tagline}</span>
+                {content.brand.brokerageLogo ? (
+                  <span className="logo-brokerage">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={content.brand.brokerageLogo.light} alt={content.brand.tagline} className="logo-brokerage--light" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={content.brand.brokerageLogo.dark} alt="" aria-hidden="true" className="logo-brokerage--dark" />
+                  </span>
+                ) : (
+                  <span className="logo-tag">{content.brand.tagline}</span>
+                )}
               </span>
             )}
           </a>
@@ -77,14 +87,40 @@ export default function SiteChrome({
 
       {/* ============ SIDE MENU ============ */}
       <div className="sidemenu" id="sidemenu" aria-hidden="true">
+        {content.brand.decal && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="sidemenu__decal" src={content.brand.decal} alt="" aria-hidden="true" />
+        )}
         <button className="sidemenu__close" id="sidemenu-close" aria-label="Close menu">&times;</button>
+        <span className="sidemenu__eyebrow">{content.brand.tagline}</span>
         <ul className="sidemenu__nav">
-          {content.nav.menu.map((link) => (
-            <li key={link.label}><a href={link.href}>{link.label}</a></li>
+          {content.nav.menu.map((link, i) => (
+            <li key={link.label} style={{ transitionDelay: `${80 + i * 45}ms` }}>
+              <a href={link.href}>{link.label}</a>
+            </li>
           ))}
         </ul>
+        <div className="sidemenu__contact">
+          <span className="sidemenu__contact-name">{content.footer.agentName}</span>
+          {content.contact?.phone && (
+            <a href={`tel:${content.contact.phone.replace(/[^+\d]/g, "")}`}>{content.contact.phone}</a>
+          )}
+          {content.contact?.email && <a href={`mailto:${content.contact.email}`}>{content.contact.email}</a>}
+          <span>
+            {content.footer.brokerage}
+            {content.legal?.licenseNumber ? ` · DRE# ${content.legal.licenseNumber}` : ""}
+          </span>
+        </div>
       </div>
       <div className="sidemenu-overlay" id="sidemenu-overlay"></div>
+
+      {/* Elfsight reviews widget (configured as a floating rating badge in Elfsight) */}
+      {content.reviews && (
+        <>
+          <div className={`elfsight-app-${content.reviews.elfsightAppId}`} data-elfsight-app-lazy></div>
+          <Script src="https://elfsightcdn.com/platform.js" strategy="lazyOnload" />
+        </>
+      )}
 
       {children}
 

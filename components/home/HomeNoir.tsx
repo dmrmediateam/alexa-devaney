@@ -1,5 +1,6 @@
 import SiteChrome from "@/components/SiteChrome";
 import CountUpStat from "@/components/home/CountUpStat";
+import EmblemFlight from "@/components/home/EmblemFlight";
 import type { Listing, SiteContent } from "@/content/site";
 
 /* ==========================================================================
@@ -22,11 +23,17 @@ export default function HomeNoir({
   return (
     <SiteChrome content={content} animateIn>
       <div className="hn">
+        {content.brand.emblem && content.brand.decal && (
+          <EmblemFlight emblem={content.brand.emblem} decal={content.brand.decal} />
+        )}
         {/* ============ HERO: full-bleed, slow Ken Burns drift ============ */}
         <section className="video-section hn-hero">
           <div className="hn-hero__media">
             {content.hero.video ? (
               <video poster={content.hero.image} loop muted autoPlay playsInline>
+                {content.hero.video.mobileMp4 && (
+                  <source src={content.hero.video.mobileMp4} type="video/mp4" media="(max-width: 768px) and (orientation: portrait)" />
+                )}
                 {content.hero.video.webm && <source src={content.hero.video.webm} type="video/webm" />}
                 {content.hero.video.mp4 && <source src={content.hero.video.mp4} type="video/mp4" />}
               </video>
