@@ -1,0 +1,4 @@
+[   39590ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/templates/estate:0
+[   40551ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[   42969ms] [ERROR] Access to XMLHttpRequest at 'https://dakvo8z10w4va.cloudfront.net/' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/templates/estate:0
+[   42970ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://dakvo8z10w4va.cloudfront.net/:0

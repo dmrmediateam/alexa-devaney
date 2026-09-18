@@ -1,0 +1,71 @@
+[     880ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[   49223ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[   72849ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[   82646ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[   96134ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[   96517ms] [LOG] [Fast Refresh] done in 383ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[   96772ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/templates:0
+[   96998ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[   98530ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  132276ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  136441ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  152303ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  283286ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  296243ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  296902ms] [LOG] [Fast Refresh] done in 1787347198490ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[  299193ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  301339ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  311685ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  510971ms] [WARNING] An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing. @ https://widgetbe.com/agent:0
+[  517188ms] [ERROR] Refused to execute script from 'https://www.eaganluxury.com/_next/static/css/6d0ed664d2fabc02.css?dpl=dpl_47WyTD9NyYLUGQubozWi22dSmFwB' because its MIME type ('text/css') is not executable, and strict MIME type checking is enabled. @ https://www.eaganluxury.com/:0
+[  540340ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_CLOSED @ https://widgetbe.com/agent:0
+[  541369ms] [WARNING] Google Maps JavaScript API has been loaded directly without loading=async. This can result in suboptimal performance. For best-practice loading patterns please see https://goo.gle/js-api-loading @ https://maps.googleapis.com/maps/api/js?callback=__googleMapsCallback&key=AIzaSyCIY9-pwOauKk5EeI-LFy4crd3WPVxwv3A&libraries=places:2600
+[  544504ms] [INFO] %c
+                           ......                            ......
+                    .^7YPB##&&&##BG5J!:                :!J5GB##&&&##BPY7^.
+                 :?P#BSPBSPBSPBSPBSPBS&BY~          ~YB&BSPBSPBSPBSPBSPBS#P?:
+               ~P&BSPBSPBS&##BB#&&BSPBSPBSBJ:    .J#BSPBSPBS&&#BB##&BSPBSPBS&P~
+             ~GBSPBSPBGY!^.     .:~?P#BSPBSP&Y:   !GBSPB#P?~:.     .^!YBBSPBSPBG^
+            JBSPBSP#J:    :~!!!~^.   .!PBSPBSP&5^   ~PP!.   .^~!!!~:    :J#BSPBSPJ
+           5BSPBSPJ.  .!5#&BSPBSP&GJ^   ^5&BSPBSPP~      ^JG&BSPBSP&#5!.  .JBSPBSP5
+          ?BSPBS&~   7#BSPBSPBSPBSPBSP~   ^Y&BSPBSPG!  :5BSPBSPBSPBSPBS#7   ~&BSPBSJ
+         :&BSPBS!   YBSPBSPBSPBSPBSPBSPG!   :J&BSPBSPG?#BSPBSPBSPBSPBSPBSY   !BSPBS&:
+         7BSPBSG   !BSPBSPBSPBSPBSPBSPBSPG!   .?#BSPBSPBSPBSPBSPBSPBSPBSPB!   GBSPBS7
+         JBSPBS5   YBSPBSPBSPBSPBSPBSPBSPBSB7.  .7BBSPBSPBSPBSPBSPBSPBSPBSJ   5BSPBSJ
+         7BSPBSG   !BSPBSPBSPBSPBSPBSPBSPBSPB#?.   !BBSPBSPBSPBSPBSPBSPBSP!   GBSPBS7
+         :&BSPBS!   YBSPBSPBSPBSPBSPBS#?GBSPBSP#J:   !GBSPBSPBSPBSPBSPBSPY   !BSPBS&:
+          ?BSPBS&~   7#BSPBSPBSPBSPBS5:  !GBSPBSP&Y:   ~PBSPBSPBSPBSPBS#7   ~&BSPBSJ
+           5BSPBSPJ.  .!5#&BSPBSP&GJ^      ~PBSPBSP&5^   ^JG&BSPBSP&#5!.  .JBSPBSP5
+            JBSPBSP#J:    :~!!!~^.   .!PP~   ^5&BSPBSPP!.   .^~!!!~:    :J#BSPBSPJ
+             ~GBSPBSPBGY!^.     .:~?P#BSPBG!   :Y&BSPBSP#P?~:.     .^!YBBSPBSPBG^
+               ~P&BSPBSPBS&##BB#&BSPBSPBSP#J.    :J#BSPBSPBS&&#BB##&BSPBSPBS&P~
+                 :?P#BSPBSPBSPBSPBSPBS&BY~          ~YB&BSPBSPBSPBSPBSPBS#P?:
+                    .^7YPB##&&&##BG5J!:                :!J5GB##&&&##BPY7^.
+                           ......                            ......
+
+We're hiring! https://bndspn.com/join-issuu
+ font-family: monospace; font-size: 7px; line-height: 1.2; @ https://e.issuu.com/reader4/543134b/_next/static/chunks/app/layout-85ec4da48c293bb5.js:0
+[  545478ms] [WARNING] An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing. @ https://widgetbe.com/agent:0
+[  667493ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/team:0
+[  667765ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  667885ms] Error: Event handlers cannot be passed to Client Component props.
+  <a href=... onClick={function onClick} children=...>
+                      ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>:1:18)
+    at resolveErrorDev (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:2405:46)
+    at processFullStringRow (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:2891:23)
+    at processFullBinaryRow (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:2834:7)
+    at processBinaryChunk (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:3037:15)
+    at progress (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:3303:13)
+[  667993ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/favicon.ico:0
+[  671002ms] [WARNING] The resource http://localhost:3000/_next/static/css/app/layout.css?v=1787347568448 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/team:0
+[  671002ms] [WARNING] The resource http://localhost:3000/equal-housing.png was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/team:0
+[  705211ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  715554ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  719888ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[  720095ms] [LOG] [Fast Refresh] done in 207ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[  720778ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  874818ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  879517ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[  938881ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630

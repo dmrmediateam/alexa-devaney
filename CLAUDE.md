@@ -1,0 +1,249 @@
+> CLIENT REPO: **Alexa Devaney** · homepage variant: **noir** · scaffolded by new-client.
+> This repo serves ONE client. Customize content/site.ts per the playbook below;
+> the other homepage variants have been removed by design - do not re-add them.
+
+# Client Customization Playbook
+
+This repo is a reusable luxury real estate template. When a user gives you client
+material (logo, colors, service areas, Zillow/realtor.com/Google Business links,
+photos), your job is to customize this template for that client. **All content edits
+happen in `content/site.ts` — do not restructure components or CSS unless asked.**
+
+## How this template works
+
+- `content/site.ts` — the `SiteContent` type + neutral demo config: every word, link,
+  image URL, brand color, logo, interior page, and IDX setting. Build fails on missing
+  fields.
+- `content/clients/<slug>.ts` — one config per client (see carole-tierney.ts). The
+  homepage renders at `/<slug>`, interior pages at `/<slug>/<page>`, via the dynamic
+  route in `app/<slug>/[slug]/page.tsx` (copy the carole-tierney folder to add a client).
+- When a client graduates to their own repo/Vercel project: copy the repo, point
+  `app/page.tsx` and `app/[slug]/page.tsx` at their config, delete other clients.
+- `app/globals.css` — the design system. Colors flow from `site.theme` (injected as CSS
+  variables in `app/layout.tsx`), so **never hardcode brand colors in CSS**.
+- `app/page.tsx` — renders the config. Only touch it for structural changes
+  (adding/removing whole sections).
+- `components/SiteEffects.tsx` — scroll/hover motion. Don't change during customization.
+- `public/` — put downloaded client assets here (logo, photos) and reference them as
+  `/filename.ext` in the config.
+
+## Homepage variants
+
+Interior pages are identical across clients; the homepage carries the visual
+identity. Pick one per client via `homeVariant` in their config:
+
+- `"classic"` (default) - light; centered serif hero over photo/video,
+  floating search card, editorial cards, stats band, overlay area cards
+- `"noir"` - dark cinematic gallery; Ken Burns hero, serif statement,
+  count-up stats, horizontal listings rail, full-width alternating area rows
+- `"estate"` - bright architectural split-screen; type panel + clip-path
+  image hero with inline stats, marquee ticker, hover-swap service showcase,
+  staggered area collage, framed portrait with drop cap, split CTA
+
+All three read the same config fields, so switching is a one-line change.
+Compare them at /templates/classic, /templates/noir, /templates/estate
+(noindexed). Variant code lives in components/home/; do not fork variants
+per client - improve them for everyone.
+
+## Teams vs individual agents
+
+The template serves both; the reference team sites (Vignette Realty, The
+Florio Team, Eagan Luxury, Legendary) all follow the same pattern:
+
+- **Voice**: teams write "we" sitewide; `footer.agentName` holds the team
+  name ("The Florio Team") and TCPA consent text names the team.
+- **Homepage about stays a founder/lead spotlight** - every reference team
+  site does this rather than cramming the roster onto the homepage. Set
+  `about.imageStyle: "photo"` for a wide team photo instead of the circular
+  headshot when the client prefers.
+- **Roster page**: fill `team.members` (name, role, photo, phone, email,
+  license, 1-2 sentence bio) and add a `type: "team"` page. Link it from
+  the side menu and footer.
+- **Per-agent profile pages** (the Vignette pattern) are just standard
+  SubPages; point a member's `href` at one. Only build these when the
+  client's agents each have real bios, testimonials, or listings to show.
+- Individual agents simply omit `team` and the roster page.
+
+## Intake checklist
+
+Collect from the user (ask once for anything missing, then proceed with what you have):
+
+1. **Logo** — files or a URL. Need a light (white) version for the hero nav and a dark
+   version for the scrolled nav. If only one color exists, set it as both and note it.
+2. **Brand colors** — primary + secondary. If not given, extract from the logo or their
+   existing site; confirm your picks with swatches before applying.
+3. **Agent/team name, brokerage, tagline** — drives wordmark, footer, metadata.
+   For teams also collect: each member's name, role, headshot, phone, email,
+   license number, and a short bio (see Teams section).
+4. **Service areas** — becomes the `areas` gallery (any count works; 4 looks best).
+5. **Zillow / realtor.com profile URL** — fetch it; mine for: agent bio, years of
+   experience, sales stats, specialties, team members, reviews. Rewrite (never copy
+   verbatim) into the `about.blocks` and `intro.paragraphs`.
+6. **Google Business profile** — address (footer), phone, hours, review themes.
+7. **Photos** — see the photo workflow below.
+
+## Applying the customization
+
+Work through `content/site.ts` top to bottom:
+
+| Config field | Source |
+|---|---|
+| `theme.primary/secondary/background` | brand colors (keep background near-white; it's the page canvas) |
+| `brand.name/tagline`, `brand.logo` | logo + name. Logo files go in `public/` |
+| `meta` | "[Main service] [City] – [Team Name]" pattern, ~60 chars title |
+| `hero` | strongest wide image or video; preTitle = geographic hook |
+| `nav`, `footer.links` | keep structure; rename to match the client's actual pages |
+| `services` | keep Buy/Sell/New Development unless the client's focus differs |
+| `stats` | 3 proof points (years, sales volume, ranking) — omit if the client has weak numbers |
+| `intro`, `about` | rewritten from Zillow/realtor.com/GBP material — their voice, their stats |
+| `areas` | one card per service area; write a 1-sentence `description` (shown on hover) |
+| `pages` | listings (Featured Listings), buy (search: true), sell (valuation: true, wizard doubles as the page hero), search, connect. Add niche pages (e.g. new construction) only when the client actually specializes there, as Carole does |
+| `featured.listings` | placeholder properties shown until IDX is connected. Mark them clearly (DEMO- MLS ids) and replace before launch |
+| `idx` | client's IDX Broker subdomain (see IDX section) |
+| `contact` | phone + email for the connect page |
+| `cta`, `footer` | address from GBP; socials from their profiles |
+
+Rules:
+- Rewrite all copy in the client's voice — never leave "Meridian"/"Alex Morgan" text.
+- Search the repo for `Meridian`, `Alex Morgan`, and `picsum` at the end; zero hits
+  outside this file means you're done.
+- Don't invent stats, awards, or credentials. Only use what the source material supports.
+- Never use em dashes in site copy. Use commas, colons, periods, or a middle dot.
+
+## Photo workflow (Envato Elements)
+
+The team has an Envato Elements subscription. There is no public download API, so use
+the **Claude in Chrome** connector (the user's real browser, already logged in):
+
+1. Confirm the Chrome connector is available and elements.envato.com is logged in.
+2. Search terms that match the client's market, e.g. "luxury condo interior",
+   "[city] skyline aerial", "modern waterfront home", "real estate agent lifestyle".
+3. Before downloading, show the user a shortlist (item pages/thumbnails) for approval.
+4. Download with a license for the client's project (Elements asks which project to
+   license to — create/select the client's name), saving to `public/photos/`.
+5. Prefer: hero = wide horizontal (≥1920px), service cards = vertical/portrait,
+   area cards = horizontal cityscape/neighborhood, about = agent's real headshot
+   (never stock), CTA = wide skyline.
+6. If the Chrome connector isn't available, ask the user to download the shortlist
+   manually and drop the files in `public/photos/`.
+
+Real photos beat stock: if the client's Zillow/GBP/website has quality original
+photography the user can license, prefer it for listings/areas.
+
+## IDX Broker: native search + listing pages (no embeds)
+
+The template has a full native IDX integration (adapted from the
+Legendary-Real-Estate production build) - server-rendered, SEO-indexed, no
+iframes:
+
+- `/listings` - MLS search: SSR'd first page, filter bar (location, price,
+  beds, baths, status, sort), URL-synced filters (shareable searches),
+  pagination, rate-limit fallbacks. Filtered URLs are `noindex, follow`.
+- `/listing/[idxId]-[listingId]-[address]` - listing detail: gallery, facts,
+  features accordion, agent rail with inquiry form, MLS attribution pulled
+  from the API's own disclaimer fields, JSON-LD (Residence + Offer +
+  BreadcrumbList), canonical/OG/Twitter metadata, similar listings.
+- Homepage featured band / exclusive listings pull the client's own listings
+  from `/clients/featured`.
+- Buy page carries a working search (`search: true`): filters query
+  /api/listings when IDX is connected, and filter the config's placeholder
+  listings in memory when it is not, so search works in either state.
+- Sell page carries the 3-step valuation wizard (`valuation: true`, optional
+  `valuationImage`): address with MLS-backed autocomplete, property details,
+  contact + TCPA consent. Front-end only; wire the submit to the client CRM.
+- Data layer lives in `lib/idx/` - `request.ts` is the ONLY file that may
+  call api.idxbroker.com. Components consume normalized types from
+  `lib/idx/types.ts` only, never raw IDX shapes.
+
+Per-client setup is env vars in Vercel (never in the repo):
+
+```
+IDX_API_KEY=...            # required for live data
+IDX_ANCILLARY_KEY=...      # optional partner key (higher limits, detail access)
+IDX_MARKET_CITIES=Naples,Bonita Springs,Marco Island   # cached browse pool
+IDX_OFFICE_IDS=abc123      # marks "our listings" vs full MLS
+```
+
+Without a key, /listings shows the config fallback listings and a note; the
+site still builds and deploys. Set `meta.siteUrl` in the client config for
+correct canonicals/sitemap/JSON-LD.
+
+## Lead handling (ships wired)
+
+All four lead forms (footer newsletter, connect, listing enquiry, valuation
+wizard) post to `/api/lead`, which spam-filters and fans out to SendGrid,
+Twilio and a CRM webhook. Per client this is three env vars in Vercel and
+nothing else:
+
+```
+SENDGRID_API_KEY      the agency key
+SENDGRID_FROM_EMAIL   the agency's verified sender (no client DNS needed)
+LEAD_NOTIFY_EMAIL     recipient(s), comma-separated
+```
+
+With nothing set the site still builds and submits; leads are logged as
+`[Lead] NOT DELIVERED` with the full payload. Never leave a client on that at
+launch: it means every lead they paid for is lost.
+
+Add new forms with the `useLeadSubmit` hook, never a fresh `fetch("/api/lead")`
+— it carries attribution, enhanced-conversion identifiers and the analytics
+event. See docs/lead-handling.md.
+
+## Regulatory / compliance (ships by default)
+
+- `/legal/privacy-policy`, `/legal/terms-and-conditions`,
+  `/legal/accessibility` (WCAG 2.1 AA), `/legal/fair-housing` - generated
+  from parameterized boilerplate in `lib/legal.ts` + the client's
+  `site.legal` values (license, MLS name, governing law, state civil rights
+  agency, last-updated date).
+- Footer: legal links row + compliance accordion (MLS/IDX disclaimer, Fair
+  Housing pledge with Equal Housing Opportunity logo, licensing + REALTOR
+  mark notice). MLS disclaimer uses `site.legal.mlsDisclaimer` (paste the
+  client MLS's required text) with a generic fallback.
+- Listing pages render the MLS-supplied attribution/disclaimer from the API.
+- TCPA consent checkboxes on all lead forms; robots.ts + sitemap.ts include
+  legal routes.
+- Fill in `site.legal` per client; never remove the compliance accordion or
+  listing disclosures.
+
+## Verify before handing off## Verify before handing off
+
+1. `npm run build` — must pass.
+2. Run dev server, screenshot every section at desktop and mobile widths.
+3. Check: no placeholder text/images remain; logo legible in both nav states; brand
+   colors applied (buttons, headings, search bar); all links point somewhere real.
+4. Push to the client's repo when the user confirms.
+
+## The 1-hour client setup (own repo per client)
+
+Each client gets their own repo and Vercel project, spawned from this
+template with ONE homepage variant baked in:
+
+1. (2 min) Create the client repo from this template
+   (GitHub "Use this template" -> private repo named after the client;
+   requires the Template repository flag in this repo's settings), clone it.
+2. (1 min) Lock the design and strip the rest:
+   `npm install && npm run new-client -- --slug <slug> --name "<Client Name>" --variant classic|noir|estate`
+   This deletes the other two homepage variants, the /templates previews,
+   and all demo-client scaffolding, marks content/site.ts as the client's
+   config, and typechecks. Commit the result.
+3. (5 min) Collect intake: logo, colors, name, areas, Zillow/GBP links,
+   IDX subdomain (see Intake checklist).
+4. (25 min) Open the repo in VS Code, run `claude`, hand it the intake
+   material. Fill content/site.ts top to bottom: theme, brand, hero, copy
+   rewritten from Zillow/GBP, areas with descriptions, pages, stats,
+   footer, team (if a team), legal.
+5. (15 min) Photos via Envato workflow (or client's own), video hero if
+   footage exists (crossfade + compress: 1600px/24fps h264 CRF30 + webm
+   + poster).
+6. (10 min) Verify (build, screenshots, link check), push. Create the
+   Vercel project on the repo; set meta.siteUrl and the IDX env vars.
+
+Never customize a client inside this template repo. This repo keeps all
+three variants, the demo config, and the preview routes; client repos
+keep exactly one variant and one config.
+
+## Deploy
+
+Standard Next.js: Vercel/Cloudflare/Netlify auto-detect it. Static export is possible
+(`output: 'export'`) since the page prerenders fully static.
