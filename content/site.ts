@@ -98,6 +98,10 @@ export interface SiteContent {
      * `dark` shows on the scrolled white nav and can be reused in the footer.
      */
     logo?: { light: string; dark: string };
+    /** Brokerage emblem pinned to the bottom-right of the homepage hero */
+    emblem?: string;
+    /** Large faint mark used as a background decal on the homepage */
+    decal?: string;
     /** Where the header logo links. Defaults to "/"; set per client scope. */
     homeHref?: string;
   };
@@ -251,6 +255,8 @@ export const site: SiteContent = {
   brand: {
     name: "Alexa Devaney",
     tagline: "The Oppenheim Group",
+    emblem: "/brand/og-emblem.png",
+    decal: "/brand/og-ring-decal.webp",
   },
   meta: {
     siteUrl: "https://example.com",

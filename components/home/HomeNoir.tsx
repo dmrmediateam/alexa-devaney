@@ -44,6 +44,10 @@ export default function HomeNoir({
               <a href={content.cta.buttonHref} className="hn-btn hn-btn--ghost">{content.cta.buttonLabel}</a>
             </div>
           </div>
+          {content.brand.emblem && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="hn-hero__emblem" src={content.brand.emblem} alt={content.brand.tagline} />
+          )}
           <div className="hn-hero__scroll" aria-hidden="true">
             <span></span>
           </div>
@@ -51,6 +55,10 @@ export default function HomeNoir({
 
         {/* ============ STATEMENT ============ */}
         <section className="hn-statement">
+          {content.brand.decal && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="hn-statement__decal" src={content.brand.decal} alt="" aria-hidden="true" />
+          )}
           <div className={`lp-container${content.about.avatar ? " hn-statement__grid" : ""}`}>
             <div>
               <span className="hn-kicker reveal">{content.brand.tagline}</span>
