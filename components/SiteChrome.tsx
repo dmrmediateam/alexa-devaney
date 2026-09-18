@@ -17,11 +17,14 @@ export default function SiteChrome({
   content,
   children,
   animateIn = false,
+  navTone = "light",
 }: {
   content: SiteContent;
   children: ReactNode;
   /** Play the logo/nav/hero load-in sequence (homepage only) */
   animateIn?: boolean;
+  /** Scrolled-header color: "dark" suits pages built on a dark canvas */
+  navTone?: "light" | "dark";
 }) {
   const themeVars = {
     "--navy": content.theme.primary,
@@ -33,7 +36,10 @@ export default function SiteChrome({
   } as CSSProperties;
 
   return (
-    <div style={themeVars} className={animateIn ? "load-anim" : undefined}>
+    <div
+      style={themeVars}
+      className={[animateIn && "load-anim", navTone === "dark" && "nav-dark"].filter(Boolean).join(" ") || undefined}
+    >
       <SiteEffects />
 
       {/* ============ HEADER / NAV ============ */}

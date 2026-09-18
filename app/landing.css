@@ -583,3 +583,42 @@ select.lp-input option { color: var(--lp-ink); background: #fff; }
 .bq-btn--ghost { border: 2px solid rgba(255,255,255,.7); color: #fff; }
 .bq-btn--ghost:hover { background: #fff; color: var(--lp-ink); }
 .bq-cta__address { margin-top: 2rem; font-size: .75rem; color: rgba(255,255,255,.45); line-height: 1.7; }
+
+
+/* ---------- mobile optimization ---------- */
+.lp-footer__list a, .lp-footer__colophon a, .lp-footer__legal a { display: inline-block; padding: 9px 0; }
+.bq-card__step { white-space: nowrap; }
+@media (max-width: 768px) {
+  .lp input, .lp select, .lp textarea { font-size: 16px !important; }
+  .lp-hero__inner { padding: 6.5rem 1.25rem 3.5rem; gap: 2rem; }
+  .lp-hero__lede { font-size: .95rem; }
+  .bq-hero__grid { padding: 2.25rem 0 2.5rem; gap: 2rem; }
+  .bq-title { font-size: 2.6rem; }
+  .bq-lede { font-size: 1rem; margin-top: 1rem; }
+  .bq-card { padding: 1.5rem; }
+  .bq-price { min-height: 52px; }
+  .bq-stat__value { font-size: 1.9rem; }
+  .bq-agent, .bq-process { padding: 4rem 0; }
+  .bq-brand { padding: 4.5rem 0; }
+  .bq-point { gap: 1.1rem; }
+  .bq-point__num { font-size: 2rem; }
+  .bq-serving__label { font-size: 11px; }
+  .lp-faq__btn { font-size: 1.05rem; padding: 1.25rem 0; }
+}
+@media (max-width: 420px) {
+  .lp-header__inner { padding: 0 1rem; }
+  .lp-header__phone { padding: .55rem .9rem; font-size: .75rem; letter-spacing: .02em; }
+  .lp-lockup__name { font-size: 14px; letter-spacing: 3px; }
+}
+
+/* Mobile order for the buyers hero: headline, then the form, then the detail
+   bullets. On phones the form otherwise sat a full screen below the fold. */
+.bq-hero__grid { grid-template-areas: "head" "form" "details"; }
+.bq-hero__head { grid-area: head; }
+.bq-hero__details { grid-area: details; }
+.bq-hero__form { grid-area: form; }
+@media (min-width: 1024px) {
+  .bq-hero__grid { grid-template-areas: "head form" "details form"; row-gap: 0; }
+  .bq-hero__details { align-self: start; }
+  .bq-hero__head { align-self: end; }
+}

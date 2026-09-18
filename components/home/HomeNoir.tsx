@@ -21,7 +21,7 @@ export default function HomeNoir({
   const featuredListings = liveListings ?? content.featured?.listings ?? [];
 
   return (
-    <SiteChrome content={content} animateIn>
+    <SiteChrome content={content} animateIn navTone="dark">
       <div className="hn">
         {content.brand.emblem && content.brand.decal && (
           <EmblemFlight emblem={content.brand.emblem} decal={content.brand.decal} />
@@ -107,8 +107,8 @@ export default function HomeNoir({
               <a href={content.intro.ctaHref} className="hn-link">View All</a>
             </div>
             <div className="hn-rail__track" tabIndex={0} aria-label="Featured properties carousel">
-              {featuredListings.map((listing, i) => (
-                <a className="hn-rail__card reveal" data-delay={(i % 4) * 80 || undefined} href={listing.href} key={listing.mls ?? listing.address}>
+              {featuredListings.map((listing) => (
+                <a className="hn-rail__card" href={listing.href} key={listing.mls ?? listing.address}>
                   <div className="hn-rail__media">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={listing.image} alt={listing.address} loading="lazy" />

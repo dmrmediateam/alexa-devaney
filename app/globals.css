@@ -234,9 +234,10 @@ ul { list-style: none; }
 
 /* hamburger */
 .hamburger {
-  width: 34px;
-  height: 22px;
-  margin-left: 28px;
+  width: 44px;
+  height: 44px;
+  margin-left: 23px;
+  margin-right: -5px;
   background: none;
   border: 0;
   cursor: pointer;
@@ -249,18 +250,18 @@ ul { list-style: none; }
 .hamburger::after {
   content: "";
   position: absolute;
-  left: 0;
-  width: 100%;
+  left: 5px;
+  width: 34px;
   height: 2px;
   background: currentColor;
   transition: 0.3s;
 }
 
-.hamburger::before { top: 2px; }
-.hamburger span { top: 10px; }
-.hamburger::after { top: 18px; }
+.hamburger::before { top: 13px; }
+.hamburger span { top: 21px; }
+.hamburger::after { top: 29px; }
 
-.hamburger:hover span { width: 70%; }
+.hamburger:hover span { width: 24px; }
 
 /* ==========================================================================
    Side menu
@@ -637,8 +638,8 @@ ul { list-style: none; }
 .boxed-text__description p {
   font-size: 16px;
   letter-spacing: 1px;
-  line-height: 1.6;
-  color: var(--taupe);
+  line-height: 1.7;
+  color: #3a3a3c;
   margin-bottom: 18px;
   text-align: left;
 }
@@ -1282,7 +1283,9 @@ footer { background: var(--cream); }
 .connect-grid__details p { margin-bottom: 8px; font-size: 14.5px; }
 .connect-grid__details a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
 
+.connect-grid > * { min-width: 0; }
 .connect-grid__fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.connect-grid__fields input, .connect-grid__fields textarea { width: 100%; min-width: 0; }
 .connect-grid__fields textarea { grid-column: 1 / -1; resize: vertical; }
 
 .connect-grid__fields input,
@@ -2642,18 +2645,33 @@ a:hover > .hn-link::after,
 }
 
 .hn-rail__track {
+  /* one gutter value drives the side padding AND the snap offset, so cards
+     settle on the same left edge as the heading instead of the screen edge */
+  --rail-gutter: max(25px, calc((100% - 1370px) / 2 + 25px));
   display: flex;
   gap: 22px;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
-  padding: 0 max(25px, calc((100vw - 1370px) / 2 + 25px)) 18px;
+  scroll-padding-inline: var(--rail-gutter);
+  padding: 0 var(--rail-gutter) 18px;
   scrollbar-width: thin;
   scrollbar-color: rgba(244, 241, 236, 0.25) transparent;
+  -webkit-overflow-scrolling: touch;
 }
+
+/* trailing spacer: flex containers drop end padding in some browsers */
+.hn-rail__track::after { content: ""; flex: 0 0 1px; }
 
 .hn-rail__card {
   flex: 0 0 min(420px, 82vw);
   scroll-snap-align: start;
+}
+
+@media (max-width: 768px) {
+  /* 25px matches .lp-container, so cards line up with the heading above */
+  .hn-rail__track { --rail-gutter: 25px; gap: 14px; }
+  .hn-rail__card { flex-basis: 80vw; scroll-snap-stop: always; }
 }
 
 .hn-rail__media {
@@ -3541,3 +3559,119 @@ a:hover > .hn-link::after,
   letter-spacing: .6px; color: var(--navy); line-height: 1.45;
 }
 .closings__meta { display: block; margin-top: 5px; font-size: 11px; letter-spacing: 1.1px; text-transform: uppercase; color: #8a847c; }
+
+
+/* ==========================================================================
+   Mobile optimization pass (phones and small tablets)
+   ========================================================================== */
+
+/* Links-in-lists, socials, and consent boxes get finger-sized hit areas everywhere */
+.socials a { display: inline-grid; place-items: center; min-width: 44px; min-height: 44px; margin: -12px; }
+.socials { gap: 18px; }
+.newsletter__consent input[type="checkbox"],
+.connect-grid__form input[type="checkbox"] { width: 18px; height: 18px; flex: none; accent-color: var(--navy); }
+.connect-btn { font-size: 11px; }
+
+@media (max-width: 768px) {
+  /* iOS zooms into any field under 16px on focus; keep every input at 16px */
+  input, select, textarea { font-size: 16px !important; }
+
+  /* the scroll cue line sits on top of the stacked hero buttons */
+  .hn-hero__scroll { display: none; }
+  .hn-hero__actions .hn-btn { min-height: 48px; }
+
+  .footer__nav a { padding: 5px 0; line-height: 1.6; }
+  .footer__legal-links a { display: inline-block; padding: 8px 0; }
+  .connect-grid__fields { grid-template-columns: 1fr; }
+  .connect-grid__details a { display: inline-block; padding: 6px 0; }
+  .adv-search__reset { padding: 12px 0; }
+  .adv-search__field label { font-size: 11px; }
+  .hn-link { display: inline-block; padding: 10px 0; }
+  .boxed-text__description p { font-size: 15px; letter-spacing: 0.3px; }
+  .closings__grid { grid-template-columns: 1fr 1fr; gap: 22px 14px; }
+  .closings__address { font-size: 13px; }
+}
+
+@media (max-width: 600px) {
+  /* logo left, menu right: the centered lockup crowded the hamburger */
+  .header__left { display: none; }
+  .navbar .header { padding: 10px 16px 10px 20px; }
+  .header__logo { padding: 0; text-align: left; }
+  .logo-mark { text-align: left; }
+  .logo-brokerage { margin-left: 0; min-width: 112%; }
+  .header__right { flex: 0 0 auto; }
+
+  /* keep the floating button clear of the Elfsight rating badge (bottom center) */
+  .connect-btn { right: 16px; bottom: 92px; padding: 13px 20px; }
+}
+
+@media (max-width: 380px) {
+  .logo-name { font-size: 17px; letter-spacing: 3.2px; }
+  .closings__grid { grid-template-columns: 1fr; }
+}
+
+
+/* ==========================================================================
+   Smooth edges: no rubber-band flashes of the page canvas past the top or
+   bottom on iOS/Android, and a dark scrolled header on the dark homepage
+   ========================================================================== */
+
+html, body { overscroll-behavior-y: none; }
+html:has(.hn) { background: #0e0f10; }
+
+.nav-dark .navbar.scrolled {
+  background-color: rgba(14, 15, 16, 0.94);
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06), 0 8px 24px rgba(0, 0, 0, 0.35);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.nav-dark .navbar.scrolled .logo-brokerage--light { display: block !important; }
+.nav-dark .navbar.scrolled .logo-brokerage--dark { display: none !important; }
+
+/* ==========================================================================
+   404
+   ========================================================================== */
+
+.nf { position: relative; overflow: hidden; background: #0e0f10; color: #f4f1ec; padding: 170px 0 110px; }
+.nf__decal {
+  position: absolute; right: -14%; top: 50%; width: min(820px, 90vw);
+  transform: translateY(-50%) rotate(-12deg); opacity: 0.14; pointer-events: none;
+}
+.nf__inner { position: relative; z-index: 1; max-width: 860px; }
+.nf__code { font-size: 12px; font-weight: 600; letter-spacing: 4px; color: var(--taupe); }
+.nf__title { margin-top: 14px; font-family: var(--display-font); font-size: clamp(38px, 6vw, 72px); font-weight: 300; line-height: 1.05; }
+.nf__lede { margin-top: 20px; max-width: 560px; font-size: 16px; line-height: 1.75; color: #b6b0a6; }
+.nf__search { margin-top: 36px; display: flex; max-width: 560px; }
+.nf__search input {
+  flex: 1; min-width: 0; padding: 16px 18px; border: 1px solid rgba(244, 241, 236, 0.25); border-right: 0;
+  background: rgba(255, 255, 255, 0.06); color: #fff; font-family: var(--body-font); font-size: 16px; outline: none;
+}
+.nf__search input::placeholder { color: rgba(244, 241, 236, 0.5); }
+.nf__search input:focus { border-color: var(--taupe); }
+.nf__search button {
+  border: 0; background: var(--taupe); color: #fff; padding: 0 26px; cursor: pointer;
+  font-family: var(--heading-font); font-size: 11px; font-weight: 600; letter-spacing: 2.2px; text-transform: uppercase;
+}
+.nf__links { margin-top: 50px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 34px; }
+.nf__links a {
+  display: flex; flex-direction: column; gap: 4px; padding: 20px 0;
+  border-top: 1px solid rgba(244, 241, 236, 0.12); transition: padding-left 0.3s ease;
+}
+.nf__links a:hover { padding-left: 8px; }
+.nf__link-label { font-size: 18px; font-weight: 400; color: #f4f1ec; }
+.nf__link-note { font-size: 12px; letter-spacing: 1px; color: #8f8a82; }
+.nf__contact { margin-top: 40px; font-size: 14px; color: #b6b0a6; }
+.nf__contact a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 600px) {
+  .nf { padding: 140px 0 80px; }
+  .nf__links { grid-template-columns: 1fr; }
+  .nf__search { flex-direction: column; }
+  .nf__search input { border-right: 1px solid rgba(244, 241, 236, 0.25); }
+  .nf__search button { padding: 16px; }
+}
+
+.visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}

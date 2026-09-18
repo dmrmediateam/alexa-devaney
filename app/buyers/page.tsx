@@ -67,7 +67,7 @@ export default function BuyersPage() {
           </div>
 
           <div className="bq-hero__grid">
-            <div>
+            <div className="bq-hero__head">
               <p className="bq-eyebrow bq-eyebrow--light">{landing?.serviceArea}</p>
               <h1 className="bq-title">
                 Find your place <em>on the coast.</em>
@@ -76,6 +76,8 @@ export default function BuyersPage() {
                 Tell Alexa where to reach you. She&apos;ll match you with the right home in
                 Encinitas, Carlsbad, Oceanside, or Fallbrook.
               </p>
+            </div>
+            <div className="bq-hero__details">
               <ul className="bq-bullets">
                 <li>Homes matched to your budget, must-haves, and the way your family lives</li>
                 <li>Early access to homes before they reach the portals</li>
