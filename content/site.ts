@@ -65,6 +65,12 @@ export interface SubPage {
   showListings?: boolean;
   /** Render the working property search (filters + results) on this page */
   search?: boolean;
+  /** Compact search form (hands off to /listings), e.g. on the buy page */
+  searchPanel?: { kicker?: string; title?: string };
+  /** Grid of the agent's sold listings, e.g. on the sell page */
+  recentClosings?: { intro?: string };
+  /** Override the heading over the showListings grid */
+  listingsHeading?: { kicker?: string; title?: string };
   /** Prepend the 3-step "What's your property worth?" wizard (e.g. sell) */
   valuation?: boolean;
   /** Full-bleed background for the valuation wizard (defaults to heroImage) */
@@ -99,8 +105,8 @@ export interface SiteContent {
      */
     logo?: { light: string; dark: string };
     /**
-     * Brokerage logo shown under the agent name in the header, sized to the
-     * name's width so the brokerage reads as prominently as the agent.
+     * Brokerage logo shown under the agent name in the header and footer,
+     * sized slightly wider than the name so the brokerage leads.
      */
     brokerageLogo?: { light: string; dark: string };
     /** Brokerage emblem pinned to the bottom-right of the homepage hero */
@@ -196,6 +202,31 @@ export interface SiteContent {
     stateCivilRightsAgency?: string;
     lastUpdated?: string;
   };
+  /**
+   * Ad landing pages (/home-value, /buyers). Stripped header with no nav links,
+   * because a landing page that offers ten ways to leave converts worse than one
+   * that offers a form. Accents are injected as CSS variables on the wrapper.
+   */
+  landing?: {
+    /** Accent used for eyebrows, rules, and the submit button */
+    accent: string;
+    /** Lighter accent for hero eyebrows and outlines on dark ground */
+    accentLight: string;
+    /** Palest accent for small caps on glass */
+    accentPale: string;
+    /** Marketing line for the landing hero and footer */
+    tagline: string;
+    /** Title / credentials shown under the agent's name */
+    designations: string[];
+    /** Spelled-out credentials for the landing footer */
+    designationsLong: string;
+    /** Communities listed on landing pages; href links to a real page */
+    communities: { label: string; href?: string }[];
+    /** How the market is described in eyebrows, e.g. "North County San Diego" */
+    serviceArea: string;
+    /** Brokerage license number for the landing footer disclosure */
+    brokerageLicense?: string;
+  };
   /** Elfsight All-in-One Reviews widget, loaded site-wide (layout is set in the Elfsight dashboard) */
   reviews?: { elfsightAppId: string };
   /** Optional proof-point band rendered after the intro (e.g. "40+ / Years") */
@@ -267,7 +298,7 @@ export const site: SiteContent = {
   brand: {
     name: "Alexa Devaney",
     tagline: "The Oppenheim Group",
-    brokerageLogo: { light: "/brand/og-logo-light.png", dark: "/brand/og-logo-dark.png" },
+    brokerageLogo: { light: "/brand/og-wordmark-light.png", dark: "/brand/og-wordmark-dark.png" },
     emblem: "/brand/og-emblem.png",
     decal: "/brand/og-ring-decal.webp",
   },
@@ -494,7 +525,9 @@ export const site: SiteContent = {
         },
       ],
       cta: { label: "Start Your Search", href: "/connect" },
-      search: true,
+      searchPanel: { kicker: "Search North County", title: "Find Your Next Home" },
+      showListings: true,
+      listingsHeading: { kicker: "Portfolio", title: "Active & Recently Sold" },
     },
     {
       slug: "sell",
@@ -528,6 +561,9 @@ export const site: SiteContent = {
       ],
       cta: { label: "Request a Valuation", href: "/connect" },
       valuation: true,
+      recentClosings: {
+        intro: "A selection of homes Alexa has recently closed across San Diego County, from Carlsbad and Vista to La Jolla and Point Loma.",
+      },
       valuationImage: "/photos/fallsbrae-estate.jpg",
     },
     { slug: "search", type: "search", title: "Search Properties", preTitle: "Every Listing, One Place", heroImage: "/photos/gordon-ocean-view.jpg" },
@@ -542,6 +578,23 @@ export const site: SiteContent = {
       ],
     },
   ],
+  landing: {
+    accent: "#B71F37",
+    accentLight: "#D8475D",
+    accentPale: "#F2C4CC",
+    tagline: "High-level service. Family first.",
+    designations: ["Senior Realtor Associate"],
+    designationsLong: "Senior Realtor Associate · The Oppenheim Group · CA DRE# 02031174",
+    communities: [
+      { label: "Encinitas", href: "/buy" },
+      { label: "Carlsbad", href: "/buy" },
+      { label: "Oceanside", href: "/buy" },
+      { label: "Vista", href: "/buy" },
+      { label: "Fallbrook", href: "/buy" },
+    ],
+    serviceArea: "North County San Diego",
+    brokerageLicense: "01983697",
+  },
   reviews: { elfsightAppId: "9a8f661c-a422-48cb-938c-64944318c827" },
   stats: [
     { value: "10+", label: "Years in San Diego Real Estate" },

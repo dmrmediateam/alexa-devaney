@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import SiteChrome from "@/components/SiteChrome";
 import ListingsBrowser from "@/components/idx/ListingsBrowser";
-import ListingsGrid from "@/components/ListingsGrid";
+import ListingsSearchPlaceholder from "@/components/ListingsSearchPlaceholder";
 import { site } from "@/content/site";
 import { filtersFromParams } from "@/lib/idx/filterParams";
 import { searchListings } from "@/lib/idx/search";
@@ -38,25 +38,31 @@ export default async function ListingsPage({ searchParams }: Params) {
   const initialFilters = filtersFromParams(toUrlSearchParams(params));
 
   if (!idxConfigured()) {
-    // Demo/unconnected state: config fallback listings + explainer
-    const fallback = site.featured?.listings ?? [];
+    // Pre-IDX placeholder: native search UI over the agent's own portfolio
+    const one = (k: string) => (typeof params[k] === "string" ? (params[k] as string) : "");
     return (
       <SiteChrome content={site}>
         <section className="idx-page-head">
           <div className="lp-container">
-            <h1 className="lp-h2">Property Search</h1>
-            <p className="idx-page-head__sub">MLS search goes live once this site is connected to IDX Broker.</p>
+            <span className="idx-page-head__eyebrow">{site.landing?.serviceArea ?? "Property Search"}</span>
+            <h1>Find a home that feels like yours.</h1>
+            <p className="idx-page-head__sub">
+              From coastal Encinitas and Carlsbad to Oceanside and the rolling hills of Fallbrook,
+              explore homes {site.footer.agentName} has represented, with full MLS search coming soon.
+            </p>
           </div>
         </section>
-        {fallback.length > 0 && (
-          <section className="solid-section">
-            <div className="featured-band lp-vertical-paddings" style={{ paddingTop: 20 }}>
-              <div className="lp-container">
-                <ListingsGrid listings={fallback} />
-              </div>
-            </div>
-          </section>
-        )}
+        <section className="solid-section">
+          <div className="lp-container adv-search-wrap">
+            <ListingsSearchPlaceholder
+              listings={site.featured?.listings ?? []}
+              initial={{
+                location: one("location"), minPrice: one("minPrice"), maxPrice: one("maxPrice"),
+                type: one("type"), beds: one("beds"), baths: one("baths"), sqft: one("sqft"), status: one("status"),
+              }}
+            />
+          </div>
+        </section>
       </SiteChrome>
     );
   }

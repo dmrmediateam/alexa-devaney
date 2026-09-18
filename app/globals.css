@@ -210,7 +210,7 @@ ul { list-style: none; }
 
 /* Brokerage logo under the agent name, as wide as the name (equal prominence) */
 /* width:0 + min-width:100% = match the name's width without widening the logo block */
-.logo-brokerage { display: block; width: 0; min-width: 100%; margin-top: 9px; }
+.logo-brokerage { display: block; width: 0; min-width: 116%; margin: 9px 0 0 -8%; }
 .header__logo .logo-brokerage img { display: block; width: 100%; height: auto; }
 .logo-brokerage--dark { display: none !important; }
 .navbar.scrolled .logo-brokerage--light { display: none !important; }
@@ -756,6 +756,14 @@ footer { background: var(--cream); }
   text-transform: uppercase;
   color: var(--navy);
   margin-bottom: 28px;
+}
+
+/* footer lockup: agent name slightly smaller than the brokerage wordmark */
+.footer__lockup { width: min(360px, 100%); margin-bottom: 28px; }
+.footer__lockup .footer__wordmark { font-size: 34px; letter-spacing: 0.5px; line-height: 1.1; margin-bottom: 12px; }
+.footer__brokerage { display: block; width: 100%; height: auto; }
+@media (max-width: 600px) {
+  .footer__lockup .footer__wordmark { font-size: 28px; }
 }
 
 .footer__agent p {
@@ -1431,8 +1439,7 @@ footer { background: var(--cream); }
    Native IDX search: page head, filter bar, browser states, pagination
    ========================================================================== */
 
-.idx-page-head { padding: 130px 0 6px; }
-.idx-page-head__sub { margin-top: 10px; font-size: 14px; color: #777; }
+
 
 .idx-filters {
   display: flex;
@@ -3334,3 +3341,203 @@ a:hover > .hn-link::after,
 .form-error, .listing-detail__inquiry-error {
   margin-top: 10px; font-size: 12px; color: #a4453a;
 }
+
+/* ==========================================================================
+   Listings search page (Carole Tierney layout, themed) + pre-IDX placeholder
+   ========================================================================== */
+
+.idx-page-head {
+  padding: 168px 0 54px;
+  background: var(--cream);
+  border-bottom: 1px solid rgba(21, 26, 28, 0.08);
+}
+.idx-page-head__eyebrow {
+  display: block;
+  margin-bottom: 12px;
+  font-family: var(--body-font);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+.idx-page-head h1 {
+  max-width: 760px;
+  font-family: var(--display-font);
+  font-size: clamp(38px, 5.4vw, 72px);
+  font-weight: 300;
+  line-height: 1.02;
+  letter-spacing: -1.4px;
+  color: var(--navy);
+}
+.idx-page-head__sub {
+  max-width: 660px;
+  margin-top: 22px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #5d5d60;
+}
+@media (max-width: 768px) {
+  .idx-page-head { padding: 140px 0 40px; }
+}
+
+.adv-search-wrap { padding-top: 40px; padding-bottom: 90px; }
+
+.adv-search__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px 18px;
+}
+.adv-search__field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.adv-search__field--wide { grid-column: span 2; }
+.adv-search__field label {
+  font-family: var(--heading-font);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+.adv-search__field input[type="text"],
+.adv-search__field select {
+  width: 100%;
+  appearance: none;
+  background: var(--white);
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 0;
+  font-family: var(--body-font);
+  font-size: 14px;
+  color: var(--navy);
+  padding: 13px 14px;
+  transition: border-color 0.2s;
+}
+.adv-search__field select {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23151A1C' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 11px;
+  padding-right: 34px;
+  cursor: pointer;
+}
+.adv-search__field input:focus, .adv-search__field select:focus { outline: none; border-color: var(--navy); }
+.adv-search__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.adv-search__submit {
+  margin-left: auto;
+  background: var(--navy);
+  color: var(--white);
+  border: 1px solid var(--navy);
+  border-radius: 0;
+  font-family: var(--heading-font);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  padding: 15px 44px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.adv-search__submit:hover { background: var(--taupe); border-color: var(--taupe); }
+.adv-search__reset {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--heading-font);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--navy);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.adv-search--compact .adv-search__grid { grid-template-columns: 2fr repeat(2, 1fr); }
+.adv-search--compact .adv-search__field--wide { grid-column: span 1; }
+@media (max-width: 992px) {
+  .adv-search__grid, .adv-search--compact .adv-search__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .adv-search__grid, .adv-search--compact .adv-search__grid { grid-template-columns: 1fr; }
+  .adv-search__field--wide { grid-column: span 1; }
+  .adv-search__submit { width: 100%; margin-left: 0; }
+}
+
+.adv-results { margin-top: 56px; }
+.adv-results__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 18px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid rgba(21, 26, 28, 0.1);
+}
+.adv-results__eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+.adv-results__count {
+  margin-top: 8px;
+  font-family: var(--display-font);
+  font-size: 30px;
+  font-weight: 400;
+  color: var(--navy);
+}
+.adv-results__range { font-size: 11px; letter-spacing: 1.8px; text-transform: uppercase; color: #777; }
+.adv-results__empty { padding: 50px 0; text-align: center; color: #555; display: grid; gap: 16px; justify-items: center; }
+.adv-results__pager { margin-top: 44px; display: flex; justify-content: center; align-items: center; gap: 22px; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; }
+.adv-results__pager button {
+  background: none; border: 1px solid var(--navy); padding: 11px 26px; cursor: pointer;
+  font-family: var(--heading-font); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--navy);
+}
+.adv-results__pager button:disabled { opacity: 0.3; cursor: default; }
+.adv-results__note {
+  margin-top: 56px;
+  padding: 26px 30px;
+  background: var(--white);
+  border-left: 3px solid var(--taupe);
+  font-size: 14px;
+  line-height: 1.8;
+  color: #444;
+}
+.adv-results__note a { color: var(--taupe); text-decoration: underline; text-underline-offset: 3px; }
+
+/* compact search band on /buy */
+.search-band { background: #ecebe8; }
+.search-band__title { margin-bottom: 28px; }
+
+/* Recent closings (sell page) */
+.closings__head { text-align: center; max-width: 640px; margin: 0 auto; }
+.closings__intro { margin-top: 14px; color: #5d5d60; line-height: 1.75; }
+.closings__grid {
+  margin-top: 44px; list-style: none; padding: 0;
+  display: grid; gap: 28px 24px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+.closings__card a { display: block; }
+.closings__media { position: relative; display: block; overflow: hidden; aspect-ratio: 4 / 3; background: #e2e2e2; }
+.closings__media img { width: 100%; height: 100%; object-fit: cover; transition: transform 700ms cubic-bezier(.22,1,.36,1); }
+.closings__card a:hover .closings__media img { transform: scale(1.05); }
+.closings__tag {
+  position: absolute; top: 12px; left: 12px;
+  background: var(--taupe); color: #fff;
+  font-family: var(--heading-font); font-size: 10px;
+  letter-spacing: 1.6px; text-transform: uppercase;
+  padding: 6px 12px;
+}
+.closings__address {
+  display: block; margin-top: 14px;
+  font-family: var(--heading-font); font-size: 14px; font-weight: 400;
+  letter-spacing: .6px; color: var(--navy); line-height: 1.45;
+}
+.closings__meta { display: block; margin-top: 5px; font-size: 11px; letter-spacing: 1.1px; text-transform: uppercase; color: #8a847c; }

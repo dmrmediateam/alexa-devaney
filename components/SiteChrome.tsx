@@ -129,10 +129,21 @@ export default function SiteChrome({
         <div className="footer">
           <div className="footer__layout container">
             <div className="footer__col footer__col--brand">
-              <h2 className="footer__wordmark">{content.brand.name}</h2>
-              <div className="footer__agent">
-                <p>{content.footer.agentName}<br /><strong>{content.footer.brokerage}</strong></p>
-              </div>
+              {content.brand.brokerageLogo ? (
+                /* One lockup: agent name over the (larger) brokerage wordmark */
+                <div className="footer__lockup">
+                  <h2 className="footer__wordmark">{content.brand.name}</h2>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="footer__brokerage" src={content.brand.brokerageLogo.dark} alt={content.brand.tagline} />
+                </div>
+              ) : (
+                <>
+                  <h2 className="footer__wordmark">{content.brand.name}</h2>
+                  <div className="footer__agent">
+                    <p>{content.footer.agentName}<br /><strong>{content.footer.brokerage}</strong></p>
+                  </div>
+                </>
+              )}
             </div>
             <div className="footer__col footer__col--nav">
               <div className="footer__nav">

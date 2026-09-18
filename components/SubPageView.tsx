@@ -1,6 +1,8 @@
 import SiteChrome from "@/components/SiteChrome";
 import ContactForm from "@/components/leads/ContactForm";
 import ListingsGrid from "@/components/ListingsGrid";
+import ListingsSearchPlaceholder from "@/components/ListingsSearchPlaceholder";
+import RecentClosings from "@/components/RecentClosings";
 import PropertySearchExperience from "@/components/PropertySearchExperience";
 import ValuationWizard from "@/components/ValuationWizard";
 import type { Listing, SiteContent, SubPage } from "@/content/site";
@@ -81,6 +83,23 @@ export default function SubPageView({
         <TeamBody content={content} page={page} />
       ) : (
         <>
+          {page.searchPanel && (
+            <section className="solid-section">
+              <div className="search-band lp-vertical-paddings">
+                <div className="lp-container reveal">
+                  <span className="featured-band__kicker">{page.searchPanel.kicker ?? "Search Homes"}</span>
+                  <h2 className="lp-h2 search-band__title">{page.searchPanel.title ?? "Find Your Next Home"}</h2>
+                  <ListingsSearchPlaceholder listings={listings} compact />
+                </div>
+              </div>
+            </section>
+          )}
+          {page.recentClosings && (
+            <RecentClosings
+              listings={listings.filter((l) => /sold|closed/i.test(l.status ?? ""))}
+              intro={page.recentClosings.intro}
+            />
+          )}
           {page.search && (
             <PropertySearchExperience
               idxEnabled={idxEnabled}
@@ -111,8 +130,8 @@ export default function SubPageView({
               <div className="featured-band lp-vertical-paddings">
                 <div className="lp-container">
                   <div className="featured-band__head reveal">
-                    <span className="featured-band__kicker">Active Listings</span>
-                    <h2 className="lp-h2">Currently Represented</h2>
+                    <span className="featured-band__kicker">{page.listingsHeading?.kicker ?? "Active Listings"}</span>
+                    <h2 className="lp-h2">{page.listingsHeading?.title ?? "Currently Represented"}</h2>
                   </div>
                   <ListingsGrid listings={listings} />
                 </div>
