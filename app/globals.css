@@ -11,9 +11,10 @@
   --taupe-overlay: rgba(136, 120, 106, 0.4);
   --cream: #FBF9F7;
   --white: #FFFFFF;
-  --heading-font: "Futura", "Jost", sans-serif;
-  --display-font: "Cormorant Garamond", "Times New Roman", serif;
-  --body-font: "Avenir LT Std", "Montserrat", sans-serif;
+  /* The Oppenheim Group style guide authorizes Montserrat only */
+  --heading-font: "Montserrat", sans-serif;
+  --display-font: "Montserrat", sans-serif;
+  --body-font: "Montserrat", sans-serif;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }

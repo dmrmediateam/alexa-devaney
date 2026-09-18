@@ -20,7 +20,7 @@ const themeVars = {
   "--navy": site.theme.primary,
   "--navy-90": `rgba(${hexToRgb(site.theme.primary)}, 0.9)`,
   "--taupe": site.theme.secondary,
-  "--taupe-overlay": `rgba(${hexToRgb(site.theme.secondary)}, 0.4)`,
+  "--taupe-overlay": `rgba(${hexToRgb(site.theme.primary)}, 0.45)`, // O Group: rich-black photo overlay, not red
   "--cream": site.theme.background,
 } as React.CSSProperties;
 
@@ -30,19 +30,11 @@ export default function RootLayout({
   return (
     <html lang="en" style={themeVars}>
       <head>
-        {/* Jost ≈ Futura, Montserrat ≈ Avenir LT Std (the original loads these same fallbacks) */}
+        {/* Montserrat is the only typeface The Oppenheim Group brand guide allows */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css?family=Jost:300,400,500,600,700&display=swap"
-          rel="stylesheet"
-        />
-        <link
           href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap"
           rel="stylesheet"
         />
       </head>

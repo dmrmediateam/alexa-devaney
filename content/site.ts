@@ -232,18 +232,12 @@ export interface SiteContent {
 
 /* --------------------------------------------------------------------------
    CLIENT: Alexa Devaney (alexa-devaney) - homepage variant "noir"
-   Source: Typeform intake (Sep 17, 2026) + ogroup.com/agents/alexa-devaney.
+   Source: Typeform intake (Sep 17, 2026), ogroup.com/agents/alexa-devaney,
+   and her content folder (headshots, lifestyle, listing photography/film).
    Brand follows The Oppenheim Group: black, white, crimson accent.
    -------------------------------------------------------------------------- */
 
 const OG_LISTING = "https://search.ogroup.com/idx/details/listing/d010";
-
-/* Placeholder area photos (Unsplash) - swap for licensed Envato shots of
-   Encinitas and Oceanside before launch. */
-const PLACEHOLDER_BEACH =
-  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80";
-const PLACEHOLDER_COAST =
-  "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=80";
 
 export const site: SiteContent = {
   homeVariant: "noir",
@@ -265,7 +259,8 @@ export const site: SiteContent = {
   hero: {
     preTitle: "North County San Diego",
     title: "Coastal Living, Personally Guided",
-    image: "/listings/5115-gordon.webp",
+    video: { webm: "/video/hero.webm", mp4: "/video/hero.mp4" },
+    image: "/video/hero-poster.jpg",
   },
   searchBar: {
     placeholder: "Search by Address or Neighborhood",
@@ -313,7 +308,7 @@ export const site: SiteContent = {
         sqft: "3,930",
         status: "For Sale",
         mls: "260002637",
-        image: "/listings/4462-fallsbrae.webp",
+        image: "/photos/fallsbrae-estate.jpg",
         href: `${OG_LISTING}/260002637/4462-Fallsbrae-Rd-Fallbrook-CA-92028`,
       },
       {
@@ -325,7 +320,7 @@ export const site: SiteContent = {
         sqft: "5,179",
         status: "Sold",
         mls: "230020240",
-        image: "/listings/5115-gordon.webp",
+        image: "/photos/gordon-exterior.jpg",
         href: `${OG_LISTING}/230020240/5115-Gordon-Ln-San-Diego-CA-92109`,
       },
       {
@@ -348,7 +343,7 @@ export const site: SiteContent = {
         sqft: "6,834",
         status: "Sold",
         mls: "250039914",
-        image: "/listings/18787-aceituno.webp",
+        image: "/photos/aceituno-aerial-dusk.jpg",
         href: `${OG_LISTING}/250039914/18787-Aceituno-St-San-Diego-CA-92128`,
       },
       {
@@ -442,7 +437,7 @@ export const site: SiteContent = {
       type: "listings",
       title: "Portfolio",
       preTitle: "Active and Recently Sold",
-      heroImage: "/listings/18787-aceituno.webp",
+      heroImage: "/photos/aceituno-aerial-dusk.jpg",
       intro: [
         "A look at the homes I have represented across San Diego County, from Fallbrook acreage to coastal Carlsbad and La Jolla.",
       ],
@@ -451,7 +446,7 @@ export const site: SiteContent = {
       slug: "buy",
       title: "Buy a Home",
       preTitle: "North County Buyer Representation",
-      heroImage: "/listings/11764-big-canyon.webp",
+      heroImage: "/photos/aceituno-great-room.jpg",
       intro: [
         "Whether this is your primary residence, a second home near the water, or a move from out of state, buying well in North County comes down to preparation. I set clear expectations about the market up front, then move quickly when the right home appears.",
       ],
@@ -459,17 +454,22 @@ export const site: SiteContent = {
         {
           heading: "Offers Structured to Win",
           text: "In a small, competitive market the strongest offer is not always the highest one. I structure terms around what the seller actually needs, and I negotiate to protect your interests from the first showing through closing.",
-          image: "/listings/7212-columbine.webp",
+          image: "/photos/aceituno-living.jpg",
         },
         {
           heading: "Relocating to San Diego",
           text: "Moving from across the country means making big decisions from a distance. I help you compare neighborhoods, schools, and commutes, preview homes on your behalf, and keep you informed at every step so nothing is left to guesswork.",
-          image: "/listings/571-anchorage.webp",
+          image: "/photos/gordon-deck-view.jpg",
         },
         {
           heading: "Diligence, Handled",
           text: "From inspections scheduled on short notice to contingent sales with moving parts on both sides, I coordinate the specialists and translate what matters so every decision is an informed one.",
-          image: "/listings/2511-san-clemente.webp",
+          image: "/photos/alexa-patio.jpg",
+        },
+        {
+          heading: "Family First, Always",
+          text: "Family comes first for me, and I know a home decision is a family decision. Schools, space to grow, a yard for the dog, time at the beach: I listen for what matters most to your family and keep the process calm, transparent, and personal.",
+          image: "/photos/alexa-family.jpg",
         },
       ],
       cta: { label: "Start Your Search", href: "/connect" },
@@ -479,7 +479,7 @@ export const site: SiteContent = {
       slug: "sell",
       title: "Sell Your Home",
       preTitle: "Strategic Pricing, Polished Presentation",
-      heroImage: "/listings/4462-fallsbrae.webp",
+      heroImage: "/photos/fallsbrae-sunset.jpg",
       intro: [
         "Selling a family home is personal. I build each sale around a clear strategy: pricing grounded in current comparables, presentation that earns showings, and steady communication so you always know where things stand.",
       ],
@@ -487,35 +487,35 @@ export const site: SiteContent = {
         {
           heading: "Pricing Grounded in Real Comparables",
           text: "Automated estimates miss what moves a North County sale: lot size, views, school boundaries, and distance to the beach and village. I price from recent sales and direct market knowledge, then position your home to draw competition.",
-          image: "/listings/3831-silverleaf.webp",
+          image: "/photos/fallsbrae-veranda.jpg",
         },
         {
           heading: "Ready for Market, Even When Life Is Busy",
           text: "Young kids, a busy schedule, a home that is not quite buyer ready. I coordinate staging, showings, and vendors so the preparation does not fall on you.",
-          image: "/listings/15840-caminito-cantaras.webp",
+          image: "/photos/gordon-kitchen.jpg",
         },
         {
           heading: "Selling and Buying at the Same Time",
           text: "Contingent moves are stressful. I have guided families through selling one home and buying the next in the same season, bridging gaps with the other side and keeping both transactions on track.",
-          image: "/listings/364-san-elijo.webp",
+          image: "/photos/alexa-living-room.jpg",
         },
         {
           heading: "The Reach of The Oppenheim Group",
           text: "Your listing benefits from the marketing and buyer network of The Oppenheim Group, with offices from Los Angeles and Newport Beach to La Jolla, Cabo, and Dubai.",
-          image: "/listings/6591-avenida-wilfredo.webp",
+          image: "/photos/og-san-diego-office.jpg",
         },
       ],
       cta: { label: "Request a Valuation", href: "/connect" },
       valuation: true,
-      valuationImage: "/listings/4462-fallsbrae.webp",
+      valuationImage: "/photos/fallsbrae-estate.jpg",
     },
-    { slug: "search", type: "search", title: "Search Properties", preTitle: "Every Listing, One Place", heroImage: "/listings/18787-aceituno.webp" },
+    { slug: "search", type: "search", title: "Search Properties", preTitle: "Every Listing, One Place", heroImage: "/photos/gordon-ocean-view.jpg" },
     {
       slug: "connect",
       type: "connect",
       title: "Let's Connect",
       preTitle: "Begin with a Conversation",
-      heroImage: "/listings/5115-gordon.webp",
+      heroImage: "/photos/alexa-kitchen.jpg",
       intro: [
         "Whether you are buying, selling, or simply curious about your options, reach out. Call, text, or email, whatever is easiest for you, and I will get back to you the same day.",
       ],
@@ -532,21 +532,21 @@ export const site: SiteContent = {
       title: "Buy a Home",
       cta: "Learn More",
       href: "/buy",
-      image: "/listings/11764-big-canyon.webp",
+      image: "/photos/aceituno-pool.jpg",
     },
     {
       preTitle: "Strategy and Presentation",
       title: "Sell Your Home",
       cta: "Learn More",
       href: "/sell",
-      image: "/listings/4462-fallsbrae.webp",
+      image: "/photos/fallsbrae-estate.jpg",
     },
     {
       preTitle: "Active and Sold",
       title: "Portfolio",
       cta: "View Properties",
       href: "/listings",
-      image: "/listings/5115-gordon.webp",
+      image: "/photos/gordon-exterior.jpg",
     },
   ],
   intro: {
@@ -564,7 +564,7 @@ export const site: SiteContent = {
       title: "Encinitas",
       description: "Surf breaks, bluff-top streets, and a laid-back coastal village from Leucadia to Cardiff.",
       href: "/buy",
-      image: PLACEHOLDER_BEACH,
+      image: "/photos/gordon-ocean-view.jpg",
     },
     {
       title: "Carlsbad",
@@ -576,19 +576,19 @@ export const site: SiteContent = {
       title: "Oceanside",
       description: "A revitalized downtown, the historic pier, and some of North County's best coastal value.",
       href: "/buy",
-      image: PLACEHOLDER_COAST,
+      image: "/photos/coast-sunset.jpg",
     },
     {
       title: "Fallbrook",
       description: "Rolling hills, groves, and acreage estates with room to breathe, inland from the coast.",
       href: "/buy",
-      image: "/listings/4462-fallsbrae.webp",
+      image: "/photos/fallsbrae-aerial.jpg",
     },
   ],
   about: {
     title: "Meet Alexa Devaney",
     subtitle: "Senior Realtor Associate · The Oppenheim Group",
-    image: "/photos/alexa-devaney.png",
+    image: "/photos/alexa-devaney.jpg",
     blocks: [
       {
         text: "For more than ten years I have helped San Diego families buy and sell with confidence, pairing deep local market knowledge with strategic negotiation and close attention to detail.",
@@ -602,7 +602,7 @@ export const site: SiteContent = {
       },
       {
         heading: "Family First",
-        text: "Buying or selling a home is a family decision. I keep the process calm and transparent so you can stay focused on what matters most.",
+        text: "Family comes first for me, and buying or selling a home is a family decision. I keep the process calm and transparent so you can stay focused on what matters most.",
       },
     ],
   },
@@ -612,7 +612,7 @@ export const site: SiteContent = {
       "Buying, selling, or simply weighing your options in North County San Diego, a short conversation is the best place to start.",
     buttonLabel: "Let's Connect",
     buttonHref: "/connect",
-    image: "/listings/6591-avenida-wilfredo.webp",
+    image: "/photos/gordon-rooftop-sunset.jpg",
   },
   footer: {
     agentName: "Alexa Devaney",
