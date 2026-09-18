@@ -71,7 +71,7 @@ function fallbackToSummary(listing: Listing, index: number): ListingSummary {
     listingId: String(index),
     mlsNumber: listing.mls ?? "",
     slug: "",
-    status: (listing.status ?? "").toLowerCase().includes("pend") ? "pending" : "active",
+    status: /pend/i.test(listing.status ?? "") ? "pending" : /sold|closed/i.test(listing.status ?? "") ? "sold" : "active",
     price: toNumber(listing.price),
     beds: toNumber(listing.beds),
     baths: toNumber(listing.baths),
