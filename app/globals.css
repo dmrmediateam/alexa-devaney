@@ -3601,8 +3601,7 @@ a:hover > .hn-link::after,
   .logo-brokerage { margin-left: 0; min-width: 112%; }
   .header__right { flex: 0 0 auto; }
 
-  /* keep the floating button clear of the Elfsight rating badge (bottom center) */
-  .connect-btn { right: 16px; bottom: 92px; padding: 13px 20px; }
+  .connect-btn { right: 16px; bottom: 16px; padding: 13px 20px; }
 }
 
 @media (max-width: 380px) {

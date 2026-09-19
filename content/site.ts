@@ -595,7 +595,8 @@ export const site: SiteContent = {
     serviceArea: "North County San Diego",
     brokerageLicense: "01983697",
   },
-  reviews: { elfsightAppId: "9a8f661c-a422-48cb-938c-64944318c827" },
+  // Elfsight reviews badge paused; restore to re-enable:
+  // reviews: { elfsightAppId: "9a8f661c-a422-48cb-938c-64944318c827" },
   stats: [
     { value: "10+", label: "Years in San Diego Real Estate" },
     { value: "$60M+", label: "In Closed Sales" },
