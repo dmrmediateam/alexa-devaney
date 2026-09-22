@@ -8,7 +8,7 @@ import type { Listing } from "@/content/site";
    Pre-IDX search (placeholder). Same fields and layout as the native MLS
    search Carole's site runs, but it filters the agent's own portfolio in
    memory until IDX Broker is connected. Filters live in the URL
-   (?location=&minPrice=...) so shareable links keep working after the swap.
+   (?city=&minPrice=...) so shareable links keep working after the swap.
    `compact` renders the short form used on /buy, which hands off to
    /listings instead of filtering in place.
    ========================================================================== */
@@ -24,10 +24,13 @@ const PRICES: Array<[string, string]> = [
   ["10000000", "$10M"],
 ];
 
+/* Values are the IDX property-type names (lib/idx/propertyTypes), so the same
+   URL filters live MLS results; matching below normalises for the config's
+   lowercase placeholder values. */
 const TYPES: Array<[string, string]> = [
-  ["single-family", "Single Family"],
-  ["condominium", "Condominium"],
-  ["townhouse", "Townhouse"],
+  ["Residential", "Residential"],
+  ["Residential Income", "Multi-Family / Income"],
+  ["Land", "Land"],
 ];
 
 const SQFT: Array<[string, string]> = [
@@ -41,32 +44,35 @@ const SQFT: Array<[string, string]> = [
 
 const PAGE_SIZE = 12;
 
+/* Field names match lib/idx/filterParams so a search built here keeps working
+   verbatim once IDX Broker is connected and /listings switches to live data. */
 export type PlaceholderFilters = {
-  location: string;
+  city: string;
   minPrice: string;
   maxPrice: string;
-  type: string;
-  beds: string;
-  baths: string;
-  sqft: string;
+  propertyTypes: string;
+  minBeds: string;
+  minBaths: string;
+  minSqFt: string;
   status: string;
 };
 
 const EMPTY: PlaceholderFilters = {
-  location: "", minPrice: "", maxPrice: "", type: "", beds: "", baths: "", sqft: "", status: "",
+  city: "", minPrice: "", maxPrice: "", propertyTypes: "", minBeds: "", minBaths: "", minSqFt: "", status: "",
 };
 
 const num = (v?: string) => (v ? parseFloat(v.replace(/[^0-9.]/g, "")) || 0 : 0);
 
 function matches(l: Listing, f: PlaceholderFilters): boolean {
-  if (f.location && !l.address.toLowerCase().includes(f.location.trim().toLowerCase())) return false;
+  if (f.city && !l.address.toLowerCase().includes(f.city.trim().toLowerCase())) return false;
   const price = num(l.price);
   if (f.minPrice && price < num(f.minPrice)) return false;
   if (f.maxPrice && price > num(f.maxPrice)) return false;
-  if (f.type && l.propertyType !== f.type) return false;
-  if (f.beds && num(l.beds) < num(f.beds)) return false;
-  if (f.baths && num(l.baths) < num(f.baths)) return false;
-  if (f.sqft && num(l.sqft) < num(f.sqft)) return false;
+  const normType = (v?: string) => (v ?? "").toLowerCase().replace(/[^a-z]/g, "");
+  if (f.propertyTypes && normType(l.propertyType) !== normType(f.propertyTypes)) return false;
+  if (f.minBeds && num(l.beds) < num(f.minBeds)) return false;
+  if (f.minBaths && num(l.baths) < num(f.minBaths)) return false;
+  if (f.minSqFt && num(l.sqft) < num(f.minSqFt)) return false;
   const sold = /sold|closed/i.test(l.status ?? "");
   if (f.status === "active" && sold) return false;
   if (f.status === "sold" && !sold) return false;
@@ -135,23 +141,23 @@ export default function ListingsSearchPlaceholder({
       <form className={`adv-search${compact ? " adv-search--compact" : ""}`} onSubmit={submit} role="search">
         <div className="adv-search__grid">
           <div className="adv-search__field adv-search__field--wide">
-            <label htmlFor="adv-location">Location</label>
+            <label htmlFor="adv-city">Location</label>
             <input
-              id="adv-location"
+              id="adv-city"
               type="text"
               list="adv-towns"
               placeholder="City, neighborhood, or address"
-              value={draft.location}
-              onChange={set("location")}
+              value={draft.city}
+              onChange={set("city")}
             />
             <datalist id="adv-towns">{towns.map((t) => <option key={t} value={t} />)}</datalist>
           </div>
           {field("minPrice", "Min Price", PRICES, "No Min")}
           {field("maxPrice", "Max Price", PRICES, "No Max")}
-          {field("type", "Property Type", TYPES, "Any Type")}
-          {field("beds", "Bedrooms", counts, "Any")}
-          {field("baths", "Bathrooms", counts, "Any")}
-          {!compact && field("sqft", "Min Sq Ft", SQFT, "Any Size")}
+          {field("propertyTypes", "Property Type", TYPES, "Any Type")}
+          {field("minBeds", "Bedrooms", counts, "Any")}
+          {field("minBaths", "Bathrooms", counts, "Any")}
+          {!compact && field("minSqFt", "Min Sq Ft", SQFT, "Any Size")}
           {!compact && field("status", "Status", [["active", "Active"], ["sold", "Sold"]], "Active & Sold")}
         </div>
         <div className="adv-search__foot">

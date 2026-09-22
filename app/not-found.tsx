@@ -40,8 +40,8 @@ export default function NotFound() {
           </p>
 
           <form className="nf__search" action="/listings" method="get" role="search">
-            <label htmlFor="nf-location" className="visually-hidden">Search by city, neighborhood, or address</label>
-            <input id="nf-location" name="location" type="text" placeholder="City, neighborhood, or address" />
+            <label htmlFor="nf-city" className="visually-hidden">Search by city, neighborhood, or address</label>
+            <input id="nf-city" name="city" type="text" placeholder="City, neighborhood, or address" />
             <button type="submit">Search Homes</button>
           </form>
 

@@ -26,6 +26,16 @@ interface IdxFeaturedItem {
   image?: Record<string, { url?: string } | number | string>;
 }
 
+/** "4462 Fallsbrae Rd", "Fallbrook", "California" -> "4462-fallsbrae-rd-fallbrook-california" */
+function addressSlug(...parts: Array<string | undefined>): string {
+  return parts
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 function firstImage(image: IdxFeaturedItem["image"]): string | undefined {
   if (!image) return undefined;
   for (const [key, value] of Object.entries(image)) {
@@ -46,9 +56,13 @@ export async function getFeaturedListings(): Promise<Listing[] | null> {
     });
     if (!res.ok) return null;
     const data = await res.json();
-    const items: IdxFeaturedItem[] = Array.isArray(data)
-      ? data
-      : Object.values(data ?? {});
+    // The API wraps results: { total, first, last, next, previous, data: {...} }
+    const payload = !Array.isArray(data) && data && typeof data === "object" && "data" in data
+      ? (data as { data: unknown }).data
+      : data;
+    const items: IdxFeaturedItem[] = Array.isArray(payload)
+      ? payload
+      : Object.values((payload ?? {}) as Record<string, IdxFeaturedItem>);
     const listings = items
       .filter((item) => item && typeof item === "object" && item.address)
       .map((item): Listing => {
@@ -63,7 +77,11 @@ export async function getFeaturedListings(): Promise<Listing[] | null> {
           status: item.propStatus ?? item.idxStatus ?? "For Sale",
           mls: item.listingID,
           image: image ?? "",
-          href: item.fullDetailsURL ?? "#",
+          // Keep visitors on our own SEO-indexed detail route, not IDX's host
+          href:
+            item.idxID && item.listingID
+              ? `/listing/${item.idxID}-${item.listingID}-${addressSlug(item.address, item.cityName, item.state)}`
+              : item.fullDetailsURL ?? "#",
         };
       })
       .filter((listing) => listing.price && listing.image);
@@ -71,4 +89,22 @@ export async function getFeaturedListings(): Promise<Listing[] | null> {
   } catch {
     return null;
   }
+}
+
+/**
+ * Live listings first, then any configured listings the feed doesn't carry.
+ *
+ * IDX "featured" returns only what the agent has active right now, so on its
+ * own it would drop the sold portfolio the homepage and buy page lean on.
+ * Matching is by MLS number, so a home that goes live in the feed replaces
+ * its manual entry rather than appearing twice.
+ */
+export function mergeFeatured(
+  live: Listing[] | null,
+  configured: Listing[] | undefined,
+): Listing[] | null {
+  if (!live || live.length === 0) return null;
+  const liveMls = new Set(live.map((l) => (l.mls ?? "").trim()).filter(Boolean));
+  const extras = (configured ?? []).filter((l) => !liveMls.has((l.mls ?? "").trim()));
+  return [...live, ...extras];
 }

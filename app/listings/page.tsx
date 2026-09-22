@@ -57,8 +57,9 @@ export default async function ListingsPage({ searchParams }: Params) {
             <ListingsSearchPlaceholder
               listings={site.featured?.listings ?? []}
               initial={{
-                location: one("location"), minPrice: one("minPrice"), maxPrice: one("maxPrice"),
-                type: one("type"), beds: one("beds"), baths: one("baths"), sqft: one("sqft"), status: one("status"),
+                city: one("city"), minPrice: one("minPrice"), maxPrice: one("maxPrice"),
+                propertyTypes: one("propertyTypes"), minBeds: one("minBeds"),
+                minBaths: one("minBaths"), minSqFt: one("minSqFt"), status: one("status"),
               }}
             />
           </div>
@@ -73,7 +74,12 @@ export default async function ListingsPage({ searchParams }: Params) {
     <SiteChrome content={site}>
       <section className="idx-page-head">
         <div className="lp-container">
-          <h1 className="lp-h2">Property Search</h1>
+          <span className="idx-page-head__eyebrow">{site.landing?.serviceArea ?? "Property Search"}</span>
+          <h1>Find a home that feels like yours.</h1>
+          <p className="idx-page-head__sub">
+            Search every active listing from coastal Encinitas and Carlsbad to Oceanside and
+            the rolling hills of Fallbrook.
+          </p>
         </div>
       </section>
       <section className="solid-section">

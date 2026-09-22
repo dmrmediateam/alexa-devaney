@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import SubPageView from "@/components/SubPageView";
-import { getFeaturedListings } from "@/lib/idxbroker";
+import { getFeaturedListings, mergeFeatured } from "@/lib/idxbroker";
 import { idxConfigured } from "@/lib/idx/config";
 import { site } from "@/content/site";
 
@@ -26,6 +26,9 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const { slug } = await params;
   const page = site.pages.find((p) => p.slug === slug);
   if (!page) notFound();
-  const liveListings = page.type === "listings" || page.showListings ? await getFeaturedListings() : null;
+  const liveListings =
+    page.type === "listings" || page.showListings
+      ? mergeFeatured(await getFeaturedListings(), site.featured?.listings)
+      : null;
   return <SubPageView idxEnabled={idxConfigured()} liveListings={liveListings} content={site} page={page} />;
 }
