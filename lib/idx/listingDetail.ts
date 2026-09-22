@@ -5,9 +5,17 @@ import { IdxApiError, ListingDetail } from './types';
 
 const DETAIL_REVALIDATE_SECONDS = 900;
 
-/** Parses the `/listing/[idxId]-[listingId]-[address-slug]` route param. */
+/**
+ * Parses the `/listing/[idxId]-[listingId]-[address-slug]` route param.
+ *
+ * Listing IDs are not always numeric: boards syndicating into the same feed
+ * use letter prefixes (SN26172778, NDP2605193, OC26098511). Requiring digits
+ * 404'd every one of those listings even though the API served them fine.
+ * Neither the MLS id nor the listing id contains a hyphen, so the first two
+ * hyphen-separated tokens are the pair and everything after is the address.
+ */
 export function parseListingSlug(slug: string): { idxId: string; listingId: string } | null {
-  const match = slug.match(/^([a-zA-Z0-9]+)-(\d+)-/);
+  const match = slug.match(/^([a-zA-Z0-9]+)-([a-zA-Z0-9]+)(?:-|$)/);
   if (!match) return null;
   return { idxId: match[1], listingId: match[2] };
 }
