@@ -5,3 +5,8 @@ next-env.d.ts
 *.tsbuildinfo
 .DS_Store
 .vercel
+
+# local env files (never commit secrets)
+.env
+.env.*
+!.env.example
