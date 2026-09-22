@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import ListingsGrid from "@/components/ListingsGrid";
+import FilterSelect from "@/components/idx/FilterSelect";
 import type { Listing } from "@/content/site";
 
 /* ==========================================================================
@@ -92,7 +93,7 @@ export default function ListingsSearchPlaceholder({
   const [applied, setApplied] = useState<PlaceholderFilters>({ ...EMPTY, ...initial });
   const [page, setPage] = useState(1);
 
-  const set = (key: keyof PlaceholderFilters) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+  const set = (key: keyof PlaceholderFilters) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setDraft((d) => ({ ...d, [key]: e.target.value }));
 
   const towns = useMemo(
@@ -126,11 +127,14 @@ export default function ListingsSearchPlaceholder({
 
   const field = (id: keyof PlaceholderFilters, label: string, options: Array<[string, string]>, any: string) => (
     <div className="adv-search__field">
-      <label htmlFor={`adv-${id}`}>{label}</label>
-      <select id={`adv-${id}`} value={draft[id]} onChange={set(id)}>
-        <option value="">{any}</option>
-        {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-      </select>
+      <span className="adv-search__label" id={`adv-${id}-label`}>{label}</span>
+      <FilterSelect
+        label={label}
+        placeholder={any}
+        value={draft[id]}
+        options={options.map(([value, text]) => ({ value, label: text }))}
+        onChange={(value) => setDraft((d) => ({ ...d, [id]: value }))}
+      />
     </div>
   );
 

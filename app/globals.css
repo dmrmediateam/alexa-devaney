@@ -3424,7 +3424,7 @@ a:hover > .hn-link::after,
 }
 .adv-search__field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
 .adv-search__field--wide { grid-column: span 2; }
-.adv-search__field label {
+.adv-search__field label, .adv-search__label {
   font-family: var(--heading-font);
   font-size: 10.5px;
   font-weight: 600;
@@ -3601,7 +3601,7 @@ a:hover > .hn-link::after,
   .connect-grid__fields { grid-template-columns: 1fr; }
   .connect-grid__details a { display: inline-block; padding: 6px 0; }
   .adv-search__reset { padding: 12px 0; }
-  .adv-search__field label { font-size: 11px; }
+  .adv-search__field label, .adv-search__label { font-size: 11px; }
   .hn-link { display: inline-block; padding: 10px 0; }
   .boxed-text__description p { font-size: 15px; letter-spacing: 0.3px; }
   .closings__grid { grid-template-columns: 1fr 1fr; gap: 22px 14px; }
@@ -4164,4 +4164,106 @@ html[data-modal-open="true"] .ld-bar { display: none !important; }
   .gate { padding: 16px; align-items: flex-start; padding-top: 40px; }
   .gate__card { padding: 30px 22px 26px; }
   .gate__heading { font-size: 23px; }
+}
+
+
+/* ==========================================================================
+   Branded filter dropdown (FilterSelect) - replaces native <select> popups
+   ========================================================================== */
+
+.fsel { position: relative; }
+
+.fsel__button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  min-height: 45px;
+  padding: 12px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  background: var(--white);
+  color: #7a7a7f;
+  font-family: var(--body-font);
+  font-size: 13.5px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
+}
+.fsel__button:hover { border-color: rgba(0, 0, 0, 0.32); }
+.fsel__button.has-value { color: var(--navy); font-weight: 500; }
+.fsel__button.is-open,
+.fsel__button:focus-visible {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(21, 26, 28, 0.08);
+}
+
+.fsel__chevron {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: -3px;
+  border-right: 1.5px solid var(--navy);
+  border-bottom: 1.5px solid var(--navy);
+  transform: rotate(45deg);
+  transition: transform 0.25s ease;
+}
+.fsel__button.is-open .fsel__chevron { transform: rotate(225deg); margin-top: 3px; }
+
+.fsel__menu {
+  position: absolute;
+  z-index: 90;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+  background: var(--white);
+  border: 1px solid rgba(21, 26, 28, 0.08);
+  box-shadow: 0 24px 50px rgba(21, 26, 28, 0.16);
+  animation: locMenuIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) { .fsel__menu { animation: none; } }
+.fsel__menu::-webkit-scrollbar { width: 8px; }
+.fsel__menu::-webkit-scrollbar-thumb { background: rgba(21, 26, 28, 0.18); border-radius: 8px; }
+
+.fsel__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 18px;
+  border: 0;
+  background-color: var(--white);
+  color: var(--navy);
+  font-family: var(--body-font);
+  font-size: 14px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.18s ease, padding-left 0.18s ease;
+}
+.fsel__option.is-active { background-color: #f4f1ee; padding-left: 22px; }
+.fsel__option.is-selected { font-weight: 600; }
+.fsel__option.is-selected::after {
+  content: "";
+  width: 6px;
+  height: 10px;
+  border-right: 1.5px solid var(--taupe);
+  border-bottom: 1.5px solid var(--taupe);
+  transform: rotate(45deg);
+  margin-bottom: 3px;
+}
+
+@media (max-width: 600px) {
+  .fsel { flex: 1 1 calc(50% - 6px); }
+  .fsel__menu { left: 0; right: 0; }
 }

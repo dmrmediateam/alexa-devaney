@@ -35,17 +35,46 @@ function isRateLimitedError(error: unknown): boolean {
     : !!error && typeof error === 'object' && 'kind' in error && error.kind === 'rateLimited';
 }
 
+/*
+ * Cache the NORMALIZED result, not the raw response.
+ *
+ * A single city of active listings comes back as ~2.7MB of raw JSON, which is
+ * over Next's 2MB data-cache ceiling: the fetch cache silently refuses it, so
+ * every request re-fetched and a cold search took ~10s. The normalized
+ * summaries are a fraction of that and cache fine, so the raw fetch runs
+ * uncached (no revalidateSeconds) and unstable_cache keeps the small version.
+ */
+const cachedCitySearch = unstable_cache(
+  async (city: string, propStatus: string | undefined) => {
+    const raw = await idxRequest<Record<string, unknown>>('/clients/searchquery', {
+      query: { aw_cityName: city, propStatus, limit: IDX_RESULT_CAP },
+      retries: 1,
+    });
+    return rawToListings(raw);
+  },
+  ['idx-city-search-v2'],
+  { revalidate: SEARCH_REVALIDATE_SECONDS, tags: ['idx-search'] },
+);
+
 async function fetchCity(
   city: string,
   propStatus: string | undefined,
 ): Promise<ListingSummary[]> {
-  const raw = await idxRequest<Record<string, unknown>>('/clients/searchquery', {
-    query: { aw_cityName: city, propStatus, limit: IDX_RESULT_CAP },
-    revalidateSeconds: SEARCH_REVALIDATE_SECONDS,
-    retries: 1,
-  });
-  return rawToListings(raw);
+  return cachedCitySearch(city, propStatus);
 }
+
+/** Same trick for targeted (city ID / subdivision / address) searches. */
+const cachedTargetedSearch = unstable_cache(
+  async (query: Record<string, string | number | undefined>) => {
+    const raw = await idxRequest<Record<string, unknown>>('/clients/searchquery', {
+      query,
+      retries: 1,
+    });
+    return rawToListings(raw);
+  },
+  ['idx-targeted-search-v1'],
+  { revalidate: SEARCH_REVALIDATE_SECONDS, tags: ['idx-search'] },
+);
 
 function deduplicate(lists: ListingSummary[][]): ListingSummary[] {
   const seen = new Set<string>();
@@ -154,28 +183,23 @@ export async function searchListings(filters: SearchFilters): Promise<SearchResp
     if (hasLocationFilter) {
       // One targeted request powers both the results and autocomplete. Next's
       // data cache also deduplicates repeated searches for the same term.
-      const raw = await idxRequest<Record<string, unknown>>('/clients/searchquery', {
-        query: {
-          aw_address: filters.address,
-          // City IDs come from the location index; the name is only a fallback
-          // for free-typed text, and the two must never be swapped.
-          'city[]': filters.cityId,
-          aw_cityName: filters.cityId ? undefined : filters.city,
-          aw_countyName: filters.county,
-          aw_zipcode: filters.postalCode,
-          aw_subdivision: filters.subdivision,
-          aw_areaName: filters.mlsArea,
-          propStatus: statusParam(status),
-          lp: filters.minPrice,
-          hp: filters.maxPrice,
-          bd: filters.minBeds,
-          tb: filters.minBaths,
-          limit: IDX_RESULT_CAP,
-        },
-        revalidateSeconds: SEARCH_REVALIDATE_SECONDS,
-        retries: 1,
+      listings = await cachedTargetedSearch({
+        aw_address: filters.address,
+        // City IDs come from the location index; the name is only a fallback
+        // for free-typed text, and the two must never be swapped.
+        'city[]': filters.cityId,
+        aw_cityName: filters.cityId ? undefined : filters.city,
+        aw_countyName: filters.county,
+        aw_zipcode: filters.postalCode,
+        aw_subdivision: filters.subdivision,
+        aw_areaName: filters.mlsArea,
+        propStatus: statusParam(status),
+        lp: filters.minPrice,
+        hp: filters.maxPrice,
+        bd: filters.minBeds,
+        tb: filters.minBaths,
+        limit: IDX_RESULT_CAP,
       });
-      listings = rawToListings(raw);
     } else if (status === 'active') {
       // Preserve the warm broad feed. If a cold chunk takes too long, cached
       // core-market queries provide a fast first-page fallback.
@@ -189,12 +213,7 @@ export async function searchListings(filters: SearchFilters): Promise<SearchResp
       };
       if (MARKET_CITIES.length === 0) {
         // No market cities configured: one broad active query for the account's MLS
-        const raw = await idxRequest<Record<string, unknown>>('/clients/searchquery', {
-          query: { propStatus: 'Active', limit: IDX_RESULT_CAP },
-          revalidateSeconds: SEARCH_REVALIDATE_SECONDS,
-          retries: 1,
-        });
-        listings = rawToListings(raw);
+        listings = await cachedTargetedSearch({ propStatus: 'Active', limit: IDX_RESULT_CAP });
       } else {
         const timeout = new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error('pool_timeout')), 3000),
