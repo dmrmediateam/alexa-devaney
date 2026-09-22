@@ -3938,12 +3938,46 @@ html:has(.hn) { background: #0e0f10; }
   color: var(--navy);
 }
 .ld__locality { margin-top: 10px; font-size: 15px; letter-spacing: 0.4px; color: #65656a; }
+/* address + price restated under the photo, above the specs */
+.ld__restate {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 34px;
+}
+.ld__restate-address {
+  font-family: var(--display-font);
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: 400;
+  color: var(--navy);
+  line-height: 1.3;
+}
+.ld__restate-address span {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--body-font);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+.ld__restate-price {
+  font-family: var(--display-font);
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: 400;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
 /* spec strip under the gallery */
 .ld__facts {
   display: flex;
   flex-wrap: wrap;
   gap: 18px 56px;
-  margin-top: 30px;
+  margin-top: 20px;
   padding-top: 26px;
   padding-bottom: 4px;
   border-top: 1px solid rgba(21, 26, 28, 0.1);
@@ -4058,7 +4092,8 @@ html:has(.hn) { background: #0e0f10; }
   .lg__nav { width: 42px; height: 42px; font-size: 24px; }
   .lg__thumb { flex-basis: 104px; }
   .ld__layout { padding-bottom: 40px; }
-  .ld__facts { gap: 14px 34px; margin-top: 22px; padding-top: 20px; }
+  .ld__restate { margin-top: 26px; gap: 6px 18px; }
+  .ld__facts { gap: 14px 34px; margin-top: 16px; padding-top: 18px; }
   .ld__facts dt { font-size: 21px; }
   .ld__layout::before { left: -40%; width: min(520px, 90vw); opacity: 0.04; }
 

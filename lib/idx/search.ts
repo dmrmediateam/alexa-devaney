@@ -215,8 +215,14 @@ export async function searchListings(filters: SearchFilters): Promise<SearchResp
         // No market cities configured: one broad active query for the account's MLS
         listings = await cachedTargetedSearch({ propStatus: 'Active', limit: IDX_RESULT_CAP });
       } else {
+        /*
+         * Budget for assembling the full market. Too tight and a cold pool
+         * always loses the race, so visitors silently see only the core
+         * cities; the hourly warm cron (app/api/warm) is what keeps this
+         * from ever being the cold path in production.
+         */
         const timeout = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('pool_timeout')), 3000),
+          setTimeout(() => reject(new Error('pool_timeout')), 8000),
         );
         listings = await Promise.race([getActivePool(), timeout]).catch(serviceAreaFallback);
       }

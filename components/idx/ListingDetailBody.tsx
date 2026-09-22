@@ -67,7 +67,16 @@ export default function ListingDetailBody({
 
       <ListingGallery photos={listing.photos} alt={listing.address.full} />
 
-      {/* the specs belong with the home, under its photograph */}
+      {/* repeat address and price under the photo so the specs are never
+          read without knowing which home, or at what price, they belong to */}
+      <div className="ld__restate lp-container">
+        <p className="ld__restate-address">
+          {listing.address.street}
+          <span>{[listing.address.city, listing.address.state].filter(Boolean).join(", ")}</span>
+        </p>
+        <p className="ld__restate-price">{formatPrice(listing.price)}</p>
+      </div>
+
       {keyFacts.length > 0 && (
         <dl className="ld__facts lp-container">
           {keyFacts.map((fact) => (
