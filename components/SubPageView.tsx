@@ -25,6 +25,10 @@ export default function SubPageView({
     ? `${content.brand.homeHref === "/" || !content.brand.homeHref ? "" : content.brand.homeHref}/listings`
     : "/listings";
   const wizardIsHero = !!page.valuation;
+  const soldListings = listings.filter((l) => /sold|closed/i.test(l.status ?? ""));
+  const gridListings = page.recentClosings
+    ? listings.filter((l) => !/sold|closed/i.test(l.status ?? ""))
+    : listings;
 
   return (
     <SiteChrome content={content}>
@@ -94,12 +98,6 @@ export default function SubPageView({
               </div>
             </section>
           )}
-          {page.recentClosings && (
-            <RecentClosings
-              listings={listings.filter((l) => /sold|closed/i.test(l.status ?? ""))}
-              intro={page.recentClosings.intro}
-            />
-          )}
           {page.search && (
             <PropertySearchExperience
               idxEnabled={idxEnabled}
@@ -125,7 +123,9 @@ export default function SubPageView({
               </div>
             </section>
           ))}
-          {page.showListings && listings.length > 0 && (
+          {/* when the page also lists closings, keep sold homes out of the
+              active grid so the same card is not shown twice */}
+          {page.showListings && gridListings.length > 0 && (
             <section className="solid-section">
               <div className="featured-band lp-vertical-paddings">
                 <div className="lp-container">
@@ -133,10 +133,16 @@ export default function SubPageView({
                     <span className="featured-band__kicker">{page.listingsHeading?.kicker ?? "Active Listings"}</span>
                     <h2 className="lp-h2">{page.listingsHeading?.title ?? "Currently Represented"}</h2>
                   </div>
-                  <ListingsGrid listings={listings} />
+                  <ListingsGrid listings={gridListings} />
                 </div>
               </div>
             </section>
+          )}
+          {page.recentClosings && (
+            <RecentClosings
+              listings={soldListings}
+              intro={page.recentClosings.intro}
+            />
           )}
           {page.cta && (
             <section className="solid-section">

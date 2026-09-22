@@ -4075,7 +4075,7 @@ html[data-modal-open="true"] .connect-btn,
 html[data-modal-open="true"] .ld-bar { display: none !important; }
 
 /* ==========================================================================
-   Listing registration gate (modal over a fully rendered listing)
+   Listing registration gate: the property on the left, the ask on the right
    ========================================================================== */
 
 .gate {
@@ -4084,86 +4084,141 @@ html[data-modal-open="true"] .ld-bar { display: none !important; }
   z-index: 1500;
   display: grid;
   place-items: center;
-  padding: 24px;
-  background: rgba(10, 11, 12, 0.72);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  padding: 28px;
+  background: rgba(10, 11, 12, 0.6);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
   overflow-y: auto;
 }
+
 .gate__card {
-  width: min(460px, 100%);
-  background: var(--white);
-  padding: 40px 38px 34px;
-  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.45);
-  text-align: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: min(1040px, 100%);
+  max-height: calc(100vh - 56px);
+  background: var(--cream);
+  box-shadow: 0 50px 110px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
 }
+
+/* left: the home they are registering to see */
+.gate__media { position: relative; background: #101113; }
+.gate__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gate__media::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 45%;
+  background: linear-gradient(to top, rgba(10, 11, 12, 0.8), transparent);
+}
+.gate__address {
+  position: absolute;
+  z-index: 1;
+  left: 28px;
+  right: 28px;
+  bottom: 26px;
+  font-family: var(--heading-font);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: #fff;
+  line-height: 1.6;
+}
+
+/* right: the ask */
+.gate__panel { padding: 52px 52px 44px; overflow-y: auto; }
 .gate__eyebrow {
   font-family: var(--heading-font);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 2.8px;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--taupe);
+  color: #8a8a8f;
 }
 .gate__heading {
-  margin-top: 12px;
+  margin-top: 16px;
   font-family: var(--display-font);
-  font-size: 27px;
+  font-size: clamp(28px, 2.6vw, 38px);
   font-weight: 300;
-  line-height: 1.2;
+  line-height: 1.16;
+  letter-spacing: -0.5px;
   color: var(--navy);
 }
-.gate__sub { margin-top: 12px; font-size: 14px; line-height: 1.7; color: #5d5d60; }
-.gate__form { margin-top: 24px; display: grid; gap: 11px; text-align: left; }
+.gate__sub { margin-top: 16px; font-size: 15px; line-height: 1.7; color: #5d5d60; }
+
+.gate__form { margin-top: 32px; display: grid; gap: 4px; }
 .gate__form input[type="text"],
 .gate__form input[type="email"],
 .gate__form input[type="tel"] {
   width: 100%;
-  padding: 14px 16px;
-  border: 1px solid rgba(21, 26, 28, 0.18);
-  background: var(--white);
+  padding: 14px 2px;
+  border: 0;
+  border-bottom: 1px solid rgba(21, 26, 28, 0.2);
+  border-radius: 0;
+  background: transparent;
   font-family: var(--body-font);
-  font-size: 15px;
+  font-size: 16px;
   color: var(--navy);
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.25s ease;
 }
-.gate__form input:focus { border-color: var(--taupe); }
-.gate__consent { display: flex; gap: 10px; align-items: flex-start; font-size: 10.5px; line-height: 1.6; color: #77777c; }
-.gate__consent input { width: 18px; height: 18px; flex: none; margin-top: 1px; accent-color: var(--navy); }
+.gate__form input::placeholder { color: #8a8a8f; }
+.gate__form input:focus { border-bottom-color: var(--navy); }
+
+.gate__consent {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 22px;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: #6c6c71;
+}
+.gate__consent input { width: 18px; height: 18px; flex: none; margin-top: 2px; accent-color: var(--navy); }
+
 .gate__submit {
-  margin-top: 6px;
+  margin-top: 26px;
+  width: 100%;
   border: 0;
   background: var(--navy);
   color: #fff;
-  padding: 16px;
+  padding: 19px;
   cursor: pointer;
   font-family: var(--heading-font);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 2.4px;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  transition: background 0.25s;
+  transition: background 0.25s ease;
 }
 .gate__submit:hover { background: var(--taupe); }
 .gate__submit:disabled { opacity: 0.6; cursor: default; }
-.gate__error { font-size: 12px; color: #b91c1c; }
+.gate__error { margin-top: 10px; font-size: 12px; color: #b91c1c; }
 .gate__skip {
-  margin-top: 18px;
+  display: block;
+  margin: 18px auto 0;
   background: none;
   border: 0;
   cursor: pointer;
-  font-size: 12px;
-  letter-spacing: 1.4px;
+  font-size: 11px;
+  letter-spacing: 1.6px;
   text-transform: uppercase;
   color: #8a8a8f;
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-@media (max-width: 480px) {
-  .gate { padding: 16px; align-items: flex-start; padding-top: 40px; }
-  .gate__card { padding: 30px 22px 26px; }
-  .gate__heading { font-size: 23px; }
+
+@media (max-width: 900px) {
+  .gate { padding: 0; place-items: stretch; }
+  .gate__card { grid-template-columns: 1fr; width: 100%; max-height: 100vh; }
+  /* keep the home visible but let the form win the fold */
+  .gate__media { height: 30vh; min-height: 170px; }
+  .gate__address { left: 20px; right: 20px; bottom: 16px; font-size: 11px; letter-spacing: 1.8px; }
+  .gate__panel { padding: 28px 22px calc(28px + env(safe-area-inset-bottom)); }
+  .gate__heading { font-size: 26px; }
+  .gate__sub { font-size: 14px; margin-top: 12px; }
+  .gate__form { margin-top: 22px; }
 }
 
 

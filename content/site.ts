@@ -333,18 +333,22 @@ export const site: SiteContent = {
   },
   nav: {
     left: [
-      { label: "Search Homes", href: "/listings" },
       { label: "Buy", href: "/buy" },
       { label: "Sell", href: "/sell" },
+      { label: "Portfolio", href: "/portfolio" },
     ],
     right: [
+      { label: "Search Homes", href: "/listings" },
+      { label: "About", href: "/about" },
       { label: "Let’s Connect", href: "/connect" },
     ],
     menu: [
       { label: "Home", href: "/" },
-      { label: "Search Homes", href: "/listings" },
       { label: "Buy a Home", href: "/buy" },
       { label: "Sell Your Home", href: "/sell" },
+      { label: "Portfolio", href: "/portfolio" },
+      { label: "Search Homes", href: "/listings" },
+      { label: "About Alexa", href: "/about" },
       { label: "Let's Connect", href: "/connect" },
     ],
   },
@@ -495,14 +499,48 @@ export const site: SiteContent = {
   },
   pages: [
     {
-      slug: "listings",
-      type: "listings",
+      slug: "portfolio",
       title: "Portfolio",
       preTitle: "Active and Recently Sold",
       heroImage: "/photos/aceituno-aerial-dusk.jpg",
       intro: [
         "A look at the homes I have represented across San Diego County, from Fallbrook acreage to coastal Carlsbad and La Jolla.",
       ],
+      showListings: true,
+      listingsHeading: { kicker: "On the Market", title: "Active Listings" },
+      recentClosings: {
+        intro:
+          "A selection of homes recently closed across San Diego County, from Carlsbad and Vista to La Jolla and Point Loma.",
+      },
+      cta: { label: "Ask About a Property", href: "/connect" },
+    },
+    {
+      slug: "about",
+      title: "About Alexa",
+      preTitle: "Senior Realtor Associate · The Oppenheim Group",
+      heroImage: "/photos/alexa-kitchen.jpg",
+      intro: [
+        "For more than ten years I have helped San Diego families buy and sell with confidence, pairing deep local market knowledge with strategic negotiation and close attention to detail.",
+        "Every client gets a personalized plan, honest guidance, and a clear line of communication. Whether you are a first-time buyer, a seasoned investor, or selling a luxury home, I anticipate challenges before they become problems and structure offers that win.",
+      ],
+      sections: [
+        {
+          heading: "Organized, Proactive, Committed",
+          text: "Clients describe the experience as organized and proactive. From cross-country relocations to competitive negotiations, I act as advisor, advocate, and problem solver long after the transaction is complete.",
+          image: "/photos/alexa-devaney.jpg",
+        },
+        {
+          heading: "Family First",
+          text: "Family comes first for me, and buying or selling a home is a family decision. Schools, space to grow, a yard for the dog, time at the beach: I listen for what matters most to your family and keep the process calm, transparent, and personal.",
+          image: "/photos/alexa-family.jpg",
+        },
+        {
+          heading: "The Reach of The Oppenheim Group",
+          text: "My clients benefit from the marketing and buyer network of The Oppenheim Group, with offices from Los Angeles and Newport Beach to La Jolla, Cabo San Lucas, and Dubai.",
+          image: "/photos/og-san-diego-office.jpg",
+        },
+      ],
+      cta: { label: "Let's Connect", href: "/connect" },
     },
     {
       slug: "buy",
@@ -588,13 +626,12 @@ export const site: SiteContent = {
     },
   ],
   listingGate: {
-    // Flip to true to ask for details on the first listing view
-    enabled: false,
+    enabled: true,
     freeViews: 0,
     dismissible: true,
-    heading: "See the full property details",
+    heading: "View Full Property Details",
     subheading:
-      "Tell Alexa where to send the details and she will follow up with photos, disclosures, and anything the MLS does not show.",
+      "Register once for complete listing information, photos, and first access to new North County San Diego properties.",
   },
   landing: {
     accent: "#B71F37",
@@ -639,7 +676,7 @@ export const site: SiteContent = {
       preTitle: "Active and Sold",
       title: "Portfolio",
       cta: "View Properties",
-      href: "/listings",
+      href: "/portfolio",
       image: "/photos/gordon-exterior.jpg",
     },
   ],
@@ -714,9 +751,11 @@ export const site: SiteContent = {
     brokerage: "The Oppenheim Group",
     links: [
       { label: "Home", href: "/" },
-      { label: "Search Homes", href: "/listings" },
       { label: "Buy a Home", href: "/buy" },
       { label: "Sell Your Home", href: "/sell" },
+      { label: "Portfolio", href: "/portfolio" },
+      { label: "Search Homes", href: "/listings" },
+      { label: "About Alexa", href: "/about" },
       { label: "Let's Connect", href: "/connect" },
     ],
     socials: [

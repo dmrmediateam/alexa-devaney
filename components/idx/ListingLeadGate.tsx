@@ -56,18 +56,26 @@ export default function ListingLeadGate({
   address,
   mlsNumber,
   consent,
+  agentName,
+  photo,
   freeViews = 0,
   dismissible = false,
   heading,
   subheading,
+  submitLabel = "View Property",
 }: {
   address: string;
   mlsNumber: string;
   consent: string;
+  /** Eyebrow over the heading, so the ask is clearly from a person */
+  agentName: string;
+  /** The listing's own hero photo: the visitor registers to see THIS home */
+  photo?: string;
   freeViews?: number;
   dismissible?: boolean;
   heading: string;
   subheading: string;
+  submitLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
   const { status, submit } = useLeadSubmit("listing-registration", "listing_registration");
@@ -130,32 +138,42 @@ export default function ListingLeadGate({
         aria-labelledby="gate-heading"
         ref={dialogRef}
       >
-        <p className="gate__eyebrow">Property Details</p>
-        <h2 className="gate__heading" id="gate-heading">{heading}</h2>
-        <p className="gate__sub">{subheading}</p>
-
-        <form className="gate__form" onSubmit={handleSubmit}>
-          <Honeypot idSuffix="listing-gate" />
-          <input name="name" type="text" placeholder="Full name" autoComplete="name" required />
-          <input name="email" type="email" placeholder="Email" autoComplete="email" required />
-          <input name="phone" type="tel" placeholder="Phone" autoComplete="tel" required />
-          <label className="gate__consent">
-            <input type="checkbox" name="termsAccepted" required />
-            <span>{consent}</span>
-          </label>
-          <button type="submit" className="gate__submit" disabled={status === "submitting"}>
-            {status === "submitting" ? "Just a moment…" : "View This Property"}
-          </button>
-          {status === "error" && (
-            <p className="gate__error">Something went wrong. Please try again.</p>
-          )}
-        </form>
-
-        {dismissible && (
-          <button type="button" className="gate__skip" onClick={() => setOpen(false)}>
-            Not now
-          </button>
+        {photo && (
+          <div className="gate__media">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photo} alt="" />
+            <span className="gate__address">{address}</span>
+          </div>
         )}
+
+        <div className="gate__panel">
+          <p className="gate__eyebrow">{agentName}</p>
+          <h2 className="gate__heading" id="gate-heading">{heading}</h2>
+          <p className="gate__sub">{subheading}</p>
+
+          <form className="gate__form" onSubmit={handleSubmit}>
+            <Honeypot idSuffix="listing-gate" />
+            <input name="name" type="text" placeholder="Full Name" autoComplete="name" required />
+            <input name="email" type="email" placeholder="Email" autoComplete="email" required />
+            <input name="phone" type="tel" placeholder="Phone" autoComplete="tel" required />
+            <label className="gate__consent">
+              <input type="checkbox" name="termsAccepted" required />
+              <span>{consent}</span>
+            </label>
+            <button type="submit" className="gate__submit" disabled={status === "submitting"}>
+              {status === "submitting" ? "Just a moment…" : submitLabel}
+            </button>
+            {status === "error" && (
+              <p className="gate__error">Something went wrong. Please try again.</p>
+            )}
+          </form>
+
+          {dismissible && (
+            <button type="button" className="gate__skip" onClick={() => setOpen(false)}>
+              Not now
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

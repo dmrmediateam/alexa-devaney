@@ -98,6 +98,8 @@ export default async function ListingPage({ params }: Params) {
           address={listing.address.full}
           mlsNumber={listing.mlsNumber}
           consent={site.footer.newsletter.consent}
+          agentName={site.footer.agentName}
+          photo={listing.photos[0]?.url}
           freeViews={site.listingGate.freeViews}
           dismissible={site.listingGate.dismissible}
           heading={site.listingGate.heading}
