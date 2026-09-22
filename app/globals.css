@@ -3909,22 +3909,16 @@ html:has(.hn) { background: #0e0f10; }
   padding-top: 64px;
   padding-bottom: 90px;
 }
-/* address + price first, then the photography */
-.ld__head { padding: 46px 25px 30px; }
-.ld__head-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 30px;
-  flex-wrap: wrap;
-}
+/* address, then price under it; specs live below the photo */
+.ld__head { padding: 52px 25px 28px; }
 .ld__price {
+  margin-top: 18px;
   font-family: var(--display-font);
-  font-size: clamp(28px, 3.2vw, 40px);
-  font-weight: 300;
+  font-size: clamp(26px, 3vw, 36px);
+  font-weight: 400;
   line-height: 1;
+  letter-spacing: -0.5px;
   color: var(--navy);
-  white-space: nowrap;
 }
 .ld__mls {
   font-family: var(--heading-font);
@@ -3944,17 +3938,19 @@ html:has(.hn) { background: #0e0f10; }
   color: var(--navy);
 }
 .ld__locality { margin-top: 10px; font-size: 15px; letter-spacing: 0.4px; color: #65656a; }
+/* spec strip under the gallery */
 .ld__facts {
-  margin-top: 26px;
-  padding-top: 22px;
-  border-top: 1px solid rgba(21, 26, 28, 0.1);
   display: flex;
   flex-wrap: wrap;
-  gap: 14px 52px;
+  gap: 18px 56px;
+  margin-top: 30px;
+  padding-top: 26px;
+  padding-bottom: 4px;
+  border-top: 1px solid rgba(21, 26, 28, 0.1);
 }
 .ld__facts dt {
   font-family: var(--display-font);
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 400;
   color: var(--navy);
   line-height: 1.1;
@@ -4049,9 +4045,9 @@ html:has(.hn) { background: #0e0f10; }
 .ld-bar { display: none; }
 
 @media (max-width: 1024px) {
-  .ld__layout { grid-template-columns: 1fr; padding-top: 44px; }
+  .ld__layout { grid-template-columns: 1fr; padding-top: 40px; }
   .ld__head { padding-top: 34px; }
-  .ld__price { font-size: 28px; }
+  .ld__price { font-size: 26px; }
   .ld__rail-inner { position: static; }
 }
 
@@ -4062,8 +4058,9 @@ html:has(.hn) { background: #0e0f10; }
   .lg__nav { width: 42px; height: 42px; font-size: 24px; }
   .lg__thumb { flex-basis: 104px; }
   .ld__layout { padding-bottom: 40px; }
-  .ld__facts { gap: 12px 30px; }
-  .ld__facts dt { font-size: 22px; }
+  .ld__facts { gap: 14px 34px; margin-top: 22px; padding-top: 20px; }
+  .ld__facts dt { font-size: 21px; }
+  .ld__layout::before { left: -40%; width: min(520px, 90vw); opacity: 0.04; }
 
   /* leave room for the fixed bar so it never covers the last section */
   .ld { padding-bottom: 84px; }
@@ -4386,14 +4383,24 @@ footer .footer::before {
   opacity: 0.05;
 }
 
-/* listing detail: large, high on the right, behind the columns */
-.ld::before {
-  top: 120px;
-  right: -12%;
-  width: min(760px, 62vw);
+/* listing detail: left, behind the description and features below the photo */
+.ld::before { content: none; }
+.ld__layout::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  top: 40px;
+  left: -14%;
+  width: min(720px, 58vw);
   aspect-ratio: 1.05;
-  transform: rotate(-12deg);
+  background-image: var(--decal, none);
+  background-repeat: no-repeat;
+  background-size: contain;
+  transform: rotate(-10deg);
+  opacity: 0.05;
 }
+.ld__main, .ld__rail { position: relative; z-index: 1; }
 
 /* search page head and filter panel */
 .idx-page-head::before {

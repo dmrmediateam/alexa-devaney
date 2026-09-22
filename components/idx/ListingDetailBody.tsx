@@ -48,26 +48,28 @@ export default function ListingDetailBody({
     listing.baths ? { value: String(listing.baths), label: listing.baths === 1 ? "Bathroom" : "Bathrooms" } : null,
     listing.sqFt ? { value: formatSqFt(listing.sqFt), label: "Sq. Ft." } : null,
     listing.features.yearBuilt ? { value: String(listing.features.yearBuilt), label: "Year Built" } : null,
+    lotSize ? { value: lotSize.replace(" acres", ""), label: "Acres" } : null,
   ].filter(Boolean) as Array<{ value: string; label: string }>;
 
   return (
     <article className="ld">
-      {/* address and price read first, then the photography */}
+      {/* address, then price directly under it: nothing else competes up here */}
       <header className="ld__head lp-container">
-        <div className="ld__head-row">
-          <div>
-            <p className="ld__mls">MLS® {listing.mlsNumber} · {status}</p>
-            <h1 className="ld__address">{listing.address.street}</h1>
-            <p className="ld__locality">
-              {[listing.address.city, listing.address.state, listing.address.postalCode]
-                .filter(Boolean)
-                .join(", ")}
-            </p>
-          </div>
-          <p className="ld__price">{formatPrice(listing.price)}</p>
-        </div>
+        <p className="ld__mls">MLS® {listing.mlsNumber} · {status}</p>
+        <h1 className="ld__address">{listing.address.street}</h1>
+        <p className="ld__locality">
+          {[listing.address.city, listing.address.state, listing.address.postalCode]
+            .filter(Boolean)
+            .join(", ")}
+        </p>
+        <p className="ld__price">{formatPrice(listing.price)}</p>
+      </header>
 
-        <dl className="ld__facts">
+      <ListingGallery photos={listing.photos} alt={listing.address.full} />
+
+      {/* the specs belong with the home, under its photograph */}
+      {keyFacts.length > 0 && (
+        <dl className="ld__facts lp-container">
           {keyFacts.map((fact) => (
             <div key={fact.label}>
               <dt>{fact.value}</dt>
@@ -75,9 +77,7 @@ export default function ListingDetailBody({
             </div>
           ))}
         </dl>
-      </header>
-
-      <ListingGallery photos={listing.photos} alt={listing.address.full} />
+      )}
 
       <div className="lp-container ld__layout">
         <div className="ld__main">
