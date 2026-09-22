@@ -21,4 +21,10 @@ const nextConfig = {
   },
 };
 
+nextConfig.redirects = async () => [
+  // One search page. /search was a stub form that only handed off to
+  // /listings; old links and printed material still land in the right place.
+  { source: "/search", destination: "/listings", permanent: true },
+];
+
 export default nextConfig;

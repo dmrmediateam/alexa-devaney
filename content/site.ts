@@ -333,20 +333,18 @@ export const site: SiteContent = {
   },
   nav: {
     left: [
-      { label: "Portfolio", href: "/listings" },
+      { label: "Search Homes", href: "/listings" },
       { label: "Buy", href: "/buy" },
       { label: "Sell", href: "/sell" },
     ],
     right: [
-      { label: "Search", href: "/search" },
       { label: "Let’s Connect", href: "/connect" },
     ],
     menu: [
       { label: "Home", href: "/" },
-      { label: "Portfolio", href: "/listings" },
+      { label: "Search Homes", href: "/listings" },
       { label: "Buy a Home", href: "/buy" },
       { label: "Sell Your Home", href: "/sell" },
-      { label: "Search", href: "/search" },
       { label: "Let's Connect", href: "/connect" },
     ],
   },
@@ -578,7 +576,6 @@ export const site: SiteContent = {
       },
       valuationImage: "/photos/fallsbrae-estate.jpg",
     },
-    { slug: "search", type: "search", title: "Search Properties", preTitle: "Every Listing, One Place", heroImage: "/photos/gordon-ocean-view.jpg" },
     {
       slug: "connect",
       type: "connect",
@@ -653,7 +650,7 @@ export const site: SiteContent = {
       "From Encinitas north through Carlsbad, Oceanside, and Fallbrook, I help clients buy and sell with confidence: primary residences, second homes near the coast, and relocations from out of state.",
       "My goal is simple: make the process seamless and deliver exceptional results, then stay a trusted resource long after closing.",
     ],
-    ctaLabel: "View Portfolio",
+    ctaLabel: "Search Homes",
     ctaHref: "/listings",
   },
   areas: [
@@ -717,10 +714,9 @@ export const site: SiteContent = {
     brokerage: "The Oppenheim Group",
     links: [
       { label: "Home", href: "/" },
-      { label: "Portfolio", href: "/listings" },
+      { label: "Search Homes", href: "/listings" },
       { label: "Buy a Home", href: "/buy" },
       { label: "Sell Your Home", href: "/sell" },
-      { label: "Search", href: "/search" },
       { label: "Let's Connect", href: "/connect" },
     ],
     socials: [
