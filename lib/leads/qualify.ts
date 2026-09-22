@@ -63,6 +63,20 @@ export function qualify(payload: Record<string, unknown>): Qualification {
     };
   }
 
+  /*
+   * Listing-page registration is browsing intent, not an enquiry: it earns an
+   * email to the agent and nothing louder. Keeping this rule here rather than
+   * in the component is what stops it drifting into an SMS or ad conversion.
+   */
+  if (formType === "listing-registration") {
+    const address = str(payload, "address");
+    return {
+      qualified: false,
+      label: address ? `Registered to view ${address}` : "Registered to view listings",
+      tag: "NEW",
+    };
+  }
+
   if (formType === "home-value") {
     const agent = str(payload, "agentStatus");
     const value = str(payload, "estimatedValue");

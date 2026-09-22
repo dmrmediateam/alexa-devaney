@@ -35,7 +35,7 @@ export default function ListingInquiryForm({
 
   if (status === "done") {
     return (
-      <div className="listing-detail__inquiry">
+      <div id="listing-inquiry" className="listing-detail__inquiry">
         <h4>Thank you</h4>
         <p>We will be in touch about {address} shortly.</p>
       </div>
@@ -43,7 +43,7 @@ export default function ListingInquiryForm({
   }
 
   return (
-    <form className="listing-detail__inquiry" onSubmit={handleSubmit}>
+    <form id="listing-inquiry" className="listing-detail__inquiry" onSubmit={handleSubmit}>
       <Honeypot idSuffix="listing" />
       <h4>Request Information</h4>
       <input type="text" name="name" placeholder="Name" required />

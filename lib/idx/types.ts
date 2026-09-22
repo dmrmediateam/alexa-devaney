@@ -55,6 +55,8 @@ export interface ListingSummary {
    * listings apart from the rest of the MLS feed. See ./brokerage.ts. */
   listingOfficeId?: string;
   virtualTourUrl?: string;
+  /** Feed's dateAdded as epoch ms, for the "newest" sort */
+  listedAt?: number;
   detailUrl: string;
 }
 
@@ -72,6 +74,9 @@ export interface ListingDetail extends ListingSummary {
 export interface SearchFilters {
   address?: string;
   city?: string;
+  /** MLS city ID from the location index. The search endpoint expects an ID
+   * here; a city NAME silently returns the wrong set. */
+  cityId?: string;
   county?: string;
   postalCode?: string;
   subdivision?: string;

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { isSpam } from "@/lib/spam-filter";
 import { emailAgent, emailLead, smsAgent } from "@/lib/leads/notify";
+import { LEAD_CAPTURED_COOKIE } from "@/lib/leads/captured";
 
 /**
- * Lead intake for the /home-value and /buyers ad landing pages.
+ * Lead intake for every form on the site.
  *
  * Delivery is env-driven so a client repo needs no code change. Every channel
  * is independent, and a lead only needs one of them to survive:
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
     utmContent: attr.utm_content ?? "",
     landingPage: attr.landingPage ?? "",
     referrer: attr.referrer ?? "",
-    source: "caroletierney.com",
+    source: "alexadevaney.com",
     submittedAt: new Date().toISOString(),
   };
 
@@ -108,5 +109,25 @@ export async function POST(request: Request) {
 
   // The visitor gets a success either way: a delivery failure is ours to fix
   // from the logs, not theirs to retry into a form that already took their data.
-  return NextResponse.json({ success: true }, { status: 200 });
+  const response = NextResponse.json({ success: true }, { status: 200 });
+
+  /*
+   * Mark this visitor as captured, from the SERVER.
+   *
+   * Safari's storage policy deletes script-written cookies and localStorage
+   * after 7 days without a visit, so a client-side flag re-prompts people who
+   * already registered. A Set-Cookie from a response survives that. Not
+   * HttpOnly: the listing gate reads it in the browser before deciding to open.
+   * Any successful lead on any form sets it, not just the gate's own.
+   */
+  response.cookies.set({
+    name: LEAD_CAPTURED_COOKIE,
+    value: "1",
+    maxAge: 60 * 60 * 24 * 400, // 400 days: the browser cap for Set-Cookie
+    path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: false,
+  });
+  return response;
 }

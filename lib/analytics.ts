@@ -28,6 +28,7 @@ export type ConversionEvent =
   | "email_click"
   | "listing_view"
   | "listing_inquiry"
+  | "listing_registration"   // browsing intent: tracked, never an ad conversion
   | "search_performed";
 
 /**
@@ -39,6 +40,7 @@ export const LEAD_VALUES: Record<string, number> = {
   "home-value": 120, // seller intent: highest value to a listing agent
   buyer: 80,
   "listing-inquiry": 60,
+  "listing-registration": 10,
   contact: 40,
   newsletter: 5,
 };

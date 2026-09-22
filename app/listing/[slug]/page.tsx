@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import SiteChrome from "@/components/SiteChrome";
 import IdxListingCard from "@/components/idx/IdxListingCard";
 import ListingDetailBody from "@/components/idx/ListingDetailBody";
+import ListingLeadGate from "@/components/idx/ListingLeadGate";
 import { site } from "@/content/site";
 import { getListingDetail, parseListingSlug } from "@/lib/idx/listingDetail";
 import { searchListings } from "@/lib/idx/search";
@@ -92,25 +93,73 @@ export default async function ListingPage({ params }: Params) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(offerLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <ListingDetailBody listing={listing} content={site} />
+      {site.listingGate?.enabled && (
+        <ListingLeadGate
+          address={listing.address.full}
+          mlsNumber={listing.mlsNumber}
+          consent={site.footer.newsletter.consent}
+          freeViews={site.listingGate.freeViews}
+          dismissible={site.listingGate.dismissible}
+          heading={site.listingGate.heading}
+          subheading={site.listingGate.subheading}
+        />
+      )}
       <Suspense>
-        <SimilarListings city={listing.address.city} excludeKey={`${listing.idxId}-${listing.listingId}`} />
+        <SimilarListings
+          city={listing.address.city}
+          subdivision={listing.address.subdivision}
+          price={listing.price}
+          excludeKey={`${listing.idxId}-${listing.listingId}`}
+        />
       </Suspense>
     </SiteChrome>
   );
 }
 
-async function SimilarListings({ city, excludeKey }: { city: string; excludeKey: string }) {
-  const response = await searchListings({ city, pageSize: 4, status: "active" }).catch(() => null);
-  const similar = (response?.listings ?? [])
-    .filter((listing) => `${listing.idxId}-${listing.listingId}` !== excludeKey)
-    .slice(0, 3);
+async function SimilarListings({
+  city,
+  excludeKey,
+  price,
+  subdivision,
+}: {
+  city: string;
+  excludeKey: string;
+  price: number;
+  subdivision?: string;
+}) {
+  /* Same community first; if that is thin, homes in the same price band. */
+  const byCommunity = subdivision
+    ? await searchListings({ subdivision, pageSize: 6, status: "active" }).catch(() => null)
+    : null;
+  let pool = (byCommunity?.listings ?? []).filter(
+    (listing) => `${listing.idxId}-${listing.listingId}` !== excludeKey,
+  );
+
+  if (pool.length < 3) {
+    const band = await searchListings({
+      city,
+      minPrice: price ? Math.round(price * 0.7) : undefined,
+      maxPrice: price ? Math.round(price * 1.3) : undefined,
+      pageSize: 8,
+      status: "active",
+    }).catch(() => null);
+    const seen = new Set(pool.map((l) => `${l.idxId}-${l.listingId}`));
+    for (const listing of band?.listings ?? []) {
+      const key = `${listing.idxId}-${listing.listingId}`;
+      if (key === excludeKey || seen.has(key)) continue;
+      seen.add(key);
+      pool.push(listing);
+    }
+  }
+
+  const similar = pool.slice(0, 3);
   if (similar.length === 0) return null;
   return (
     <section className="solid-section">
       <div className="featured-band lp-vertical-paddings">
         <div className="lp-container">
           <div className="featured-band__head">
-            <span className="featured-band__kicker">More in {city}</span>
+            <span className="featured-band__kicker">{subdivision ? `More in ${subdivision}` : `More in ${city}`}</span>
             <h2 className="lp-h2">Similar Listings</h2>
           </div>
           <div className="listings-grid">

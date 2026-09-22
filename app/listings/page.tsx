@@ -25,8 +25,11 @@ export async function generateMetadata({ searchParams }: Params): Promise<Metada
   const params = await searchParams;
   const hasFilters = Object.keys(params).length > 0;
   const base: Metadata = {
-    title: `Property Search – ${site.brand.name}`,
-    description: `Search every MLS listing in our market with ${site.brand.name}: filter by price, beds, baths, and neighborhood.`,
+    title: `North County San Diego MLS Listings – ${site.brand.name}`,
+    description: `Search every active MLS listing from Encinitas and Carlsbad to Oceanside and Fallbrook with ${site.brand.name}: filter by price, beds, baths, and neighborhood.`,
+    // Every filter permutation canonicalises to the clean page, or Google
+    // indexes thousands of near-duplicates of the same grid.
+    alternates: { canonical: "/listings" },
   };
   // Filtered permutations stay crawlable but out of the index
   if (hasFilters) return { ...base, robots: { index: false, follow: true } };

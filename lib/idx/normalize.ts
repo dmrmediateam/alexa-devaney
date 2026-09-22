@@ -49,12 +49,45 @@ export interface RawIdxListing {
   // MLS office code. Present on both search results and detail records —
   // unlike listOfficeName, which only exists on the detail endpoint.
   listingOfficeID?: string;
+  dateAdded?: string;
   listOfficeName?: string;
   listingOfficeName?: string;
   mediaData?: RawIdxImageEntry[];
   image?: { [key: string]: RawIdxImageEntry | number | undefined; totalCount?: number };
   disclaimer?: RawIdxDisclosureEntry[];
   courtesy?: RawIdxDisclosureEntry[];
+  // Detail-endpoint feature fields, grouped for display (see buildFeatureGroups)
+  levels?: string[] | string;
+  storiesTotal?: string | number;
+  appliances?: string[] | string;
+  laundryFeatures?: string[] | string;
+  fireplaceFeatures?: string[] | string;
+  fireplacesTotal?: string | number;
+  cooling?: string[] | string;
+  heating?: string[] | string;
+  heatSource?: string[] | string;
+  livingArea?: string | number;
+  roof?: string[] | string;
+  constructionMaterials?: string[] | string;
+  fencing?: string[] | string;
+  poolFeatures?: string[] | string;
+  parkingFeatures?: string[] | string;
+  parkingTotal?: string | number;
+  lotSizeSquareFeet?: string | number;
+  subdivision?: string;
+  sdmlsNeighborhood?: string;
+  mlsAreaMajor?: string;
+  associationFee?: string | number;
+  feeFrequency?: string;
+  associationFeeIncludes?: string[] | string;
+  restrictions?: string[] | string;
+  petsAllowed?: string[] | string;
+  sewer?: string[] | string;
+  waterSource?: string[] | string;
+  listingTerms?: string[] | string;
+  specialListingConditions?: string[] | string;
+  daysOnMarket?: string | number;
+  listingAgentName?: string;
 }
 
 function slugify(value: string): string {
@@ -128,6 +161,7 @@ export function normalizeListingSummary(raw: RawIdxListing): ListingSummary {
     state: raw.state ?? '',
     postalCode: raw.zipcode ?? '',
     county: raw.countyName,
+    subdivision: raw.sdmlsNeighborhood || raw.subdivision || undefined,
     slug: addressSlug(raw),
   };
 
@@ -157,46 +191,99 @@ export function normalizeListingSummary(raw: RawIdxListing): ListingSummary {
     // cannot single out our own listings — use listingOfficeId for that.
     featured: raw.featured === 'y',
     listingOfficeId: raw.listingOfficeID,
+    listedAt: raw.dateAdded ? Date.parse(String(raw.dateAdded)) || undefined : undefined,
     detailUrl: detailUrlFor(raw),
   };
 }
 
+/** Feed values arrive as arrays, single strings, or empty: normalise to text. */
+function listValue(value: string[] | string | number | undefined): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  const text = Array.isArray(value) ? value.filter(Boolean).join(', ') : String(value);
+  const trimmed = text.trim();
+  if (!trimmed || trimmed.toLowerCase() === 'none' || trimmed === '0') return undefined;
+  return trimmed;
+}
+
+/**
+ * Feature groups built from the feed's own field groupings (interior,
+ * exterior, community, utilities) rather than dumping every field in one
+ * list. Empty fields drop out, and a group with nothing in it never renders.
+ */
 function buildFeatureGroups(raw: RawIdxListing): ListingFeatureGroup[] {
-  const groups: ListingFeatureGroup[] = [];
+  const lotSize = raw.acres && Number(raw.acres) > 0
+    ? `${raw.acres} acres`
+    : listValue(raw.lotSizeSquareFeet) ? `${listValue(raw.lotSizeSquareFeet)} sq ft` : undefined;
 
-  groups.push({
-    title: 'Property Details',
-    items: [
-      { label: 'Property Type', value: raw.propType || raw.propSubType || raw.idxPropType || 'Residential' },
-      { label: 'Year Built', value: raw.yearBuilt ? String(raw.yearBuilt) : 'Unknown' },
-      { label: 'Lot Size', value: raw.acres ? `${raw.acres} acres` : 'Unknown' },
-      { label: 'Garage Spaces', value: raw.garageSpaces !== undefined ? String(raw.garageSpaces) : '0' },
-    ],
-  });
+  const definitions: Array<{ title: string; items: Array<[string, string | undefined]> }> = [
+    {
+      title: 'Interior',
+      items: [
+        ['Bedrooms', raw.bedrooms ? String(raw.bedrooms) : undefined],
+        ['Bathrooms', raw.totalBaths ? String(raw.totalBaths) : undefined],
+        ['Living Area', (() => {
+          const value = toOptionalNumber(raw.livingArea ?? raw.sqFt);
+          return value ? `${value.toLocaleString('en-US')} sq ft` : undefined;
+        })()],
+        ['Levels', listValue(raw.levels ?? raw.storiesTotal)],
+        ['Appliances', listValue(raw.appliances)],
+        ['Laundry', listValue(raw.laundryFeatures)],
+        ['Fireplace', listValue(raw.fireplaceFeatures ?? raw.fireplacesTotal)],
+        ['Cooling', listValue(raw.cooling)],
+        ['Heating', listValue(raw.heating)],
+        ['Heat Source', listValue(raw.heatSource)],
+      ],
+    },
+    {
+      title: 'Exterior & Lot',
+      items: [
+        ['Lot Size', lotSize],
+        ['Construction', listValue(raw.constructionMaterials)],
+        ['Roof', listValue(raw.roof)],
+        ['Pool', listValue(raw.poolFeatures)],
+        ['Fencing', listValue(raw.fencing)],
+        ['Parking', listValue(raw.parkingFeatures)],
+        ['Parking Spaces', listValue(raw.parkingTotal ?? raw.garageSpaces)],
+        ['Stories', listValue(raw.storiesTotal)],
+        ['Year Built', raw.yearBuilt ? String(raw.yearBuilt) : undefined],
+      ],
+    },
+    {
+      title: 'Community',
+      items: [
+        ['Neighborhood', listValue(raw.sdmlsNeighborhood ?? raw.subdivision)],
+        ['Area', listValue(raw.mlsAreaMajor)],
+        ['County', listValue(raw.countyName)],
+        [
+          'HOA Dues',
+          raw.associationFee && Number(String(raw.associationFee).replace(/[^0-9.]/g, '')) > 0
+            ? [listValue(raw.associationFee), listValue(raw.feeFrequency)].filter(Boolean).join(' ')
+            : undefined,
+        ],
+        ['HOA Includes', listValue(raw.associationFeeIncludes)],
+        ['Pets', listValue(raw.petsAllowed)],
+        ['Restrictions', listValue(raw.restrictions)],
+      ],
+    },
+    {
+      title: 'Utilities & Terms',
+      items: [
+        ['Sewer', listValue(raw.sewer)],
+        ['Water', listValue(raw.waterSource)],
+        ['Terms', listValue(raw.listingTerms)],
+        ['Conditions', listValue(raw.specialListingConditions)],
+      ],
+    },
+  ];
 
-  if (raw.waterfrontYN === 'yes' && raw.waterfrontFeatures?.length) {
-    groups.push({
-      title: 'Waterfront',
-      items: raw.waterfrontFeatures.map((f) => ({ label: 'Feature', value: f })),
-    });
-  }
-
-  if (raw.countyName) {
-    groups.push({
-      title: 'Location',
-      items: [{ label: 'County', value: raw.countyName }],
-    });
-  }
-
-  const officeName = raw.listOfficeName || raw.listingOfficeName;
-  if (officeName) {
-    groups.push({
-      title: 'Listing Office',
-      items: [{ label: 'Office', value: officeName }],
-    });
-  }
-
-  return groups;
+  return definitions
+    .map((group) => ({
+      title: group.title,
+      items: group.items
+        .filter((entry): entry is [string, string] => Boolean(entry[1]))
+        .map(([label, value]) => ({ label, value })),
+    }))
+    .filter((group) => group.items.length > 0);
 }
 
 function cleanRemarks(text: string | undefined): string {
@@ -227,7 +314,14 @@ export function normalizeListingDetail(raw: RawIdxListing): ListingDetail {
       groups: buildFeatureGroups(raw),
     },
     listOfficeName: officeName,
-    attribution: officeName ? `Listing courtesy of ${officeName}` : 'Listing data provided by MLS',
-    disclosures: detailsDisclosure ? [detailsDisclosure] : ['Information deemed reliable but not guaranteed.'],
+    // The feed supplies its own courtesy line; only fall back when it does not
+    attribution:
+      disclosureText(raw.courtesy, 'details') ||
+      disclosureText(raw.courtesy, 'results') ||
+      (officeName ? `Listing courtesy of ${officeName}` : 'Listing data provided by MLS'),
+    disclosures: detailsDisclosure
+      ? [detailsDisclosure]
+      : [disclosureText(raw.disclaimer, 'results') || 'Information deemed reliable but not guaranteed.'],
+    daysOnMarket: toOptionalNumber(raw.daysOnMarket),
   };
 }

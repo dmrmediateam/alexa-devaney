@@ -13,6 +13,7 @@ export function filtersFromParams(params: URLSearchParams): SearchFilters {
   return {
     address: params.get('address') || undefined,
     city: params.get('city') || undefined,
+    cityId: params.get('cityId') || undefined,
     county: params.get('county') || undefined,
     postalCode: params.get('postalCode') || undefined,
     subdivision: params.get('subdivision') || undefined,
@@ -36,6 +37,7 @@ export function paramsFromFilters(filters: SearchFilters): URLSearchParams {
   const params = new URLSearchParams();
   if (filters.address) params.set('address', filters.address);
   if (filters.city) params.set('city', filters.city);
+  if (filters.cityId) params.set('cityId', filters.cityId);
   if (filters.county) params.set('county', filters.county);
   if (filters.postalCode) params.set('postalCode', filters.postalCode);
   if (filters.subdivision) params.set('subdivision', filters.subdivision);

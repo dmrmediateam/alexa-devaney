@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import IdxListingCard from "@/components/idx/IdxListingCard";
+import LocationAutocomplete, { freeTextSelection } from "@/components/idx/LocationAutocomplete";
+import { PROPERTY_TYPES } from "@/lib/idx/propertyTypes";
 import { filtersFromParams, paramsFromFilters } from "@/lib/idx/filterParams";
 import type { SearchFilters, SearchResponse } from "@/lib/idx/types";
 
@@ -42,7 +44,11 @@ export default function ListingsBrowser({
       setResponse(data);
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
-        setError("We could not load listings just now. Please try again shortly.");
+          setError(
+          (err as Error).message?.includes("429")
+            ? "Live MLS data is busy right now."
+            : "We could not load listings just now.",
+        );
       }
     } finally {
       setLoading(false);
@@ -94,10 +100,25 @@ export default function ListingsBrowser({
           Live listing data is briefly unavailable. Showing the most recent results; please refresh in a minute.
         </p>
       )}
-      {error && <p className="idx-browser__notice idx-browser__notice--error">{error}</p>}
+      {error && (
+        <p className="idx-browser__notice idx-browser__notice--error" role="status">
+          {error}{" "}
+          <button type="button" className="idx-browser__retry" onClick={() => fetchResults(filters)}>
+            Try again
+          </button>{" "}
+          or <a href="/connect">ask Alexa to search for you</a>.
+        </p>
+      )}
 
       <p className="idx-browser__count" aria-live="polite">
-        {totalCount > 0 ? `Showing ${first}–${last} of ${totalCount.toLocaleString()} homes` : loading ? "Searching…" : "No listings match these filters yet. Adjust the filters or reach out and we will search the full MLS for you."}
+        {/* Always announce the search while it runs: a cold city query takes a
+            few seconds, and leaving the previous count on screen reads as if
+            nothing happened. */}
+        {loading
+          ? "Searching the MLS…"
+          : totalCount > 0
+            ? `Showing ${first}–${last} of ${totalCount.toLocaleString()} homes`
+            : "No listings match these filters yet. Adjust the filters or reach out and we will search the full MLS for you."}
       </p>
 
       <div className={`listings-grid${loading ? " listings-grid--loading" : ""}`}>
@@ -133,31 +154,40 @@ function SearchFiltersBar({
   filters: SearchFilters;
   onApply: (next: Partial<SearchFilters>) => void;
 }) {
-  const [location, setLocation] = useState(filters.city ?? filters.address ?? "");
+  const [location, setLocation] = useState(
+    filters.subdivision ?? filters.city ?? filters.address ?? "",
+  );
 
   useEffect(() => {
-    setLocation(filters.city ?? filters.address ?? "");
-  }, [filters.city, filters.address]);
+    setLocation(filters.subdivision ?? filters.city ?? filters.address ?? "");
+  }, [filters.subdivision, filters.city, filters.address]);
 
-  const submitLocation = () => {
-    const value = location.trim();
-    // Digits usually mean an address search; otherwise treat as a city
-    const isAddress = /\d/.test(value);
-    onApply({ address: isAddress ? value : undefined, city: !isAddress && value ? value : undefined });
-  };
+  /** Replace the whole location group so a new pick never stacks on the old */
+  const applyLocation = (next: Partial<SearchFilters>) =>
+    onApply({ address: undefined, city: undefined, cityId: undefined, subdivision: undefined, ...next });
 
   return (
     <div className="idx-filters">
       <div className="idx-filters__location">
-        <input
-          type="text"
+        <LocationAutocomplete
           value={location}
-          placeholder="City or Address"
-          onChange={(e) => setLocation(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && submitLocation()}
-          aria-label="Search by city or address"
+          onChange={setLocation}
+          onSelect={(sel) =>
+            applyLocation({ cityId: sel.cityId, city: sel.city, subdivision: sel.subdivision, address: sel.address })
+          }
+          onSubmit={(raw) => {
+            const sel = freeTextSelection(raw);
+            applyLocation({ city: sel.city, address: sel.address });
+          }}
         />
-        <button type="button" onClick={submitLocation} aria-label="Search">
+        <button
+          type="button"
+          onClick={() => {
+            const sel = freeTextSelection(location);
+            applyLocation({ city: sel.city, address: sel.address });
+          }}
+          aria-label="Search"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
         </button>
       </div>
@@ -207,6 +237,17 @@ function SearchFiltersBar({
       </select>
 
       <select
+        value={filters.propertyTypes?.[0] ?? ""}
+        onChange={(e) => onApply({ propertyTypes: e.target.value ? [e.target.value] : undefined })}
+        aria-label="Property type"
+      >
+        <option value="">Property Type</option>
+        {PROPERTY_TYPES.map((t) => (
+          <option value={t} key={t}>{t}</option>
+        ))}
+      </select>
+
+      <select
         value={filters.status ?? "active"}
         onChange={(e) => onApply({ status: e.target.value as SearchFilters["status"] })}
         aria-label="Listing status"
@@ -222,6 +263,7 @@ function SearchFiltersBar({
         aria-label="Sort order"
       >
         <option value="">Sort</option>
+        <option value="newest">Newest First</option>
         <option value="priceDesc">Price: High to Low</option>
         <option value="priceAsc">Price: Low to High</option>
         <option value="sqftDesc">Largest First</option>

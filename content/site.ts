@@ -227,6 +227,18 @@ export interface SiteContent {
     /** Brokerage license number for the landing footer disclosure */
     brokerageLicense?: string;
   };
+  /**
+   * Registration gate on listing detail pages. The listing still renders (and
+   * indexes) underneath; only a modal overlays it. freeViews 0 asks on the
+   * first listing; dismissible adds a "Not now" link.
+   */
+  listingGate?: {
+    enabled: boolean;
+    freeViews: number;
+    dismissible: boolean;
+    heading: string;
+    subheading: string;
+  };
   /** Elfsight All-in-One Reviews widget, loaded site-wide (layout is set in the Elfsight dashboard) */
   reviews?: { elfsightAppId: string };
   /** Optional proof-point band rendered after the intro (e.g. "40+ / Years") */
@@ -578,6 +590,15 @@ export const site: SiteContent = {
       ],
     },
   ],
+  listingGate: {
+    // Flip to true to ask for details on the first listing view
+    enabled: false,
+    freeViews: 0,
+    dismissible: true,
+    heading: "See the full property details",
+    subheading:
+      "Tell Alexa where to send the details and she will follow up with photos, disclosures, and anything the MLS does not show.",
+  },
   landing: {
     accent: "#B71F37",
     accentLight: "#D8475D",

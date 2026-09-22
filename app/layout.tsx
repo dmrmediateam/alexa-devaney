@@ -4,6 +4,7 @@ import { site } from "@/content/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(site.meta.siteUrl ?? "https://example.com"),
   title: site.meta.title,
   description: site.meta.description,
   icons: { icon: "data:," },

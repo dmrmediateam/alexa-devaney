@@ -4,6 +4,7 @@ import { idxRequest } from './request';
 import { normalizeListingSummary, RawIdxListing } from './normalize';
 import { AddressSuggestion, IdxApiError, ListingSummary, SearchFilters, SearchResponse } from './types';
 import { CORE_MARKET_CITIES, MARKET_CITIES } from './config';
+import { RESIDENTIAL_PROPERTY_TYPES } from './propertyTypes';
 
 const SEARCH_REVALIDATE_SECONDS = 900;
 const POOL_REVALIDATE_SECONDS = 3600;
@@ -136,10 +137,16 @@ function addressSuggestionsFrom(listings: ListingSummary[]): AddressSuggestion[]
 export async function searchListings(filters: SearchFilters): Promise<SearchResponse> {
   const page = filters.page ?? 1;
   const pageSize = filters.pageSize ?? DEFAULT_PAGE_SIZE;
+  /*
+   * Default to active. Without a status the API returns every status at once,
+   * which is both the wrong result set for a "homes for sale" page and large
+   * enough (megabytes) to blow past the data-cache ceiling and fail.
+   */
+  const status = filters.status ?? 'active';
 
   const hasLocationFilter =
-    !!filters.address || !!filters.city || !!filters.county || !!filters.postalCode ||
-    !!filters.subdivision || !!filters.mlsArea;
+    !!filters.address || !!filters.city || !!filters.cityId || !!filters.county ||
+    !!filters.postalCode || !!filters.subdivision || !!filters.mlsArea;
 
   let listings: ListingSummary[];
 
@@ -150,12 +157,15 @@ export async function searchListings(filters: SearchFilters): Promise<SearchResp
       const raw = await idxRequest<Record<string, unknown>>('/clients/searchquery', {
         query: {
           aw_address: filters.address,
-          aw_cityName: filters.city,
+          // City IDs come from the location index; the name is only a fallback
+          // for free-typed text, and the two must never be swapped.
+          'city[]': filters.cityId,
+          aw_cityName: filters.cityId ? undefined : filters.city,
           aw_countyName: filters.county,
           aw_zipcode: filters.postalCode,
           aw_subdivision: filters.subdivision,
           aw_areaName: filters.mlsArea,
-          propStatus: statusParam(filters.status),
+          propStatus: statusParam(status),
           lp: filters.minPrice,
           hp: filters.maxPrice,
           bd: filters.minBeds,
@@ -166,7 +176,7 @@ export async function searchListings(filters: SearchFilters): Promise<SearchResp
         retries: 1,
       });
       listings = rawToListings(raw);
-    } else if (!filters.status || filters.status === 'active') {
+    } else if (status === 'active') {
       // Preserve the warm broad feed. If a cold chunk takes too long, cached
       // core-market queries provide a fast first-page fallback.
       const serviceAreaFallback = async () => {
@@ -195,7 +205,7 @@ export async function searchListings(filters: SearchFilters): Promise<SearchResp
       // Non-active status (sold/pending) — live parallel fetch
       const results = await Promise.all(
         CORE_MARKET_CITIES.map((city) =>
-          fetchCity(city, statusParam(filters.status)).catch(() => [] as ListingSummary[]),
+          fetchCity(city, statusParam(status)).catch(() => [] as ListingSummary[]),
         ),
       );
       listings = deduplicate(results);
@@ -211,8 +221,19 @@ export async function searchListings(filters: SearchFilters): Promise<SearchResp
       const offices = new Set(filters.officeIds.map((id) => id.toLowerCase()));
       listings = listings.filter((l) => !!l.listingOfficeId && offices.has(l.listingOfficeId.toLowerCase()));
     }
-    if (filters.propertyTypes?.length) {
-      const wanted = new Set(filters.propertyTypes.map((t) => t.toLowerCase()));
+    /*
+     * Residential by default. The MLS mixes Residential Lease into the same
+     * feed, so without this a search for homes shows $4,000/month rentals
+     * beside $4M houses. An address lookup is exempt: the visitor asked for
+     * that specific property, whatever type it is.
+     */
+    const wantedTypes = filters.propertyTypes?.length
+      ? filters.propertyTypes
+      : filters.address
+        ? undefined
+        : (RESIDENTIAL_PROPERTY_TYPES as readonly string[]);
+    if (wantedTypes?.length) {
+      const wanted = new Set(wantedTypes.map((t) => t.toLowerCase()));
       listings = listings.filter((l) => wanted.has(l.propertyType.toLowerCase()));
     }
     if (filters.keywords) {
@@ -225,6 +246,7 @@ export async function searchListings(filters: SearchFilters): Promise<SearchResp
     }
 
     switch (filters.sort) {
+      case 'newest':    listings = listings.sort((a, b) => (b.listedAt ?? 0) - (a.listedAt ?? 0)); break;
       case 'priceAsc':  listings = listings.sort((a, b) => a.price - b.price); break;
       case 'priceDesc': listings = listings.sort((a, b) => b.price - a.price); break;
       case 'sqftDesc':  listings = listings.sort((a, b) => (b.sqFt ?? 0) - (a.sqFt ?? 0)); break;

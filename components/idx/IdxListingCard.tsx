@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ListingSummary } from "@/lib/idx/types";
 import { formatPrice, formatSqFt } from "@/lib/idx/display";
 
@@ -14,8 +15,14 @@ export default function IdxListingCard({ listing }: { listing: ListingSummary })
     <a className="listing-card" href={listing.detailUrl}>
       <div className="listing-card__media">
         {listing.primaryPhoto ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={listing.primaryPhoto.url} alt={listing.address.full} loading="lazy" />
+          <Image
+            src={listing.primaryPhoto.url}
+            alt={listing.address.full}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
+            quality={70}
+            loading="lazy"
+          />
         ) : (
           <div className="listing-card__nophoto">Photo Coming Soon</div>
         )}
