@@ -32,6 +32,8 @@ export default function SiteChrome({
     "--taupe": content.theme.secondary,
     "--taupe-overlay": `rgba(${hexToRgb(content.theme.primary)}, 0.45)`,
     "--cream": content.theme.background,
+    // brand watermark, used by the decal rules in globals.css
+    "--decal": content.brand.decal ? `url(${content.brand.decal})` : "none",
     background: content.theme.background,
   } as CSSProperties;
 

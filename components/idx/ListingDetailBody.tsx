@@ -47,16 +47,15 @@ export default function ListingDetailBody({
     listing.beds ? { value: String(listing.beds), label: listing.beds === 1 ? "Bedroom" : "Bedrooms" } : null,
     listing.baths ? { value: String(listing.baths), label: listing.baths === 1 ? "Bathroom" : "Bathrooms" } : null,
     listing.sqFt ? { value: formatSqFt(listing.sqFt), label: "Sq. Ft." } : null,
-    { value: formatPrice(listing.price), label: status },
+    listing.features.yearBuilt ? { value: String(listing.features.yearBuilt), label: "Year Built" } : null,
   ].filter(Boolean) as Array<{ value: string; label: string }>;
 
   return (
     <article className="ld">
-      <ListingGallery photos={listing.photos} alt={listing.address.full} />
-
-      <div className="lp-container ld__layout">
-        <div className="ld__main">
-          <header className="ld__head">
+      {/* address and price read first, then the photography */}
+      <header className="ld__head lp-container">
+        <div className="ld__head-row">
+          <div>
             <p className="ld__mls">MLS® {listing.mlsNumber} · {status}</p>
             <h1 className="ld__address">{listing.address.street}</h1>
             <p className="ld__locality">
@@ -64,16 +63,24 @@ export default function ListingDetailBody({
                 .filter(Boolean)
                 .join(", ")}
             </p>
+          </div>
+          <p className="ld__price">{formatPrice(listing.price)}</p>
+        </div>
 
-            <dl className="ld__facts">
-              {keyFacts.map((fact) => (
-                <div key={fact.label}>
-                  <dt>{fact.value}</dt>
-                  <dd>{fact.label}</dd>
-                </div>
-              ))}
-            </dl>
-          </header>
+        <dl className="ld__facts">
+          {keyFacts.map((fact) => (
+            <div key={fact.label}>
+              <dt>{fact.value}</dt>
+              <dd>{fact.label}</dd>
+            </div>
+          ))}
+        </dl>
+      </header>
+
+      <ListingGallery photos={listing.photos} alt={listing.address.full} />
+
+      <div className="lp-container ld__layout">
+        <div className="ld__main">
 
           {listing.description && (
             <section className="ld__section">

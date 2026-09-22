@@ -3769,15 +3769,21 @@ html:has(.hn) { background: #0e0f10; }
 
 .ld { padding-top: 73px; }
 
-/* ---- gallery ---- */
-.lg { background: var(--navy); }
+/* ---- gallery: contained, so the photo reads as a plate rather than a wall ---- */
+.lg {
+  width: 100%;
+  max-width: 1370px;
+  margin: 0 auto;
+  padding: 0 25px;
+  background: none;
+}
 .lg__stage { position: relative; }
 .lg__main {
   position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 3 / 2;
-  max-height: 78vh;
+  aspect-ratio: 16 / 9;
+  max-height: 60vh;
   padding: 0;
   border: 0;
   background: #101113;
@@ -3817,13 +3823,13 @@ html:has(.hn) { background: #0e0f10; }
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 8px;
-  background: var(--navy);
+  padding: 8px 0 0;
+  background: none;
   scrollbar-width: thin;
 }
 .lg__thumb {
   position: relative;
-  flex: 0 0 132px;
+  flex: 0 0 116px;
   aspect-ratio: 3 / 2;
   border: 0;
   padding: 0;
@@ -3895,13 +3901,31 @@ html:has(.hn) { background: #0e0f10; }
 
 /* ---- layout ---- */
 .ld__layout {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 380px;
   gap: clamp(40px, 5vw, 80px);
   padding-top: 64px;
   padding-bottom: 90px;
 }
-.ld__head { padding-bottom: 34px; border-bottom: 1px solid rgba(21, 26, 28, 0.1); }
+/* address + price first, then the photography */
+.ld__head { padding: 46px 25px 30px; }
+.ld__head-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.ld__price {
+  font-family: var(--display-font);
+  font-size: clamp(28px, 3.2vw, 40px);
+  font-weight: 300;
+  line-height: 1;
+  color: var(--navy);
+  white-space: nowrap;
+}
 .ld__mls {
   font-family: var(--heading-font);
   font-size: 11px;
@@ -3921,7 +3945,9 @@ html:has(.hn) { background: #0e0f10; }
 }
 .ld__locality { margin-top: 10px; font-size: 15px; letter-spacing: 0.4px; color: #65656a; }
 .ld__facts {
-  margin-top: 30px;
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(21, 26, 28, 0.1);
   display: flex;
   flex-wrap: wrap;
   gap: 14px 52px;
@@ -4024,12 +4050,15 @@ html:has(.hn) { background: #0e0f10; }
 
 @media (max-width: 1024px) {
   .ld__layout { grid-template-columns: 1fr; padding-top: 44px; }
+  .ld__head { padding-top: 34px; }
+  .ld__price { font-size: 28px; }
   .ld__rail-inner { position: static; }
 }
 
 @media (max-width: 768px) {
   .ld { padding-top: 63px; }
-  .lg__main { aspect-ratio: 4 / 3; max-height: 60vh; }
+  .lg { padding: 0 16px; }
+  .lg__main { aspect-ratio: 4 / 3; max-height: 52vh; }
   .lg__nav { width: 42px; height: 42px; font-size: 24px; }
   .lg__thumb { flex-basis: 104px; }
   .ld__layout { padding-bottom: 40px; }
@@ -4321,4 +4350,107 @@ html[data-modal-open="true"] .ld-bar { display: none !important; }
 @media (max-width: 600px) {
   .fsel { flex: 1 1 calc(50% - 6px); }
   .fsel__menu { left: 0; right: 0; }
+}
+
+
+/* ==========================================================================
+   Brand watermark: the Oppenheim ring, very faint, on off-white ground.
+   One rule set, switched on per surface, so it never lands on photography
+   or on text it would fight with.
+   ========================================================================== */
+
+.ld,
+.idx-page-head,
+.adv-search-wrap,
+.boxed-text,
+.closings,
+.featured-band,
+footer .footer {
+  position: relative;
+}
+
+.ld::before,
+.idx-page-head::before,
+.adv-search-wrap::before,
+.boxed-text::before,
+.closings::before,
+.featured-band::before,
+footer .footer::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--decal, none);
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.05;
+}
+
+/* listing detail: large, high on the right, behind the columns */
+.ld::before {
+  top: 120px;
+  right: -12%;
+  width: min(760px, 62vw);
+  aspect-ratio: 1.05;
+  transform: rotate(-12deg);
+}
+
+/* search page head and filter panel */
+.idx-page-head::before {
+  top: 50%;
+  right: -6%;
+  width: min(520px, 46vw);
+  aspect-ratio: 1.05;
+  transform: translateY(-50%) rotate(-12deg);
+}
+.adv-search-wrap::before {
+  bottom: -8%;
+  left: -10%;
+  width: min(560px, 50vw);
+  aspect-ratio: 1.05;
+  transform: rotate(8deg);
+  opacity: 0.04;
+}
+
+/* interior intro, closings and featured bands */
+.boxed-text::before {
+  top: -10%;
+  right: -8%;
+  width: min(520px, 48vw);
+  aspect-ratio: 1.05;
+  transform: rotate(-12deg);
+}
+.closings::before,
+.featured-band::before {
+  bottom: -14%;
+  left: -8%;
+  width: min(620px, 52vw);
+  aspect-ratio: 1.05;
+  transform: rotate(10deg);
+  opacity: 0.04;
+}
+
+/* footer */
+footer .footer::before {
+  top: -6%;
+  right: -10%;
+  width: min(680px, 58vw);
+  aspect-ratio: 1.05;
+  transform: rotate(-8deg);
+  opacity: 0.045;
+}
+
+/* keep every surface's own content above the watermark */
+.boxed-text > *,
+.closings > *,
+.featured-band > *,
+.idx-page-head > *,
+.adv-search-wrap > *,
+footer .footer > * { position: relative; z-index: 1; }
+
+@media (max-width: 768px) {
+  /* smaller and fainter: on a phone a big ring reads as a smudge */
+  .ld::before, .idx-page-head::before, .adv-search-wrap::before,
+  .boxed-text::before, .closings::before, .featured-band::before,
+  footer .footer::before { width: min(360px, 78vw); opacity: 0.035; }
 }
