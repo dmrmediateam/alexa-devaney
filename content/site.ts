@@ -32,7 +32,20 @@ export interface Listing {
   status?: string;
   mls?: string;
   image: string;
+  /**
+   * Where the card links. Point it at an on-site route (`/property/<slug>`
+   * for the config-driven detail pages, `/listing/...` for live IDX ones);
+   * external MLS links send hard-won traffic to someone else's site.
+   */
   href: string;
+  /** Brokerage/MLS page for the same home, linked from the detail page */
+  mlsHref?: string;
+  /** Extra photos for the detail page gallery; `image` leads the set */
+  gallery?: string[];
+  /** Property copy for the detail page (omit rather than invent one) */
+  description?: string;
+  /** Year built, lot size etc. shown in the detail page's fact rail */
+  facts?: { label: string; value: string }[];
 }
 
 export interface TeamMember {
@@ -67,8 +80,14 @@ export interface SubPage {
   search?: boolean;
   /** Compact search form (hands off to /listings), e.g. on the buy page */
   searchPanel?: { kicker?: string; title?: string };
-  /** Grid of the agent's sold listings, e.g. on the sell page */
-  recentClosings?: { intro?: string };
+  /** Proof-point band (site.stats) under the intro, e.g. on the portfolio page */
+  showStats?: boolean;
+  /**
+   * Grid of the agent's sold listings, e.g. on the sell page. `showPrices`
+   * puts the sale price on each card: right on a portfolio page, wrong on a
+   * seller page, where the prices belong in the conversation.
+   */
+  recentClosings?: { intro?: string; kicker?: string; heading?: string; showPrices?: boolean };
   /** Override the heading over the showListings grid */
   listingsHeading?: { kicker?: string; title?: string };
   /** Prepend the 3-step "What's your property worth?" wizard (e.g. sell) */
@@ -375,7 +394,13 @@ export const site: SiteContent = {
         status: "For Sale",
         mls: "260002637",
         image: "/photos/fallsbrae-estate.jpg",
-        href: `${OG_LISTING}/260002637/4462-Fallsbrae-Rd-Fallbrook-CA-92028`,
+        href: "/property/4462-fallsbrae-rd-fallbrook",
+        gallery: [
+          "/photos/fallsbrae-aerial.jpg",
+          "/photos/fallsbrae-veranda.jpg",
+          "/photos/fallsbrae-sunset.jpg",
+        ],
+        mlsHref: `${OG_LISTING}/260002637/4462-Fallsbrae-Rd-Fallbrook-CA-92028`,
       },
       {
         price: "$6,955,734",
@@ -387,7 +412,14 @@ export const site: SiteContent = {
         status: "Sold",
         mls: "230020240",
         image: "/photos/gordon-exterior.jpg",
-        href: `${OG_LISTING}/230020240/5115-Gordon-Ln-San-Diego-CA-92109`,
+        href: "/property/5115-gordon-ln-san-diego",
+        gallery: [
+          "/photos/gordon-ocean-view.jpg",
+          "/photos/gordon-kitchen.jpg",
+          "/photos/gordon-deck-view.jpg",
+          "/photos/gordon-rooftop-sunset.jpg",
+        ],
+        mlsHref: `${OG_LISTING}/230020240/5115-Gordon-Ln-San-Diego-CA-92109`,
       },
       {
         price: "$6,900,000",
@@ -398,7 +430,8 @@ export const site: SiteContent = {
         status: "Sold",
         mls: "250028692",
         image: "/listings/6591-avenida-wilfredo.webp",
-        href: `${OG_LISTING}/250028692/6591-Avenida-Wilfredo-La-Jolla-CA-92037`,
+        href: "/property/6591-avenida-wilfredo-la-jolla",
+        mlsHref: `${OG_LISTING}/250028692/6591-Avenida-Wilfredo-La-Jolla-CA-92037`,
       },
       {
         price: "$3,750,000",
@@ -410,7 +443,13 @@ export const site: SiteContent = {
         status: "Sold",
         mls: "250039914",
         image: "/photos/aceituno-aerial-dusk.jpg",
-        href: `${OG_LISTING}/250039914/18787-Aceituno-St-San-Diego-CA-92128`,
+        href: "/property/18787-aceituno-st-san-diego",
+        gallery: [
+          "/photos/aceituno-great-room.jpg",
+          "/photos/aceituno-living.jpg",
+          "/photos/aceituno-pool.jpg",
+        ],
+        mlsHref: `${OG_LISTING}/250039914/18787-Aceituno-St-San-Diego-CA-92128`,
       },
       {
         price: "$3,500,000",
@@ -422,7 +461,8 @@ export const site: SiteContent = {
         status: "Sold",
         mls: "260007518",
         image: "/listings/11764-big-canyon.webp",
-        href: `${OG_LISTING}/260007518/11764-Big-Canyon-Ln-Scripps-Ranch-CA-92131`,
+        href: "/property/11764-big-canyon-ln-scripps-ranch",
+        mlsHref: `${OG_LISTING}/260007518/11764-Big-Canyon-Ln-Scripps-Ranch-CA-92131`,
       },
       {
         price: "$3,050,000",
@@ -434,7 +474,8 @@ export const site: SiteContent = {
         status: "Sold",
         mls: "230022226",
         image: "/listings/364-san-elijo.webp",
-        href: `${OG_LISTING}/230022226/364-San-Elijo-St-Point-Loma-CA-92106`,
+        href: "/property/364-san-elijo-st-point-loma",
+        mlsHref: `${OG_LISTING}/230022226/364-San-Elijo-St-Point-Loma-CA-92106`,
       },
       {
         price: "$2,560,000",
@@ -445,7 +486,8 @@ export const site: SiteContent = {
         status: "Sold",
         mls: "NDP2605193",
         image: "/listings/15840-caminito-cantaras.webp",
-        href: `${OG_LISTING}/NDP2605193/15840-Caminito-Cantaras-Del-Mar-CA-92014`,
+        href: "/property/15840-caminito-cantaras-del-mar",
+        mlsHref: `${OG_LISTING}/NDP2605193/15840-Caminito-Cantaras-Del-Mar-CA-92014`,
       },
       {
         price: "$1,974,000",
@@ -457,7 +499,8 @@ export const site: SiteContent = {
         status: "Sold",
         mls: "250041353",
         image: "/listings/7212-columbine.webp",
-        href: `${OG_LISTING}/250041353/7212-Columbine-Dr-Carlsbad-CA-92011`,
+        href: "/property/7212-columbine-dr-carlsbad",
+        mlsHref: `${OG_LISTING}/250041353/7212-Columbine-Dr-Carlsbad-CA-92011`,
       },
       {
         price: "$1,780,000",
@@ -469,7 +512,8 @@ export const site: SiteContent = {
         status: "Sold",
         mls: "250029080",
         image: "/listings/2511-san-clemente.webp",
-        href: `${OG_LISTING}/250029080/2511-San-Clemente-Ave-Vista-CA-92084`,
+        href: "/property/2511-san-clemente-ave-vista",
+        mlsHref: `${OG_LISTING}/250029080/2511-San-Clemente-Ave-Vista-CA-92084`,
       },
       {
         price: "$1,600,000",
@@ -481,7 +525,8 @@ export const site: SiteContent = {
         status: "Sold",
         mls: "240011803",
         image: "/listings/571-anchorage.webp",
-        href: `${OG_LISTING}/240011803/571-Anchorage-Ave-Carlsbad-CA-92011`,
+        href: "/property/571-anchorage-ave-carlsbad",
+        mlsHref: `${OG_LISTING}/240011803/571-Anchorage-Ave-Carlsbad-CA-92011`,
       },
       {
         price: "$1,465,000",
@@ -493,7 +538,8 @@ export const site: SiteContent = {
         status: "Sold",
         mls: "230013267",
         image: "/listings/3831-silverleaf.webp",
-        href: `${OG_LISTING}/230013267/3831-Silverleaf-Ln-Vista-CA-92084`,
+        href: "/property/3831-silverleaf-ln-vista",
+        mlsHref: `${OG_LISTING}/230013267/3831-Silverleaf-Ln-Vista-CA-92084`,
       },
     ],
   },
@@ -506,11 +552,15 @@ export const site: SiteContent = {
       intro: [
         "A look at the homes I have represented across San Diego County, from Fallbrook acreage to coastal Carlsbad and La Jolla.",
       ],
+      showStats: true,
       showListings: true,
-      listingsHeading: { kicker: "On the Market", title: "Active Listings" },
+      listingsHeading: { kicker: "On the Market", title: "Available Now" },
       recentClosings: {
+        kicker: "The Track Record",
+        heading: "Recent Closings",
         intro:
           "A selection of homes recently closed across San Diego County, from Carlsbad and Vista to La Jolla and Point Loma.",
+        showPrices: true,
       },
       cta: { label: "Ask About a Property", href: "/connect" },
     },

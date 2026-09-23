@@ -4496,3 +4496,275 @@ footer .footer > * { position: relative; z-index: 1; }
   .boxed-text::before, .closings::before, .featured-band::before,
   footer .footer::before { width: min(360px, 78vw); opacity: 0.035; }
 }
+
+
+/* ==========================================================================
+   Portfolio page: proof-point band, active-listing spotlight, priced closings
+   ========================================================================== */
+
+/* ---- proof points (interior pages; site.stats) ---- */
+.page-stats { padding: 6px 0 54px; }
+
+.page-stats__row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+}
+
+.page-stats__item {
+  border-top: 1px solid rgba(136, 120, 106, 0.32);
+  padding-top: 20px;
+}
+
+.page-stats__value {
+  display: block;
+  font-family: var(--heading-font);
+  font-size: clamp(32px, 3.2vw, 46px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+
+.page-stats__label {
+  font-family: var(--body-font);
+  font-size: 11px;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+
+/* ---- active listing spotlight ---- */
+.spotlights { display: grid; gap: 40px; }
+
+.spotlight {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  align-items: stretch;
+  background: var(--white);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.07);
+}
+
+.spotlight__media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 16 / 11;
+  background: #e2e2e2;
+}
+
+.spotlight__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 800ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.spotlight__media:hover img { transform: scale(1.04); }
+
+.spotlight__tag {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  background: var(--navy);
+  color: var(--white);
+  font-family: var(--body-font);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  padding: 8px 14px;
+}
+
+.spotlight__panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 46px clamp(28px, 3.4vw, 52px);
+}
+
+.spotlight__mls {
+  font-family: var(--body-font);
+  font-size: 11px;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: var(--taupe);
+  margin-bottom: 16px;
+}
+
+.spotlight__price {
+  font-family: var(--heading-font);
+  font-size: clamp(30px, 3vw, 40px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  color: var(--navy);
+}
+
+.spotlight__address {
+  margin: 14px 0 0;
+  font-family: var(--heading-font);
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: 0.6px;
+  line-height: 1.4;
+  color: #2f2f31;
+}
+
+.spotlight__address a { color: inherit; }
+.spotlight__address a:hover { color: var(--navy); }
+
+.spotlight__address span {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--body-font);
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+
+.spotlight__specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 22px 0 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  font-family: var(--body-font);
+  font-size: 12px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #55555a;
+}
+
+.spotlight__specs li + li { padding-left: 18px; border-left: 1px solid rgba(0, 0, 0, 0.12); }
+
+.spotlight__actions {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+
+.spotlight__actions .lp-btn { padding: 16px 30px; }
+
+.spotlight__link {
+  font-family: var(--body-font);
+  font-size: 12px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--taupe);
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 3px;
+}
+
+.spotlight__link:hover { color: var(--navy); }
+
+/* two active homes: side by side, image stacked over the panel */
+.spotlights--pair { grid-template-columns: 1fr 1fr; gap: 30px; }
+.spotlights--pair .spotlight { grid-template-columns: 1fr; }
+.spotlights--pair .spotlight__media { aspect-ratio: 3 / 2; }
+.spotlights--pair .spotlight__panel { padding: 32px clamp(24px, 2.4vw, 34px) 38px; }
+
+/* ---- closings with prices (portfolio) ---- */
+/* a short strip (e.g. "More From the Portfolio") centres instead of leaving
+   two empty columns at the end of an auto-fill row */
+.closings__grid--few { grid-template-columns: repeat(3, 1fr); max-width: 980px; margin-inline: auto; }
+
+/* 240px min keeps ten closings on two even rows of five at desktop width */
+.closings__grid--priced { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 38px 24px; }
+.closings__grid--priced .closings__media { aspect-ratio: 3 / 2; }
+
+.closings__price {
+  display: block;
+  margin-top: 16px;
+  font-family: var(--heading-font);
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  color: var(--navy);
+}
+
+.closings__grid--priced .closings__address { margin-top: 6px; }
+
+.closings__cue {
+  display: inline-block;
+  margin-top: 12px;
+  font-family: var(--body-font);
+  font-size: 11px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--taupe);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.closings__card a:hover .closings__cue,
+.closings__card a:focus-visible .closings__cue { opacity: 1; transform: none; }
+
+@media (hover: none) {
+  .closings__cue { opacity: 1; transform: none; }
+}
+
+@media (max-width: 1000px) {
+  .spotlight { grid-template-columns: 1fr; }
+  .spotlight__media { aspect-ratio: 3 / 2; }
+  .spotlight__panel { padding: 32px 26px 38px; }
+  .spotlights--pair { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .page-stats { padding: 0 0 40px; }
+  .page-stats__row { grid-template-columns: 1fr; gap: 22px; }
+  .closings__grid--priced { grid-template-columns: 1fr 1fr; gap: 26px 16px; }
+  .closings__price { font-size: 18px; margin-top: 12px; }
+  .spotlight__actions { gap: 18px; }
+  .spotlight__actions .lp-btn { width: 100%; }
+}
+
+@media (max-width: 380px) {
+  .closings__grid--priced { grid-template-columns: 1fr; }
+}
+
+/* ---- /property detail extras ---- */
+.property-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 112px;
+  font-family: var(--body-font);
+  font-size: 11px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+
+.property-crumbs + .ld { padding-top: 14px; }
+
+.property-crumbs a { color: var(--taupe); border-bottom: 1px solid transparent; }
+.property-crumbs a:hover { color: var(--navy); border-bottom-color: currentColor; }
+.property-crumbs span:last-child { color: #55555a; }
+
+.property-mls-link { padding-bottom: 10px; }
+
+.property-mls-link a {
+  font-family: var(--body-font);
+  font-size: 12px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--taupe);
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 3px;
+}
+
+.property-mls-link a:hover { color: var(--navy); }
+
+@media (max-width: 768px) {
+  .property-crumbs { padding-top: 96px; font-size: 10.5px; letter-spacing: 1.4px; }
+  .property-crumbs span:last-child { display: none; }
+}

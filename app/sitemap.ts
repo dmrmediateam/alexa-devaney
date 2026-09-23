@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { site } from "@/content/site";
 import { legalDocs } from "@/lib/legal";
+import { portfolioListings } from "@/lib/portfolio";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = site.meta.siteUrl ?? "https://example.com";
@@ -16,6 +17,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: "monthly" as const,
         priority: 0.7,
       })),
+    ...portfolioListings().map((listing) => ({
+      url: `${siteUrl}${listing.href}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
     ...legalDocs(site).map((doc) => ({
       url: `${siteUrl}/legal/${doc.slug}`,
       lastModified: now,

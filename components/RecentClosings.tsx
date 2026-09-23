@@ -1,20 +1,24 @@
 import type { Listing } from "@/content/site";
 
 /**
- * Recent closings grid for seller pages: addresses and specs, no prices.
- * The addresses prove current, verifiable activity in the market; sale
- * prices are left to the conversation (and some are other agents' data).
+ * Recent closings grid.
+ *
+ * On a seller page the addresses alone prove current, verifiable activity and
+ * the sale prices are left to the conversation. On the portfolio page the
+ * prices are the point, so `showPrices` puts them on the card.
  */
 export default function RecentClosings({
   listings,
   kicker = "Recently Sold",
   heading = "Recent Closings",
   intro,
+  showPrices = false,
 }: {
   listings: Listing[];
   kicker?: string;
   heading?: string;
   intro?: string;
+  showPrices?: boolean;
 }) {
   if (listings.length === 0) return null;
 
@@ -27,15 +31,22 @@ export default function RecentClosings({
             <h2 className="lp-h2">{heading}</h2>
             {intro && <p className="closings__intro">{intro}</p>}
           </div>
-          <ul className="closings__grid">
+          <ul
+            className={`closings__grid${showPrices ? " closings__grid--priced" : ""}${
+              listings.length <= 3 ? " closings__grid--few" : ""
+            }`}
+          >
             {listings.map((listing, i) => (
               <li className="closings__card reveal" data-delay={i * 60} key={`${listing.mls}-${i}`}>
                 <a href={listing.href}>
                   <span className="closings__media">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={listing.image} alt={listing.address} loading="lazy" />
-                    <span className="closings__tag">Sold</span>
+                    <span className="closings__tag">{listing.status ?? "Sold"}</span>
                   </span>
+                  {showPrices && listing.price && (
+                    <span className="closings__price">{listing.price}</span>
+                  )}
                   <span className="closings__address">{listing.address}</span>
                   {(listing.beds || listing.baths || listing.sqft) && (
                     <span className="closings__meta">
@@ -54,6 +65,7 @@ export default function RecentClosings({
                         .join(" · ")}
                     </span>
                   )}
+                  <span className="closings__cue">View Property</span>
                 </a>
               </li>
             ))}

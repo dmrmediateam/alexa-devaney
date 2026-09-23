@@ -3,6 +3,7 @@ import ContactForm from "@/components/leads/ContactForm";
 import ListingsGrid from "@/components/ListingsGrid";
 import ListingsSearchPlaceholder from "@/components/ListingsSearchPlaceholder";
 import RecentClosings from "@/components/RecentClosings";
+import PortfolioSpotlight from "@/components/PortfolioSpotlight";
 import PropertySearchExperience from "@/components/PropertySearchExperience";
 import ValuationWizard from "@/components/ValuationWizard";
 import type { Listing, SiteContent, SubPage } from "@/content/site";
@@ -76,6 +77,22 @@ export default function SubPageView({
         </section>
       )}
 
+      {/* ============ PROOF POINTS ============ */}
+      {page.showStats && content.stats && content.stats.length > 0 && (
+        <section className="solid-section">
+          <div className="page-stats">
+            <div className="lp-container page-stats__row">
+              {content.stats.map((stat, i) => (
+                <div className="page-stats__item reveal" data-delay={i * 100 || undefined} key={stat.label}>
+                  <span className="page-stats__value">{stat.value}</span>
+                  <span className="page-stats__label">{stat.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ============ BODY ============ */}
       {page.type === "search" ? (
         <SearchBody content={content} />
@@ -124,7 +141,9 @@ export default function SubPageView({
             </section>
           ))}
           {/* when the page also lists closings, keep sold homes out of the
-              active grid so the same card is not shown twice */}
+              active grid so the same card is not shown twice. One or two
+              active homes would leave holes in a three-across grid, so they
+              get the spotlight treatment instead. */}
           {page.showListings && gridListings.length > 0 && (
             <section className="solid-section">
               <div className="featured-band lp-vertical-paddings">
@@ -133,7 +152,14 @@ export default function SubPageView({
                     <span className="featured-band__kicker">{page.listingsHeading?.kicker ?? "Active Listings"}</span>
                     <h2 className="lp-h2">{page.listingsHeading?.title ?? "Currently Represented"}</h2>
                   </div>
-                  <ListingsGrid listings={gridListings} />
+                  {gridListings.length <= 2 ? (
+                    <PortfolioSpotlight
+                      listings={gridListings}
+                      ctaHref={page.cta?.href ?? "/connect"}
+                    />
+                  ) : (
+                    <ListingsGrid listings={gridListings} />
+                  )}
                 </div>
               </div>
             </section>
@@ -141,7 +167,10 @@ export default function SubPageView({
           {page.recentClosings && (
             <RecentClosings
               listings={soldListings}
+              kicker={page.recentClosings.kicker}
+              heading={page.recentClosings.heading}
               intro={page.recentClosings.intro}
+              showPrices={page.recentClosings.showPrices}
             />
           )}
           {page.cta && (

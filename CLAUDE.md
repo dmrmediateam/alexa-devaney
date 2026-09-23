@@ -155,6 +155,25 @@ iframes:
   call api.idxbroker.com. Components consume normalized types from
   `lib/idx/types.ts` only, never raw IDX shapes.
 
+### Portfolio detail pages (/property/<slug>)
+
+IDX drops a listing from the client feed the moment it closes, so sold homes
+can never have an IDX detail page. `featured.listings` entries whose `href`
+starts with `/property/` get a config-driven detail page instead, rendered by
+the same `ListingDetailBody` as the live IDX pages (gallery, key facts, At a
+Glance, agent rail + inquiry form, sticky CTA, JSON-LD, sitemap entry).
+
+- Point every config listing's `href` at `/property/<slug>`; never at the
+  brokerage's own site. Put the brokerage/MLS page in `mlsHref` and it is
+  linked from the bottom of the detail page.
+- `href` is the only source of truth for the slug; routes are generated from it.
+- Optional per-listing fields: `gallery` (extra photos), `description` (real
+  copy; a factual summary is generated from the specs when it is missing),
+  `facts` (year built, lot size, HOA - rendered in the details accordion).
+- Active listings that IDX does carry are replaced by the live feed on the
+  page grids, so those cards link to `/listing/...` instead. Both routes look
+  identical.
+
 Per-client setup is env vars in Vercel (never in the repo):
 
 ```
@@ -167,6 +186,16 @@ IDX_OFFICE_IDS=abc123      # marks "our listings" vs full MLS
 Without a key, /listings shows the config fallback listings and a note; the
 site still builds and deploys. Set `meta.siteUrl` in the client config for
 correct canonicals/sitemap/JSON-LD.
+
+## Portfolio page layout
+
+The portfolio page (`showListings` + `recentClosings`) splits active homes
+from closed ones. One or two active listings render as an editorial spotlight
+(photo + facts panel + both CTAs) rather than an orphan card in a three-across
+grid; three or more fall back to the grid automatically. `showStats: true`
+drops the `site.stats` proof points under the intro, and
+`recentClosings.showPrices` puts sale prices on the closing cards (right for a
+portfolio, wrong for the seller page, where prices belong in the conversation).
 
 ## Lead handling (ships wired)
 
