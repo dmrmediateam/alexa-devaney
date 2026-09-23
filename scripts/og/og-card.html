@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing:border-box; margin:0; }
+  body { background:#ddd; font-family:Montserrat,sans-serif; }
+  .og { width:1200px; height:630px; position:relative; display:grid; grid-template-columns:1fr 1fr;
+        background:#151A1C; overflow:hidden; }
+  .og__text { padding:56px 60px; display:flex; flex-direction:column; justify-content:center; position:relative; z-index:2; }
+  .og__decal { position:absolute; left:-120px; bottom:-170px; width:460px; height:460px; opacity:.10;
+               background:url('/brand/og-emblem.png') center/contain no-repeat; }
+  .og__eyebrow { font-size:17px; font-weight:500; letter-spacing:5px; text-transform:uppercase; color:#B71F37; margin-bottom:22px; }
+  .og__name { font-size:54px; font-weight:400; letter-spacing:6px; text-transform:uppercase; color:#fff; line-height:1.05; }
+  .og__rule { width:76px; height:2px; background:#B71F37; margin:22px 0 20px; }
+  .og__brokerage { font-size:18px; font-weight:400; letter-spacing:5px; text-transform:uppercase; color:#e8e6e2; }
+  .og__line { margin-top:24px; font-size:17.5px; font-weight:300; letter-spacing:.6px; color:#b9b6b1; line-height:1.6; }
+  .og__media { position:relative; }
+  .og__media img { width:100%; height:100%; object-fit:cover; object-position:center 32%; }
+  .og__media::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,#151A1C 0%, rgba(21,26,28,0) 42%); }
+</style></head><body>
+<div class="og" id="og">
+  <div class="og__text">
+    <span class="og__decal"></span>
+    <p class="og__eyebrow">North County San Diego</p>
+    <h1 class="og__name">Alexa<br>Devaney</h1>
+    <span class="og__rule"></span>
+    <p class="og__brokerage">The Oppenheim Group</p>
+    <p class="og__line">Luxury homes from Encinitas and Carlsbad to Oceanside, Fallbrook and La Jolla.</p>
+  </div>
+  <div class="og__media"><img src="/photos/alexa-devaney.webp" alt=""></div>
+</div>
+</body></html>

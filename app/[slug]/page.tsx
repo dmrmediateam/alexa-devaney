@@ -16,9 +16,32 @@ export const dynamicParams = false;
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const page = site.pages.find((p) => p.slug === slug);
+  if (!page) return { title: { absolute: site.meta.title }, description: site.meta.description };
+
+  // metaTitle is written for the search result; the layout template appends
+  // the brand, so a page-specific title never has to repeat it.
+  const title = page.metaTitle ?? page.title;
+  const description = page.metaDescription ?? page.intro?.[0] ?? site.meta.description;
+  const url = `/${page.slug}`;
+  const image = page.ogImage ?? page.heroImage ?? site.meta.ogImage;
+
   return {
-    title: page ? `${page.title} – ${site.brand.name}` : site.meta.title,
-    description: page?.intro?.[0] ?? site.meta.description,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "website",
+      url,
+      title: `${title} | ${site.brand.name}`,
+      description,
+      ...(image ? { images: [{ url: image, alt: page.title }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | ${site.brand.name}`,
+      description,
+      ...(image ? { images: [image] } : {}),
+    },
   };
 }
 

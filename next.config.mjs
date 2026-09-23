@@ -16,7 +16,7 @@ const nextConfig = {
     ],
     formats: ["image/avif", "image/webp"],
     // Next 16 requires the quality values used anywhere in the app
-    qualities: [60, 70, 78, 82],
+    qualities: [60, 70, 78, 80, 82],
     minimumCacheTTL: 60 * 60 * 24 * 7,
   },
 };

@@ -25,7 +25,7 @@ export async function generateMetadata({ searchParams }: Params): Promise<Metada
   const params = await searchParams;
   const hasFilters = Object.keys(params).length > 0;
   const base: Metadata = {
-    title: `North County San Diego MLS Listings – ${site.brand.name}`,
+    title: "North County San Diego Homes for Sale · MLS Search",
     description: `Search every active MLS listing from Encinitas and Carlsbad to Oceanside and Fallbrook with ${site.brand.name}: filter by price, beds, baths, and neighborhood.`,
     // Every filter permutation canonicalises to the clean page, or Google
     // indexes thousands of near-duplicates of the same grid.

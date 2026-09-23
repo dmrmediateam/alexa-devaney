@@ -218,6 +218,70 @@ Add new forms with the `useLeadSubmit` hook, never a fresh `fetch("/api/lead")`
 — it carries attribution, enhanced-conversion identifiers and the analytics
 event. See docs/lead-handling.md.
 
+## Split-section photography
+
+Editorial split sections frame their photo 4:3 by default, which beheads a
+full-length shot of a person. Set `imageShape: "portrait"` on those sections
+(3:4, capped at 470px wide) and `imageFocus` when the subject sits off-centre.
+Check every section photo of the agent after a client's photos land: a
+portrait source in a landscape frame is the most common thing to miss.
+
+## SEO, icons and social previews
+
+Set `meta.siteUrl` to the live origin **before launch** (the www host if the
+apex redirects there). It feeds canonicals, the sitemap, OG urls and every
+JSON-LD `@id`; left on the placeholder, the whole site canonicalises to
+example.com.
+
+- **Titles**: the root layout owns `title.template` (`%s | <brand>`), so a
+  page sets only its own half. Interior pages take `metaTitle` /
+  `metaDescription` in the config: write them for the query ("Buy a Home in
+  North County San Diego"), ~60 and ~155 characters, and never repeat the
+  brand name.
+- **Canonicals + OG**: `app/[slug]` emits canonical, OpenGraph and Twitter
+  tags from the page's own fields, falling back to `heroImage` then
+  `meta.ogImage`. Listing and property pages do the same with the property
+  photo.
+- **Icons**: `app/icon.png` (tab, monogram only: a brush ring turns to mush at
+  16px), `app/apple-icon.png` + `public/brand/icon-{192,512}.png` (full mark),
+  `public/favicon.ico` for legacy requests, and `app/manifest.ts`. Regenerate
+  by rendering the mark at 512px and downsampling; never ship
+  `icons: { icon: "data:," }`, which is a deliberately blank favicon.
+- **Social card**: `public/og/alexa-devaney.jpg` (1200x630) is built from
+  `scripts/og/og-card.html` - serve it from `public/`, screenshot the `#og`
+  element, save as JPEG. Property pages get their own 1200x630 crops in
+  `public/og/property/<slug>.jpg`. Social scrapers still want JPEG, so these
+  stay JPEG even though the site's own photography is WebP.
+- **Local SEO**: `site.localSeo` (areaServed, region, sameAs) plus the footer
+  address and `site.legal` licence numbers drive the RealEstateAgent +
+  WebSite structured data in `components/seo/SiteJsonLd.tsx`. Only list towns
+  the client actually works; `areaServed` is a claim. No geo coordinates
+  unless the client confirms them.
+
+## Images and video (performance budget)
+
+The site's photography is **WebP**, capped at 1920px for full-bleed art (page
+hero banners, the CTA band) and 1400px for anything in a column. Convert new
+client photos before committing them; a 600KB JPEG hero is the single easiest
+way to lose a mobile visitor.
+
+Local photos render through **next/image** (`fill` + a real `sizes`) in the
+hero banner, split sections, area rows, about block, and every card grid, so
+Vercel serves AVIF at the size the box actually paints. The wrapper carries
+`position: relative` and the aspect ratio; the `<img>` keeps `object-fit:
+cover`. Add new `quality` values to `images.qualities` in next.config or the
+build throws. Plain `<img>` is still right for logos, the emblem and the CSS
+background on the CTA band.
+
+Hero video: 1440px wide, 24fps, h264 CRF 32, no audio track, `+faststart`
+(`ffmpeg -vf "scale=1440:-2,fps=24" -c:v libx264 -preset slow -crf 32 -an`).
+VP9/WebM was tried and came out larger than h264 on this footage, so there is
+no webm; `hero.video.webm` stays empty unless a future encode actually wins.
+The poster is a WebP at the same width as the video.
+
+Rough budget, measured on a cold cache: homepage under 2.6MB fully scrolled
+(1.4MB of that is the hero video), interior pages a few hundred KB.
+
 ## Regulatory / compliance (ships by default)
 
 - `/legal/privacy-policy`, `/legal/terms-and-conditions`,

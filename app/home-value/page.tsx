@@ -12,7 +12,7 @@ import "../landing.css";
  * the signal. Google Ads does not require indexation.
  */
 export const metadata: Metadata = {
-  title: "What's Your North County Home Worth? | Alexa Devaney",
+  title: "What's Your North County Home Worth?",
   description: `Request a personal home value analysis from ${site.footer.agentName} of ${site.footer.brokerage}, grounded in current North County San Diego sales.`,
   robots: { index: false, follow: true },
   alternates: { canonical: "/home-value" },
@@ -77,7 +77,7 @@ export default function HomeValuePage() {
       <section className="lp-hero">
         <div className="lp-hero__bg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/photos/fallsbrae-sunset.jpg" alt="North County San Diego estate at sunset" />
+          <img src="/photos/fallsbrae-sunset.webp" alt="North County San Diego estate at sunset" />
         </div>
         <div className="lp-hero__scrim" />
         <div className="lp-hero__inner">
@@ -104,7 +104,7 @@ export default function HomeValuePage() {
             <Reveal>
               <div className="lp-agent__frame">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/photos/alexa-devaney-headshot.jpg" alt={`${site.footer.agentName}, Senior Realtor Associate`} />
+                <img src="/photos/alexa-devaney-headshot.webp" alt={`${site.footer.agentName}, Senior Realtor Associate`} />
               </div>
             </Reveal>
             <Reveal delay={120}>

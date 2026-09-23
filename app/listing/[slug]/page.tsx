@@ -26,8 +26,8 @@ async function loadListing(slug: string) {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const listing = await loadListing(slug);
-  if (!listing) return { title: `Listing – ${site.brand.name}`, robots: { index: false } };
-  const title = `${listing.address.full} | ${site.brand.name}`;
+  if (!listing) return { title: "Listing", robots: { index: false } };
+  const title = listing.address.full;
   const description = listing.description
     ? listing.description.slice(0, 155)
     : `${listing.beds} bed, ${listing.baths} bath ${listing.features.propertyType} in ${listing.address.city}.`;

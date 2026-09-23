@@ -1,13 +1,54 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Analytics from "@/components/Analytics";
+import SiteJsonLd from "@/components/seo/SiteJsonLd";
 import { site } from "@/content/site";
 import "./globals.css";
 
+const siteUrl = site.meta.siteUrl ?? "https://example.com";
+const ogImage = site.meta.ogImage ?? site.hero.image;
+
 export const metadata: Metadata = {
-  metadataBase: new URL(site.meta.siteUrl ?? "https://example.com"),
-  title: site.meta.title,
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: site.meta.title,
+    // Interior pages pass only their own title; the brand is appended here so
+    // no page has to repeat it (and none can forget it).
+    template: `%s | ${site.brand.name}`,
+  },
   description: site.meta.description,
-  icons: { icon: "data:," },
+  applicationName: site.brand.name,
+  authors: [{ name: site.footer.agentName, url: siteUrl }],
+  creator: site.footer.agentName,
+  publisher: site.footer.brokerage,
+  alternates: { canonical: "/" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
+  },
+  openGraph: {
+    type: "website",
+    siteName: `${site.brand.name} · ${site.footer.brokerage}`,
+    locale: "en_US",
+    url: siteUrl,
+    title: site.meta.title,
+    description: site.meta.description,
+    images: [{ url: ogImage, width: 1200, height: 630, alt: `${site.footer.agentName}, ${site.footer.brokerage}` }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: site.meta.title,
+    description: site.meta.description,
+    images: [ogImage],
+  },
+  // Phone numbers are already marked up as tel: links; iOS Safari's own
+  // detection double-styles them.
+  formatDetection: { telephone: false, address: false, email: false },
+};
+
+export const viewport: Viewport = {
+  themeColor: site.theme.primary,
+  colorScheme: "light",
 };
 
 /** Convert "#RRGGBB" to "r, g, b" for rgba() variants */
@@ -40,6 +81,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <SiteJsonLd content={site} />
         <Analytics />
         {children}
       </body>

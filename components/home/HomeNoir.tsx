@@ -1,3 +1,4 @@
+import Image from "next/image";
 import SiteChrome from "@/components/SiteChrome";
 import CountUpStat from "@/components/home/CountUpStat";
 import EmblemFlight from "@/components/home/EmblemFlight";
@@ -110,8 +111,13 @@ export default function HomeNoir({
               {featuredListings.map((listing) => (
                 <a className="hn-rail__card" href={listing.href} key={listing.mls ?? listing.address}>
                   <div className="hn-rail__media">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={listing.image} alt={listing.address} loading="lazy" />
+                    <Image
+                      src={listing.image}
+                      alt={listing.address}
+                      fill
+                      sizes="(max-width: 700px) 80vw, 420px"
+                      quality={78}
+                    />
                     {listing.status && <span className="hn-rail__status">{listing.status}</span>}
                   </div>
                   <div className="hn-rail__body">
@@ -138,8 +144,13 @@ export default function HomeNoir({
           {content.areas.map((area, i) => (
             <a className={`hn-area${i % 2 === 1 ? " hn-area--flip" : ""}`} href={area.href} key={area.title}>
               <div className="hn-area__media reveal">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={area.image} alt="" loading="lazy" />
+                <Image
+                  src={area.image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 900px) 100vw, 56vw"
+                  quality={78}
+                />
               </div>
               <div className="hn-area__text reveal" data-delay="100">
                 <h3 className="hn-area__title">{area.title}</h3>
@@ -154,8 +165,13 @@ export default function HomeNoir({
         <section className="hn-about" id="about">
           <div className="lp-container hn-about__grid">
             <div className="hn-about__media reveal">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={content.about.image} alt={content.about.title} />
+              <Image
+                src={content.about.image}
+                alt={content.about.title}
+                fill
+                sizes="(max-width: 900px) 100vw, 45vw"
+                quality={80}
+              />
             </div>
             <div className="hn-about__text reveal" data-delay="100">
               <span className="hn-kicker">{content.about.subtitle}</span>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Listing } from "@/content/site";
 
 /* ==========================================================================
@@ -42,8 +43,13 @@ export default function PortfolioSpotlight({
         return (
           <article className="spotlight reveal" data-delay={i ? i * 120 : undefined} key={listing.mls ?? listing.address}>
             <a className="spotlight__media" href={listing.href} aria-label={`View ${listing.address}`}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={listing.image} alt={listing.address} />
+              <Image
+                src={listing.image}
+                alt={listing.address}
+                fill
+                sizes="(max-width: 1000px) 100vw, 55vw"
+                quality={80}
+              />
               {listing.status && <span className="spotlight__tag">{listing.status}</span>}
             </a>
 

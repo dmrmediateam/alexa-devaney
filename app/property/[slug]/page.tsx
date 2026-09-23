@@ -27,7 +27,7 @@ export const dynamicParams = false;
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const listing = findPortfolioListing(slug);
-  if (!listing) return { title: `Property – ${site.brand.name}`, robots: { index: false } };
+  if (!listing) return { title: "Property", robots: { index: false } };
 
   const sold = /sold|closed/i.test(listing.status ?? "");
   const specs = [
@@ -37,18 +37,27 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   ]
     .filter(Boolean)
     .join(", ");
-  const title = `${listing.address} | ${site.brand.name}`;
+  const title = `${listing.address}${sold ? " · Sold" : ""}`;
   const description =
     listing.description ??
     `${specs ? `${specs} home` : "Home"} at ${listing.address}, ${sold ? "sold" : "listed"} at ${listing.price} and represented by ${site.footer.agentName} of ${site.footer.brokerage}.`;
   const url = `${siteUrl}${listing.href}`;
+  // 1200x630 crop of the property photo: the listing images themselves are
+  // portrait-ish webp, which several scrapers letterbox or skip.
+  const image = `/og/property/${slug}.jpg`;
 
   return {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, type: "website", images: [{ url: listing.image }] },
-    twitter: { card: "summary_large_image", title, description, images: [listing.image] },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: "website",
+      images: [{ url: image, width: 1200, height: 630, alt: listing.address }],
+    },
+    twitter: { card: "summary_large_image", title, description, images: [image] },
   };
 }
 

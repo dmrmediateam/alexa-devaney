@@ -1,3 +1,4 @@
+import Image from "next/image";
 import SiteChrome from "@/components/SiteChrome";
 import ContactForm from "@/components/leads/ContactForm";
 import ListingsGrid from "@/components/ListingsGrid";
@@ -37,8 +38,9 @@ export default function SubPageView({
       {!wizardIsHero && (
       <section className="video-section video-section--banner">
         <div className="video-wrapper">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={page.heroImage} alt="" />
+          {/* The banner is this page's LCP element: next/image sizes it per
+              viewport, serves AVIF/WebP, and emits the preload. */}
+          <Image src={page.heroImage} alt="" fill sizes="100vw" priority quality={78} />
         </div>
         <div className="overlay-component"></div>
         <div className="middle-content-wrapper">
@@ -127,9 +129,19 @@ export default function SubPageView({
               <div className={`split-section lp-vertical-paddings${i % 2 === 1 ? " split-section--flip" : ""}`}>
                 <div className="lp-container split-section__row">
                   {section.image && (
-                    <div className="split-section__media reveal">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={section.image} alt="" loading="lazy" />
+                    <div
+                      className={`split-section__media reveal${
+                        section.imageShape === "portrait" ? " split-section__media--portrait" : ""
+                      }`}
+                    >
+                      <Image
+                        src={section.image}
+                        alt=""
+                        fill
+                        sizes="(max-width: 860px) 100vw, 50vw"
+                        quality={78}
+                        style={section.imageFocus ? { objectPosition: section.imageFocus } : undefined}
+                      />
                     </div>
                   )}
                   <div className="split-section__text reveal" data-delay="100">

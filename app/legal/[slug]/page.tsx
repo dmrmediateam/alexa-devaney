@@ -15,7 +15,9 @@ type Params = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const doc = legalDocs(site).find((d) => d.slug === slug);
-  return { title: doc ? `${doc.title} – ${site.brand.name}` : site.meta.title };
+  return doc
+    ? { title: doc.title, alternates: { canonical: `/legal/${doc.slug}` } }
+    : { title: { absolute: site.meta.title } };
 }
 
 export default async function LegalPage({ params }: Params) {

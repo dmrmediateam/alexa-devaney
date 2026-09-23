@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Listing } from "@/content/site";
 
 /**
@@ -40,8 +41,13 @@ export default function RecentClosings({
               <li className="closings__card reveal" data-delay={i * 60} key={`${listing.mls}-${i}`}>
                 <a href={listing.href}>
                   <span className="closings__media">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={listing.image} alt={listing.address} loading="lazy" />
+                    <Image
+                      src={listing.image}
+                      alt={listing.address}
+                      fill
+                      sizes="(max-width: 380px) 100vw, (max-width: 768px) 50vw, 25vw"
+                      quality={78}
+                    />
                     <span className="closings__tag">{listing.status ?? "Sold"}</span>
                   </span>
                   {showPrices && listing.price && (

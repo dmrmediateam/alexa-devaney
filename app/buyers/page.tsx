@@ -11,7 +11,8 @@ import "../landing.css";
  * does not need it indexed and AdsBot can still reach it.
  */
 export const metadata: Metadata = {
-  title: "Find Your North County San Diego Home | Alexa Devaney",
+  // The layout template appends the brand name to every page title
+  title: "Find Your North County San Diego Home",
   description: `Tell ${site.footer.agentName} of ${site.footer.brokerage} what you're looking for and get a curated search across Encinitas, Carlsbad, Oceanside, and Fallbrook.`,
   robots: { index: false, follow: true },
   alternates: { canonical: "/buyers" },
@@ -58,7 +59,7 @@ export default function BuyersPage() {
       <section className="bq-hero">
         <div className="bq-hero__bg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/photos/aceituno-pool.jpg" alt="Hillside North County San Diego home with a pool at dusk" />
+          <img src="/photos/aceituno-pool.webp" alt="Hillside North County San Diego home with a pool at dusk" />
         </div>
         <div className="bq-hero__scrim" />
         <div className="bq-hero__inner">
@@ -121,7 +122,7 @@ export default function BuyersPage() {
             <Reveal>
               <div className="bq-portrait">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/photos/alexa-devaney.jpg" alt={`${site.footer.agentName}, Senior Realtor Associate`} />
+                <img src="/photos/alexa-devaney.webp" alt={`${site.footer.agentName}, Senior Realtor Associate`} />
               </div>
             </Reveal>
             <Reveal delay={120}>
@@ -151,7 +152,7 @@ export default function BuyersPage() {
       <section className="bq-brand">
         <div className="bq-brand__bg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/photos/coast-sunset.jpg" alt="" />
+          <img src="/photos/coast-sunset.webp" alt="" />
         </div>
         {site.brand.decal && (
           // eslint-disable-next-line @next/next/no-img-element

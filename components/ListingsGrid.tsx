@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Listing } from "@/content/site";
 
 /** Listing cards: photo with status/MLS badges, price, address, beds·baths·sqft */
@@ -12,8 +13,13 @@ export default function ListingsGrid({ listings }: { listings: Listing[] }) {
           data-delay={i % 3 === 0 ? undefined : (i % 3) * 100}
         >
           <div className="listing-card__media">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={listing.image} alt={listing.address} loading="lazy" />
+            <Image
+              src={listing.image}
+              alt={listing.address}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 33vw"
+              quality={78}
+            />
             <div className="listing-card__badges">
               {listing.status && <span>{listing.status}</span>}
               {listing.mls && <span>MLS&reg; {listing.mls}</span>}

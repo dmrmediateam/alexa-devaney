@@ -1225,7 +1225,21 @@ footer { background: var(--cream); }
 
 .split-section--flip .split-section__media { order: 2; }
 
-.split-section__media img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.split-section__media { position: relative; aspect-ratio: 4 / 3; overflow: hidden; }
+
+/* full-length portraits: a 4:3 crop of a standing or seated figure cuts the
+   head off, so these sections get a taller frame */
+/* capped width, not height: the column is wide enough that a full-height 3:4
+   frame would tower over the paragraph beside it */
+.split-section__media--portrait {
+  aspect-ratio: 3 / 4;
+  width: 100%;
+  max-width: 470px;
+  /* auto margins would make this grid item shrink to its content, and a
+     fill image has none, so the box collapses to zero */
+  justify-self: center;
+}
+.split-section__media img { width: 100%; height: 100%; object-fit: cover; }
 
 .split-section__text .lp-h2 { margin-bottom: 20px; }
 
@@ -2739,7 +2753,7 @@ a:hover > .hn-link::after,
 .hn-area--flip { grid-template-columns: 1fr 1.25fr; }
 .hn-area--flip .hn-area__media { order: 2; }
 
-.hn-area__media { overflow: hidden; }
+.hn-area__media { position: relative; overflow: hidden; }
 
 .hn-area__media img {
   width: 100%;
@@ -2780,9 +2794,11 @@ a:hover > .hn-link::after,
   align-items: center;
 }
 
+.hn-about__media { position: relative; aspect-ratio: 4 / 5; overflow: hidden; }
+
 .hn-about__media img {
   width: 100%;
-  aspect-ratio: 4 / 5;
+  height: 100%;
   object-fit: cover;
   object-position: center 20%;
   filter: saturate(0.9);
