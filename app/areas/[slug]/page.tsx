@@ -37,8 +37,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
   const title = `${area.title} Homes for Sale`;
   const description =
-    area.intro?.[0]?.slice(0, 155) ??
-    `${area.title} real estate with ${site.footer.agentName} of ${site.footer.brokerage}: current listings, neighborhoods, and local guidance.`;
+    area.metaDescription ??
+    `${area.title} real estate with ${site.footer.agentName} of ${site.footer.brokerage}: current listings, neighborhood guidance, and homes before they reach the portals.`;
+
   const url = `/areas/${slug}`;
   const image = area.heroImage ?? area.image;
 
@@ -152,8 +153,8 @@ export default async function AreaPage({ params }: Params) {
                  no explanation looks broken. */
               <p className="area-page__empty reveal">
                 Nothing is active in {area.title} at this moment, which happens in a market this
-                size. <a href="/connect">Tell me what you are looking for</a> and I will send
-                homes as they come on, including the ones that sell before they hit the portals.
+                size. <a href="/connect">Tell me what you are looking for</a> and I will send homes
+                as they come available, including those that sell before they reach the portals.
               </p>
             )}
           </div>
@@ -165,10 +166,10 @@ export default async function AreaPage({ params }: Params) {
           <div className="lp-container area-page__cta-grid">
             <div className="reveal">
               <span className="featured-band__kicker">Buying or Selling in {area.title}?</span>
-              <h2 className="lp-h2">Ask someone who works this market every week.</h2>
+              <h2 className="lp-h2">Talk to someone who works this market every week.</h2>
               <p>
-                I can tell you what a street is really worth, which listings are overpriced, and
-                what is coming before it is public. No pressure, no drip campaign.
+                I can tell you what a street is genuinely worth, which listings are priced ahead
+                of the market, and what is coming before it reaches the portals.
               </p>
             </div>
             <div className="reveal" data-delay="120">

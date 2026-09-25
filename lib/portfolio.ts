@@ -93,7 +93,7 @@ export function summaryFor(listing: Listing, content: SiteContent = site): strin
   return (
     `${street} is a ${specs ? `${specs} ` : ""}${type}${size}${where}, ` +
     `represented by ${content.footer.agentName} of ${content.footer.brokerage}.${price} ` +
-    `Reach out for photos, disclosures, and comparable sales in the neighborhood.`
+    `Ask for the full photography, disclosures, and recent comparable sales nearby.`
   );
 }
 

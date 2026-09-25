@@ -140,7 +140,7 @@ export default async function PropertyPage({ params }: Params) {
       {more.length > 0 && (
         <RecentClosings
           listings={more}
-          kicker="Keep Looking"
+          kicker="Also Represented"
           heading="More From the Portfolio"
           showPrices
         />

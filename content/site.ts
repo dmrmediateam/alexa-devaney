@@ -32,6 +32,12 @@ export interface GalleryCard {
   heroImage?: string;
   /** CSS object-position for the banner crop, e.g. "center 70%" */
   heroFocus?: string;
+  /**
+   * Search-result snippet for the area page, ~150 characters. Written by hand:
+   * slicing the intro either cuts mid-sentence or wastes the space on one
+   * short line.
+   */
+  metaDescription?: string;
 }
 
 export interface Listing {
@@ -777,7 +783,7 @@ export const site: SiteContent = {
       title: "Sell Your Home",
       metaTitle: "Sell Your Home in North County San Diego",
       metaDescription:
-        "Pricing grounded in real North County comparables, presentation that earns showings, steady communication. Request a home value analysis from Alexa.",
+        "Pricing grounded in real North County comparables, presentation that earns showings, and steady communication. Request a home value analysis.",
       preTitle: "Strategic Pricing, Polished Presentation",
       heroImage: "/photos/fallsbrae-sunset.webp",
       intro: [
@@ -865,7 +871,7 @@ export const site: SiteContent = {
   stats: [
     { value: "10+", label: "Years in Real Estate" },
     { value: "150+", label: "Homes Closed", pending: true },
-    { value: "$30M+", label: "Sold in a Typical Year", pending: true },
+    { value: "$30M+", label: "In Annual Sales Volume", pending: true },
   ],
   /*
    * TIMELINE - awaiting Alexa's detail. Every milestone below is built from
@@ -876,34 +882,34 @@ export const site: SiteContent = {
    * has not sent us in writing.
    */
   story: {
-    kicker: "The Long Version",
-    title: "Ten Years In, Still in the Same Zip Codes",
+    kicker: "Experience",
+    title: "A Decade in the Same Neighborhoods",
     intro:
-      "I did not come to real estate as a second career or a side project. I started at 22, learned this market one open house at a time, and I am still here.",
+      "Real estate was not a second career for me. I earned my license at 22, learned this market one showing at a time, and have spent every year since in the same corner of San Diego County.",
     milestones: [
       {
         title: "Licensed at 22",
-        text: "I got my license the year most of my friends were figuring out their first job, and I have worked in San Diego real estate every year since.",
+        text: "I earned my license while most of my friends were starting their first jobs, and I have worked in San Diego real estate every year since.",
         pending: true,
       },
       {
-        title: "Learning North County Street by Street",
-        text: "Years of showings from Leucadia to Fallbrook taught me what no portal can: which streets flood, which schools draw families, and what a home is really worth on a given block.",
+        title: "Learning the Market Street by Street",
+        text: "Hundreds of showings from Leucadia to Fallbrook taught me what no portal can: which blocks hold their value, which schools draw families, and what a home is genuinely worth on a given street.",
         pending: true,
       },
       {
         title: "Joining The Oppenheim Group",
-        text: "The brokerage brought national marketing reach and a buyer network that runs from Los Angeles to Cabo and Dubai. My clients get that reach with none of the distance.",
+        text: "The brokerage brought national marketing and a buyer network reaching from Los Angeles to Cabo and Dubai. My clients gained that reach without giving up a local agent.",
         pending: true,
       },
       {
-        title: "Motherhood Changed How I Work",
-        text: "Having my own family made me better at this. I think about school boundaries, nap schedules, and the yard before I think about square footage, because that is how families actually decide.",
+        title: "Motherhood Changed the Questions I Ask",
+        text: "Raising my own family made me a better guide for other families. School boundaries, commute times, and whether a yard genuinely works come before square footage, because that is how families decide.",
         pending: true,
       },
       {
         title: "Today",
-        text: "First-time buyers, growing families, relocations, investors, and luxury sellers, all in the same week. The price point changes; the way I work does not.",
+        text: "A first-time buyer, a relocating family, and a luxury seller can share the same week on my calendar. The price changes. The preparation does not.",
       },
     ],
   },
@@ -914,13 +920,13 @@ export const site: SiteContent = {
    */
   family: {
     kicker: "Off the Clock",
-    title: "A North County Family, Same as Yours",
+    title: "Raising My Family Here, Too",
     paragraphs: [
-      "My family is the reason I understand what my clients are weighing. We are at the same beaches on Saturday, the same schools on Monday, and the same taco shop after practice.",
-      "When I tell you a neighborhood is worth the stretch, or that it is not, it comes from living here, not from a market report.",
+      "My own family is why I understand what my clients are weighing. We are at the same beaches on the weekend and in the same school pickup lines on Monday.",
+      "So when I say a neighborhood is worth stretching for, or that it is not, the answer comes from living here rather than from a market report.",
     ],
     photos: [
-      { image: "/photos/alexa-family.webp", caption: "Game night, the part of the week nothing gets scheduled over." },
+      { image: "/photos/alexa-family.webp", caption: "Game night, the one thing on the calendar that never moves." },
     ],
     cta: { label: "Let's Connect", href: "/connect" },
   },
@@ -950,9 +956,9 @@ export const site: SiteContent = {
   intro: {
     title: "Oppenheim Group Reach. Local, Family-First Service.",
     paragraphs: [
-      "I am a North County mom who has sold real estate here for more than ten years. My clients are first-time buyers, growing families, downsizers, investors, and yes, luxury sellers: the common thread is that they want someone who knows these streets and answers the phone.",
-      "From Encinitas north through Carlsbad, Oceanside, and Fallbrook, I help people buy and sell with confidence at every price point, whether that is a first condo near the village or an estate on acreage.",
-      "The Oppenheim Group gives my listings serious reach. What you get from me is the local, personal part: straight answers, sharp negotiation, and a trusted resource long after closing.",
+      "For more than ten years I have sold homes across North County, and I am raising my family in the same neighborhoods I represent. First home or fifth, the standard is the same: know the market street by street, and be present for every decision that follows.",
+      "From the bluffs of Encinitas through Carlsbad and Oceanside to the groves of Fallbrook, my clients range from first-time buyers to families selling the home they raised their children in. Each one gets the same preparation.",
+      "The Oppenheim Group gives my listings national reach and a buyer network well beyond San Diego. What I bring is closer to home: candid advice, careful negotiation, and someone you can still call years after the keys change hands.",
     ],
     ctaLabel: "Search Homes",
     ctaHref: "/listings",
@@ -971,19 +977,23 @@ export const site: SiteContent = {
     {
       title: "Encinitas",
       slug: "encinitas",
+      metaDescription:
+        "Encinitas homes from Leucadia to Cardiff: beach bungalows, family streets, and bluff-top views. Current listings and local guidance from Alexa Devaney.",
       cityId: "14668",
       description: "Surf breaks, bluff-top streets, and a laid-back coastal village from Leucadia to Cardiff.",
       href: "/areas/encinitas",
       image: "/photos/areas/encinitas.webp",
       heroImage: "/photos/areas/encinitas.webp",
       intro: [
-        "Encinitas runs from Leucadia down through Cardiff, and each pocket has its own character: beach bungalows on the 101, family streets east of the freeway, and bluff-top homes with the kind of view people move across the country for.",
-        "Inventory here moves quickly and rarely looks like the listing photos alone suggest. I preview in person and tell you which ones are worth your Saturday.",
+        "Encinitas runs from Leucadia down through Cardiff, and every pocket has its own character: beach bungalows along the 101, family streets east of the freeway, and bluff-top homes with the views people move across the country for.",
+        "Inventory moves quickly here, and photographs rarely tell the whole story. I preview homes in person, so your weekends are spent only on the ones worth seeing.",
       ],
     },
     {
       title: "Carlsbad",
       slug: "carlsbad",
+      metaDescription:
+        "Carlsbad homes from Olde Carlsbad to La Costa: strong schools, a walkable village, and coastal estates. Current listings and local guidance from Alexa Devaney.",
       cityId: "7324",
       description: "Top-rated schools, walkable village streets, and generous lots a short drive from the beach.",
       href: "/areas/carlsbad",
@@ -992,34 +1002,38 @@ export const site: SiteContent = {
       // pull the banner crop down to keep the village sign arch in frame
       heroFocus: "center 78%",
       intro: [
-        "Carlsbad is where a lot of North County families land and stay: strong schools, a walkable village, and neighborhoods from Olde Carlsbad to La Costa that each price differently for good reasons.",
-        "Buyers here range from first homes in the village to estates near the coast. I work the whole range, and I will tell you honestly where your budget goes furthest.",
+        "Carlsbad is where many North County families land and stay: strong schools, a walkable village, and neighborhoods from Olde Carlsbad to La Costa that each price differently for good reason.",
+        "Buyers here range from first homes near the village to estates above the coast. I work every part of that range, and I will tell you candidly where your budget goes furthest.",
       ],
     },
     {
       title: "Oceanside",
       slug: "oceanside",
+      metaDescription:
+        "Oceanside homes in South O, Fire Mountain, and the blocks nearest the sand, still North County's best coastal value. Current listings from Alexa Devaney.",
       cityId: "34097",
       description: "A revitalized downtown, the historic pier, and some of North County's best coastal value.",
       href: "/areas/oceanside",
       image: "/photos/areas/oceanside.webp",
       heroImage: "/photos/areas/oceanside.webp",
       intro: [
-        "Oceanside has changed fast: the pier and harbor are the same, but downtown now has the restaurants and hotels that used to mean a drive south. It is still the best coastal value in North County.",
-        "South O, Fire Mountain, and the beachside blocks all behave like separate markets. Knowing which one fits you is most of the work.",
+        "Oceanside has changed quickly. The pier and harbor are unchanged, but downtown now holds the restaurants and hotels that once meant a drive south, and the coastline remains the best value in North County.",
+        "South O, Fire Mountain, and the blocks nearest the sand behave like separate markets. Matching you to the right one is most of the work.",
       ],
     },
     {
       title: "Fallbrook",
       slug: "fallbrook",
+      metaDescription:
+        "Fallbrook homes on acreage: groves, rolling hills, and room for horses. Current listings and straight answers on wells, septic, and fire clearance.",
       cityId: "15576",
       description: "Rolling hills, groves, and acreage estates with room to breathe, inland from the coast.",
       href: "/areas/fallbrook",
       image: "/photos/fallsbrae-aerial.webp",
       heroImage: "/photos/fallsbrae-aerial.webp",
       intro: [
-        "Fallbrook trades the coast for space: groves, rolling hills, and acreage where the nearest neighbor is a walk rather than a wall. It draws people who want room for horses, gardens, or simply quiet.",
-        "Wells, septic, easements, and fire clearance all matter here in ways they do not at the beach. I have sold enough Fallbrook property to know which questions to ask before you fall in love with a view.",
+        "Fallbrook trades the coastline for space: avocado groves, rolling hills, and acreage with real distance between neighbors. It draws families who want room for horses, gardens, or simply quiet.",
+        "Wells, septic, easements, and fire clearance carry weight here that they never do at the beach. I have sold enough Fallbrook property to ask the right questions before you fall for the view.",
       ],
     },
   ],
