@@ -266,6 +266,13 @@ Deploying the Studio is separate from deploying the site: `npm run
 sanity:deploy` after setting `SANITY_STUDIO_SITE_URL`. Variable names are
 listed in `.env.local` and in Step 4 of the SOP.
 
+The client's own numbers (SOP Step 5) are seeded with `npm run dmr:seed`
+(`scripts/dmr-seed-settings.mjs`), which replaces the single
+`dmr-client-settings` document. Monthly figures are deliberately NOT seeded:
+they are reported numbers and belong in the Studio or the Google Ads sync. The
+dashboard shows the "Sample data" badge until at least one
+`dmrMonthlyReport` exists, so a client never sees invented performance.
+
 ## Lead handling (ships wired)
 
 All four lead forms (footer newsletter, connect, listing enquiry, valuation

@@ -10,7 +10,8 @@
     "new-client": "node scripts/new-client.mjs",
     "sanity": "sanity dev",
     "sanity:build": "sanity build",
-    "sanity:deploy": "sanity deploy"
+    "sanity:deploy": "sanity deploy",
+    "dmr:seed": "node scripts/dmr-seed-settings.mjs"
   },
   "dependencies": {
     "@sanity/client": "^7.27.0",
