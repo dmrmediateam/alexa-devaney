@@ -1,4 +1,4 @@
-import Image from "next/image";
+import ListingImage from "@/components/ListingImage";
 import type { Listing } from "@/content/site";
 
 /** Listing cards: photo with status/MLS badges, price, address, beds·baths·sqft */
@@ -13,7 +13,7 @@ export default function ListingsGrid({ listings }: { listings: Listing[] }) {
           data-delay={i % 3 === 0 ? undefined : (i % 3) * 100}
         >
           <div className="listing-card__media">
-            <Image
+            <ListingImage
               src={listing.image}
               alt={listing.address}
               fill

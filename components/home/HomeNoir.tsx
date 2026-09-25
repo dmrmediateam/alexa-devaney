@@ -1,4 +1,4 @@
-import Image from "next/image";
+import ListingImage from "@/components/ListingImage";
 import SiteChrome from "@/components/SiteChrome";
 import CountUpStat from "@/components/home/CountUpStat";
 import FamilyBand from "@/components/FamilyBand";
@@ -112,7 +112,7 @@ export default function HomeNoir({
               {featuredListings.map((listing) => (
                 <a className="hn-rail__card" href={listing.href} key={listing.mls ?? listing.address}>
                   <div className="hn-rail__media">
-                    <Image
+                    <ListingImage
                       src={listing.image}
                       alt={listing.address}
                       fill
@@ -145,7 +145,7 @@ export default function HomeNoir({
           {content.areas.map((area, i) => (
             <a className={`hn-area${i % 2 === 1 ? " hn-area--flip" : ""}`} href={area.href} key={area.title}>
               <div className="hn-area__media reveal">
-                <Image
+                <ListingImage
                   src={area.image}
                   alt=""
                   fill
@@ -166,7 +166,7 @@ export default function HomeNoir({
         <section className="hn-about" id="about">
           <div className="lp-container hn-about__grid">
             <div className="hn-about__media reveal">
-              <Image
+              <ListingImage
                 src={content.about.image}
                 alt={content.about.title}
                 fill

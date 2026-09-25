@@ -1,4 +1,4 @@
-import Image from "next/image";
+import ListingImage from "@/components/ListingImage";
 import type { ListingSummary } from "@/lib/idx/types";
 import { formatPrice, formatSqFt } from "@/lib/idx/display";
 
@@ -15,7 +15,7 @@ export default function IdxListingCard({ listing }: { listing: ListingSummary })
     <a className="listing-card" href={listing.detailUrl}>
       <div className="listing-card__media">
         {listing.primaryPhoto ? (
-          <Image
+          <ListingImage
             src={listing.primaryPhoto.url}
             alt={listing.address.full}
             fill

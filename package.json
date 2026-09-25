@@ -7,12 +7,21 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "new-client": "node scripts/new-client.mjs"
+    "new-client": "node scripts/new-client.mjs",
+    "sanity": "sanity dev",
+    "sanity:build": "sanity build",
+    "sanity:deploy": "sanity deploy"
   },
   "dependencies": {
+    "@sanity/client": "^7.27.0",
+    "@sanity/icons": "^3.8.0",
+    "@sanity/ui": "^3.5.5",
+    "@sendgrid/mail": "^8.1.6",
     "next": "^15.4.5",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "sanity": "^4.22.1",
+    "styled-components": "^6.5.3"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

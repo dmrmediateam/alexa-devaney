@@ -57,5 +57,5 @@ export async function middleware(request: NextRequest) {
 export const config = {
   // /api is excluded from the default matcher; form endpoints must be listed
   // explicitly or the limiter never runs.
-  matcher: ["/api/lead"],
+  matcher: ["/api/lead", "/api/dmr/budget-request"],
 };

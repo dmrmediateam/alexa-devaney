@@ -237,6 +237,35 @@ drops the `site.stats` proof points under the intro, and
 `recentClosings.showPrices` puts sale prices on the closing cards (right for a
 portfolio, wrong for the seller page, where prices belong in the conversation).
 
+## DMR client dashboard (Sanity Studio + /client-portal)
+
+Built from the ClickUp SOP "Client Dashboard in Sanity Studio"; the reference
+implementation is `dmrmediateam/eagan-luxury` -> `sanity/dmr-dashboard/`.
+
+- `sanity/dmr-dashboard/` is a **verbatim copy** of the reference module. It
+  only depends on `sanity`, `@sanity/ui`, `@sanity/icons` and React, carries
+  its own `dmr-` prefixed CSS, and falls back to sample data until real
+  numbers exist. Do not edit it here: fix it in the reference repo and
+  re-copy, or every client drifts.
+- `sanity.config.ts` lists `dmrDashboard()` first, which makes the dashboard
+  the landing screen after sign-in. This site keeps its content in
+  `content/site.ts`, so the DMR report types are the only schemas.
+- `app/client-portal/` is the branded sign-in. The reference styles it with
+  Tailwind, which this site does not use, so the markup was ported to plain
+  CSS in `portal.css`. It renders without `SiteChrome`, so there is no site
+  header or footer by construction, and it is noindex and out of the sitemap.
+- `app/api/dmr/budget-request/route.ts` emails DMR when a client moves the
+  spend dial. Keep its guards: the document must exist in Sanity, be under 15
+  minutes old, and not already emailed, and the email is built from the stored
+  record rather than from the request body.
+- `lib/client.ts` builds the Sanity client **lazily**. `createClient` throws at
+  import time without a projectId, which would fail the whole build over an
+  unconfigured dashboard; the route returns 503 instead and the site is fine.
+
+Deploying the Studio is separate from deploying the site: `npm run
+sanity:deploy` after setting `SANITY_STUDIO_SITE_URL`. Variable names are
+listed in `.env.local` and in Step 4 of the SOP.
+
 ## Lead handling (ships wired)
 
 All four lead forms (footer newsletter, connect, listing enquiry, valuation
@@ -314,6 +343,12 @@ Vercel serves AVIF at the size the box actually paints. The wrapper carries
 cover`. Add new `quality` values to `images.qualities` in next.config or the
 build throws. Plain `<img>` is still right for logos, the emblem and the CSS
 background on the CTA band.
+
+MLS photos render through `components/ListingImage.tsx`, not `next/image`
+directly. `next/image` throws on a hostname missing from `remotePatterns`,
+which turns one unexpected listing photo into a 500 for the whole page, and
+listing brokerages serve photos from whatever host they like (S3 turned up in
+the live feed). Known hosts are optimized; anything else renders unoptimized.
 
 Hero video: 1440px wide, 24fps, h264 CRF 32, no audio track, `+faststart`
 (`ffmpeg -vf "scale=1440:-2,fps=24" -c:v libx264 -preset slow -crf 32 -an`).

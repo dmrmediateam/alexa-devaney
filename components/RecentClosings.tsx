@@ -1,4 +1,4 @@
-import Image from "next/image";
+import ListingImage from "@/components/ListingImage";
 import type { Listing } from "@/content/site";
 
 /**
@@ -41,7 +41,7 @@ export default function RecentClosings({
               <li className="closings__card reveal" data-delay={i * 60} key={`${listing.mls}-${i}`}>
                 <a href={listing.href}>
                   <span className="closings__media">
-                    <Image
+                    <ListingImage
                       src={listing.image}
                       alt={listing.address}
                       fill

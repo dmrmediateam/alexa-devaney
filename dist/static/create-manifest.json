@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "createdAt": "2026-09-25T21:52:51.834Z",
+  "workspaces": [
+    {
+      "name": "default",
+      "title": "Alexa Devaney",
+      "basePath": "/",
+      "projectId": "yy80nmbb",
+      "dataset": "production",
+      "icon": "<svg viewBox=\"0 0 32 32\" width=\"1em\" height=\"1em\" aria-hidden=\"true\"><rect width=\"32\" height=\"32\" rx=\"7\" fill=\"#0f0f0f\"></rect><text x=\"16\" y=\"21\" text-anchor=\"middle\" font-family=\"'Instrument Serif', Georgia, serif\" font-size=\"14\" fill=\"#fafaf9\">DMR</text></svg>",
+      "mediaLibrary": {
+        "enabled": false
+      },
+      "schema": "610149ae.create-schema.json",
+      "tools": "f1348a94.create-tools.json"
+    }
+  ],
+  "studioVersion": "4.22.1"
+}

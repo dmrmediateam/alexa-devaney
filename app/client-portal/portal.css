@@ -1,0 +1,245 @@
+/* ==========================================================================
+   Client portal sign-in (/client-portal)
+
+   The reference build at eaganluxury.com styles this page with Tailwind. This
+   site has no Tailwind, so the same design is expressed here as plain CSS,
+   scoped under .portal so nothing leaks into the marketing pages. Colors are
+   DMR's (ink #0f0f0f, paper #fafaf9, accent #3c88c0), not the client's: this
+   is DMR's product surface, and it should look the same for every client.
+   ========================================================================== */
+
+.portal {
+  --ink: #0f0f0f;
+  --paper: #fafaf9;
+  --muted: #6b6b68;
+  --line: #e7e7e5;
+  --accent: #3c88c0;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-dmr-sans), Inter, system-ui, sans-serif;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.portal__signin {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  padding: 32px 16px;
+}
+
+.portal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.portal__wordmark {
+  font-family: var(--font-dmr-serif), Georgia, serif;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.portal__headlink,
+.portal__foot a {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+.portal__headlink:hover,
+.portal__foot a:hover { color: var(--ink); }
+
+.portal__body {
+  width: 100%;
+  max-width: 384px;
+  margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px 0;
+}
+
+.portal__eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+.portal__title {
+  margin: 12px 0 0;
+  font-family: var(--font-dmr-serif), Georgia, serif;
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+.portal__lede {
+  margin-top: 16px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #3d3d3b;
+}
+
+.portal__btn {
+  display: inline-flex;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 0 24px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.portal__btn--primary {
+  margin-top: 40px;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.portal__btn--primary:hover { transform: translateY(-1px); background: #2d2d2d; }
+
+.portal__btn--ghost {
+  border: 1px solid var(--ink);
+  color: var(--ink);
+}
+
+.portal__btn--ghost:hover { transform: translateY(-1px); }
+
+.portal__btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.portal__hint {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.portal__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 32px 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #9a9a96;
+}
+
+.portal__divider span { height: 1px; flex: 1; background: var(--line); }
+
+.portal__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+
+/* ---- brand panel (desktop only) ---- */
+.portal__panel { display: none; }
+
+.portal__panel-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgba(250, 250, 249, 0.6);
+}
+
+.portal__panel-title {
+  max-width: 28rem;
+  margin: 0;
+  font-family: var(--font-dmr-serif), Georgia, serif;
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+}
+
+.portal__card {
+  margin-top: 40px;
+  max-width: 28rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--paper);
+  padding: 24px;
+  color: var(--ink);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+}
+
+.portal__card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.portal__card-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--muted); }
+
+.portal__card-roi {
+  margin: 4px 0 0;
+  font-family: var(--font-dmr-serif), Georgia, serif;
+  font-size: 60px;
+  line-height: 1;
+}
+
+.portal__badge {
+  border-radius: 999px;
+  background: #e6f0f8;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.portal__bars {
+  margin-top: 24px;
+  display: flex;
+  height: 80px;
+  align-items: flex-end;
+  gap: 8px;
+  border-bottom: 1px solid rgba(107, 107, 104, 0.6);
+}
+
+.portal__bars i { flex: 1; border-radius: 3px 3px 0 0; background: var(--accent); }
+
+.portal__stats { margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.portal__stats p { margin: 0; }
+.portal__stats .portal__card-label { letter-spacing: 0.14em; }
+.portal__stat-value { margin-top: 4px; font-family: var(--font-dmr-serif), Georgia, serif; font-size: 24px; }
+
+.portal__sample { margin-top: 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(250, 250, 249, 0.4); }
+
+.portal__note { max-width: 24rem; font-size: 14px; line-height: 1.65; color: rgba(250, 250, 249, 0.7); }
+.portal__note em { font-family: var(--font-dmr-serif), Georgia, serif; font-style: italic; font-size: 16px; }
+
+@media (min-width: 640px) {
+  .portal__signin { padding: 32px 40px; }
+}
+
+@media (min-width: 1024px) {
+  .portal { grid-template-columns: 1fr 1fr; }
+  .portal__signin { padding: 32px 64px; }
+  .portal__panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    background: var(--ink);
+    padding: 48px;
+    color: var(--paper);
+  }
+}

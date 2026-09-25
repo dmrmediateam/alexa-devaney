@@ -1,0 +1,445 @@
+[
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "clientName",
+        "type": "string",
+        "title": "Client name"
+      },
+      {
+        "description": "e.g. \"St. Petersburg, FL\"",
+        "name": "market",
+        "type": "string"
+      },
+      {
+        "description": "e.g. \"Google Search + Performance Max\"",
+        "name": "channels",
+        "type": "string"
+      },
+      {
+        "name": "websiteLabel",
+        "type": "string",
+        "title": "Website label"
+      },
+      {
+        "name": "mediaBuyer",
+        "type": "string",
+        "title": "Media buyer name"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "avgHomePrice",
+        "type": "number",
+        "title": "Average home price"
+      },
+      {
+        "initialValue": "Redfin median sale price",
+        "name": "priceSource",
+        "type": "string",
+        "title": "Price source"
+      },
+      {
+        "initialValue": 0.03,
+        "description": "0.03 = 3%",
+        "name": "commissionRate",
+        "type": "number",
+        "title": "Commission (one side)"
+      },
+      {
+        "initialValue": 0.9,
+        "description": "0.9 = 90%",
+        "name": "agentSplit",
+        "type": "number",
+        "title": "Agent split after brokerage"
+      },
+      {
+        "initialValue": 0.01,
+        "description": "0.01 = 1% (low estimate on purpose)",
+        "name": "closeRate",
+        "type": "number",
+        "title": "Lead-to-close rate"
+      },
+      {
+        "initialValue": 650,
+        "name": "monthlyFee",
+        "type": "number",
+        "title": "DMR monthly fee"
+      },
+      {
+        "initialValue": 103,
+        "description": "LocaliQ/WordStream real estate benchmark",
+        "name": "industryCpl",
+        "type": "number",
+        "title": "Industry avg cost per lead"
+      },
+      {
+        "initialValue": 0.7,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "min",
+                "constraint": 0.3
+              },
+              {
+                "flag": "max",
+                "constraint": 1
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "How leads scale with budget in the Ad spend planner. 0.7 = doubling spend gives ~1.6× the leads. Lower it for small markets.",
+        "name": "spendElasticity",
+        "type": "number",
+        "title": "Spend efficiency (planner)"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "sprintSopUrl",
+        "type": "url",
+        "title": "7-Day Sprint SOP URL"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "scriptsUrl",
+        "type": "url",
+        "title": "Scripts, texts & emails URL"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "propertyScriptUrl",
+        "type": "url",
+        "title": "Property inquiry script URL"
+      },
+      {
+        "initialValue": "manual",
+        "options": {
+          "list": [
+            {
+              "title": "Manual (entered monthly)",
+              "value": "manual"
+            },
+            {
+              "title": "Google Ads sync",
+              "value": "googleAds"
+            }
+          ],
+          "layout": "radio"
+        },
+        "name": "dataSource",
+        "type": "string",
+        "title": "Data source"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "regex",
+                "constraint": {
+                  "pattern": "/^\\d{10}$/",
+                  "name": "10 digits",
+                  "invert": false
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "10 digits, no dashes. Used by the sync job — not a secret.",
+        "name": "googleAdsCustomerId",
+        "type": "string",
+        "title": "Google Ads customer ID"
+      }
+    ],
+    "name": "dmrClientSettings",
+    "type": "document",
+    "title": "DMR · Report Settings"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Use the 1st of the month",
+        "name": "month",
+        "type": "date"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "name": "subtitle",
+                "type": "string"
+              },
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "min",
+                        "constraint": 0
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "spend",
+                "type": "number"
+              },
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "min",
+                        "constraint": 0
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "leads",
+                "type": "number"
+              },
+              {
+                "readOnly": true,
+                "name": "googleAdsCampaignId",
+                "type": "string",
+                "title": "Google Ads campaign ID"
+              }
+            ],
+            "type": "object",
+            "name": "campaign"
+          }
+        ],
+        "name": "campaigns",
+        "type": "array"
+      },
+      {
+        "description": "Only for months without a campaign breakdown",
+        "name": "spendOverride",
+        "type": "number",
+        "title": "Total spend override"
+      },
+      {
+        "name": "leadsOverride",
+        "type": "number",
+        "title": "Total leads override"
+      },
+      {
+        "name": "footnote",
+        "type": "string"
+      },
+      {
+        "readOnly": true,
+        "name": "syncedAt",
+        "type": "datetime",
+        "title": "Last synced from Google Ads"
+      }
+    ],
+    "name": "dmrMonthlyReport",
+    "type": "document",
+    "title": "DMR · Monthly Report"
+  },
+  {
+    "fields": [
+      {
+        "name": "clientName",
+        "type": "string",
+        "title": "Client"
+      },
+      {
+        "name": "currentSpend",
+        "type": "number",
+        "title": "Current monthly spend"
+      },
+      {
+        "name": "requestedSpend",
+        "type": "number",
+        "title": "Requested monthly spend"
+      },
+      {
+        "name": "baselineMonth",
+        "type": "date",
+        "title": "Projection based on"
+      },
+      {
+        "fields": [
+          {
+            "name": "leads",
+            "type": "number"
+          },
+          {
+            "name": "cpl",
+            "type": "number",
+            "title": "Cost per lead"
+          },
+          {
+            "name": "roi",
+            "type": "number",
+            "title": "Est. ROI (0.4 = 40%)"
+          },
+          {
+            "name": "commission",
+            "type": "number",
+            "title": "Est. commission"
+          }
+        ],
+        "name": "projection",
+        "type": "object",
+        "title": "Dashboard projection"
+      },
+      {
+        "rows": 3,
+        "name": "note",
+        "type": "text",
+        "title": "Note from client"
+      },
+      {
+        "name": "requestedBy",
+        "type": "string",
+        "title": "Requested by"
+      },
+      {
+        "name": "requestedByEmail",
+        "type": "string",
+        "title": "Requester email"
+      },
+      {
+        "initialValue": "requested",
+        "options": {
+          "list": [
+            "requested",
+            "confirmed",
+            "declined"
+          ],
+          "layout": "radio"
+        },
+        "name": "status",
+        "type": "string"
+      },
+      {
+        "readOnly": true,
+        "name": "emailedAt",
+        "type": "datetime",
+        "title": "Emailed to DMR at"
+      }
+    ],
+    "readOnly": "conditional",
+    "name": "dmrBudgetRequest",
+    "type": "document",
+    "title": "DMR · Budget Request"
+  }
+]

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import ListingImage from "@/components/ListingImage";
 import type { Listing } from "@/content/site";
 
 /* ==========================================================================
@@ -43,7 +43,7 @@ export default function PortfolioSpotlight({
         return (
           <article className="spotlight reveal" data-delay={i ? i * 120 : undefined} key={listing.mls ?? listing.address}>
             <a className="spotlight__media" href={listing.href} aria-label={`View ${listing.address}`}>
-              <Image
+              <ListingImage
                 src={listing.image}
                 alt={listing.address}
                 fill
