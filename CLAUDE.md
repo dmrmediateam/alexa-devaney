@@ -187,6 +187,46 @@ Without a key, /listings shows the config fallback listings and a note; the
 site still builds and deploys. Set `meta.siteUrl` in the client config for
 correct canonicals/sitemap/JSON-LD.
 
+## Area pages (/areas/<slug>)
+
+Each entry in `areas` with a `slug` gets a page: banner, local intro, that
+town's live MLS results, and a prefilled enquiry form. Two rules:
+
+- **`cityId`, never a city name.** The IDX search endpoint silently returns
+  the wrong set for a name. Get IDs from `GET /api/locations` (the same index
+  the search autocomplete uses) and paste them into the config.
+- **Photography must be that town.** Use destination imagery (a recognisable
+  landmark or coastline) consistently across the area cards rather than
+  mixing in listing photos, and verify the location before shipping - stock
+  libraries are full of "Oceanside" that is Oceanside, New York, and the
+  local buyer this page is for will spot it immediately. `heroFocus` sets the
+  banner crop when the landmark sits low in the frame.
+
+Area pages carry `changeFrequency: daily` in the sitemap; they are the local
+SEO surface of the site.
+
+## Search defaults
+
+`searchListings` sorts **newest first** when no sort is given (`filters.sort ??
+'newest'`), and the filter bar shows that as the active option. The feed's own
+order is roughly price-descending, which opens the search on the most
+expensive homes in the market and tells an ordinary buyer the site is not for
+them. Do not "fix" the default back to price.
+
+## Stats, story and family blocks
+
+- `stats[].pending: true` marks a number the client has estimated but the MLS
+  has not confirmed. It renders normally and is greppable
+  (`grep -n "pending: true" content/site.ts`). Never source these from Zillow
+  or realtor.com, which under-count most agents badly.
+- `story` is the career timeline (`showStory` on a page). `year` is optional
+  precisely so nobody invents one; a milestone with an unconfirmed detail
+  carries `pending: true` until the client supplies it.
+- `family` is the life-outside-work band (`showFamily` on a page, and it
+  renders on the noir homepage automatically). `photos` takes one to five and
+  the layout adapts, so new family photos are a config edit. Its CTA hides
+  itself when the page already ends with one.
+
 ## Portfolio page layout
 
 The portfolio page (`showListings` + `recentClosings`) splits active homes
@@ -242,11 +282,13 @@ example.com.
   tags from the page's own fields, falling back to `heroImage` then
   `meta.ogImage`. Listing and property pages do the same with the property
   photo.
-- **Icons**: `app/icon.png` (tab, monogram only: a brush ring turns to mush at
-  16px), `app/apple-icon.png` + `public/brand/icon-{192,512}.png` (full mark),
+- **Icons**: the brokerage's brush ring on the brand black, at 84% of the
+  tile so the stroke survives a 16px favicon. `app/icon.png` (tab),
+  `app/apple-icon.png` + `public/brand/icon-{192,512}.png`,
   `public/favicon.ico` for legacy requests, and `app/manifest.ts`. Regenerate
-  by rendering the mark at 512px and downsampling; never ship
-  `icons: { icon: "data:," }`, which is a deliberately blank favicon.
+  by compositing `public/brand/og-emblem.webp` onto a 1024px black square and
+  downsampling; never ship `icons: { icon: "data:," }`, which is a
+  deliberately blank favicon.
 - **Social card**: `public/og/alexa-devaney.jpg` (1200x630) is built from
   `scripts/og/og-card.html` - serve it from `public/`, screenshot the `#og`
   element, save as JPEG. Property pages get their own 1200x630 crops in

@@ -254,7 +254,7 @@ function SearchFiltersBar({
       <FilterSelect
         label="Sort order"
         placeholder="Sort"
-        value={filters.sort ?? ""}
+        value={filters.sort ?? "newest"}
         options={[
           { value: "newest", label: "Newest First" },
           { value: "priceDesc", label: "Price: High to Low" },

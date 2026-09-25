@@ -270,7 +270,12 @@ export async function searchListings(filters: SearchFilters): Promise<SearchResp
       );
     }
 
-    switch (filters.sort) {
+    /*
+     * Default to newest, not the feed's own order (which comes back roughly
+     * price-descending). A buyer landing on a wall of the most expensive
+     * homes in the market concludes the site is not for them.
+     */
+    switch (filters.sort ?? 'newest') {
       case 'newest':    listings = listings.sort((a, b) => (b.listedAt ?? 0) - (a.listedAt ?? 0)); break;
       case 'priceAsc':  listings = listings.sort((a, b) => a.price - b.price); break;
       case 'priceDesc': listings = listings.sort((a, b) => b.price - a.price); break;

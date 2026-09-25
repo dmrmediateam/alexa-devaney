@@ -18,6 +18,20 @@ export interface GalleryCard {
   description?: string;
   href: string;
   image: string;
+  /**
+   * Area cards only: fills out the /areas/<slug> page. `cityId` is the MLS
+   * city ID (GET /api/locations lists them) - the search endpoint silently
+   * returns the wrong set for a city NAME, so the ID is what makes an area
+   * page show that area's homes and nobody else's.
+   */
+  slug?: string;
+  cityId?: string;
+  /** 1-2 paragraphs of genuinely local copy for the top of the area page */
+  intro?: string[];
+  /** Wide image for the area page banner; must be that town, not a lookalike */
+  heroImage?: string;
+  /** CSS object-position for the banner crop, e.g. "center 70%" */
+  heroFocus?: string;
 }
 
 export interface Listing {
@@ -105,6 +119,10 @@ export interface SubPage {
   searchPanel?: { kicker?: string; title?: string };
   /** Proof-point band (site.stats) under the intro, e.g. on the portfolio page */
   showStats?: boolean;
+  /** Career timeline (site.story), e.g. on the about page */
+  showStory?: boolean;
+  /** Family band (site.family), e.g. on the about page */
+  showFamily?: boolean;
   /**
    * Grid of the agent's sold listings, e.g. on the sell page. `showPrices`
    * puts the sale price on each card: right on a portfolio page, wrong on a
@@ -302,8 +320,46 @@ export interface SiteContent {
   };
   /** Elfsight All-in-One Reviews widget, loaded site-wide (layout is set in the Elfsight dashboard) */
   reviews?: { elfsightAppId: string };
-  /** Optional proof-point band rendered after the intro (e.g. "40+ / Years") */
-  stats?: { value: string; label: string }[];
+  /**
+   * Proof-point band rendered after the intro (e.g. "40+ / Years").
+   *
+   * `pending: true` marks a number that has NOT been verified against the MLS
+   * yet. Those are the client's own estimates, they render normally, and they
+   * are greppable so nobody has to remember which ones still need checking:
+   * `grep -n "pending: true" content/site.ts`. Clear the flag when the MLS
+   * export confirms the figure; correct the value first if it disagrees.
+   */
+  stats?: { value: string; label: string; pending?: boolean }[];
+  /**
+   * Career/personal timeline, rendered on the page that sets `showStory`.
+   * Milestones carry an optional `year`: leave it out rather than guessing,
+   * and never add an award or a date the client has not confirmed.
+   */
+  story?: {
+    kicker?: string;
+    title: string;
+    intro?: string;
+    milestones: {
+      /** Year or span, e.g. "2015" or "2015-2019". Omit when unconfirmed. */
+      year?: string;
+      title: string;
+      text: string;
+      /** Awaiting the client's detail; see the stats note on `pending` */
+      pending?: boolean;
+    }[];
+  };
+  /**
+   * Family / life-outside-work band. Real estate is a trust business and this
+   * is the block that earns it, so it takes real photos rather than stock.
+   * Any number of photos works; the layout handles 1-5.
+   */
+  family?: {
+    kicker?: string;
+    title: string;
+    paragraphs: string[];
+    photos: { image: string; caption?: string }[];
+    cta?: { label: string; href: string };
+  };
   services: GalleryCard[];
   intro: {
     title: string;
@@ -402,8 +458,8 @@ export const site: SiteContent = {
     ],
   },
   hero: {
-    preTitle: "North County San Diego",
-    title: "Coastal Living, Personally Guided",
+    preTitle: "North County San Diego · The Oppenheim Group",
+    title: "A Family-First Realtor for North County",
     video: { mp4: "/video/hero.mp4", mobileMp4: "/video/hero-mobile.mp4" },
     image: "/video/hero-poster.webp",
   },
@@ -442,6 +498,18 @@ export const site: SiteContent = {
     stateCivilRightsAgency: "California Civil Rights Department",
     lastUpdated: "September 2026",
   },
+  /*
+   * ACTIVE listings come from IDX automatically and replace their entry here
+   * by MLS number, so nothing needs maintaining while a home is on the market.
+   * CLOSED sales do not: this MLS/IDX subscription returns nothing for
+   * propStatus=Sold (verified against the API), so every closing below is
+   * entered by hand and its /property/<slug> page is generated from it. If
+   * IDX Broker ever enables sold data on this account, `searchListings({
+   * status: "sold", officeIds })` can replace this list wholesale.
+   *
+   * Order here is the order shown on the portfolio page (highest sale first);
+   * it is independent of the buyer-facing search, which sorts newest first.
+   */
   featured: {
     title: "Featured Properties",
     subtitle: "Active and Recently Sold",
@@ -637,6 +705,8 @@ export const site: SiteContent = {
         "Ten years helping San Diego families buy and sell, from Encinitas and Carlsbad to Fallbrook. Senior Realtor Associate with The Oppenheim Group in La Jolla.",
       preTitle: "Senior Realtor Associate · The Oppenheim Group",
       heroImage: "/photos/alexa-kitchen.webp",
+      showStory: true,
+      showFamily: true,
       intro: [
         "For more than ten years I have helped San Diego families buy and sell with confidence, pairing deep local market knowledge with strategic negotiation and close attention to detail.",
         "Every client gets a personalized plan, honest guidance, and a clear line of communication. Whether you are a first-time buyer, a seasoned investor, or selling a luxury home, I anticipate challenges before they become problems and structure offers that win.",
@@ -785,11 +855,75 @@ export const site: SiteContent = {
   },
   // Elfsight reviews badge paused; restore to re-enable:
   // reviews: { elfsightAppId: "9a8f661c-a422-48cb-938c-64944318c827" },
+  /*
+   * PENDING MLS VERIFICATION. The homes-closed and volume figures below are
+   * Alexa's own estimates (roughly 150 closings; $30-40M in a typical year,
+   * nearer $20M in a slow one) and are deliberately conservative. Replace them
+   * with the MLS export's numbers and drop `pending` - do not source these
+   * from Zillow or realtor.com, which under-count her by a wide margin.
+   */
   stats: [
-    { value: "10+", label: "Years in San Diego Real Estate" },
-    { value: "$60M+", label: "In Closed Sales" },
-    { value: "25+", label: "Closed Transactions" },
+    { value: "10+", label: "Years in Real Estate" },
+    { value: "150+", label: "Homes Closed", pending: true },
+    { value: "$30M+", label: "Sold in a Typical Year", pending: true },
   ],
+  /*
+   * TIMELINE - awaiting Alexa's detail. Every milestone below is built from
+   * what she has already stated (started at 22, ten-plus years in the
+   * business, North County roots, motherhood). Entries flagged `pending` need
+   * her to confirm a year or supply the story; delete any she does not want
+   * rather than inventing a substitute, and never add an award or ranking she
+   * has not sent us in writing.
+   */
+  story: {
+    kicker: "The Long Version",
+    title: "Ten Years In, Still in the Same Zip Codes",
+    intro:
+      "I did not come to real estate as a second career or a side project. I started at 22, learned this market one open house at a time, and I am still here.",
+    milestones: [
+      {
+        title: "Licensed at 22",
+        text: "I got my license the year most of my friends were figuring out their first job, and I have worked in San Diego real estate every year since.",
+        pending: true,
+      },
+      {
+        title: "Learning North County Street by Street",
+        text: "Years of showings from Leucadia to Fallbrook taught me what no portal can: which streets flood, which schools draw families, and what a home is really worth on a given block.",
+        pending: true,
+      },
+      {
+        title: "Joining The Oppenheim Group",
+        text: "The brokerage brought national marketing reach and a buyer network that runs from Los Angeles to Cabo and Dubai. My clients get that reach with none of the distance.",
+        pending: true,
+      },
+      {
+        title: "Motherhood Changed How I Work",
+        text: "Having my own family made me better at this. I think about school boundaries, nap schedules, and the yard before I think about square footage, because that is how families actually decide.",
+        pending: true,
+      },
+      {
+        title: "Today",
+        text: "First-time buyers, growing families, relocations, investors, and luxury sellers, all in the same week. The price point changes; the way I work does not.",
+      },
+    ],
+  },
+  /*
+   * FAMILY BAND - Alexa is comfortable showing her kids. `photos` takes any
+   * number (the layout handles one to five), so new family photos drop
+   * straight in here with no code change.
+   */
+  family: {
+    kicker: "Off the Clock",
+    title: "A North County Family, Same as Yours",
+    paragraphs: [
+      "My family is the reason I understand what my clients are weighing. We are at the same beaches on Saturday, the same schools on Monday, and the same taco shop after practice.",
+      "When I tell you a neighborhood is worth the stretch, or that it is not, it comes from living here, not from a market report.",
+    ],
+    photos: [
+      { image: "/photos/alexa-family.webp", caption: "Game night, the part of the week nothing gets scheduled over." },
+    ],
+    cta: { label: "Let's Connect", href: "/connect" },
+  },
   services: [
     {
       preTitle: "Primary, Second Home, Relocation",
@@ -814,39 +948,79 @@ export const site: SiteContent = {
     },
   ],
   intro: {
-    title: "High-Level Service, Family First",
+    title: "Oppenheim Group Reach. Local, Family-First Service.",
     paragraphs: [
-      "A personal approach to buying and selling in North County San Diego, built on clear communication, sharp negotiation, and genuine care for every family I represent.",
-      "From Encinitas north through Carlsbad, Oceanside, and Fallbrook, I help clients buy and sell with confidence: primary residences, second homes near the coast, and relocations from out of state.",
-      "My goal is simple: make the process seamless and deliver exceptional results, then stay a trusted resource long after closing.",
+      "I am a North County mom who has sold real estate here for more than ten years. My clients are first-time buyers, growing families, downsizers, investors, and yes, luxury sellers: the common thread is that they want someone who knows these streets and answers the phone.",
+      "From Encinitas north through Carlsbad, Oceanside, and Fallbrook, I help people buy and sell with confidence at every price point, whether that is a first condo near the village or an estate on acreage.",
+      "The Oppenheim Group gives my listings serious reach. What you get from me is the local, personal part: straight answers, sharp negotiation, and a trusted resource long after closing.",
     ],
     ctaLabel: "Search Homes",
     ctaHref: "/listings",
   },
+  /*
+   * Area cards link to /areas/<slug>, which renders that town's own live MLS
+   * results via `cityId` (from GET /api/locations).
+   *
+   * Carlsbad, Oceanside and Encinitas use ALEXA'S OWN photography of each
+   * town (supplied Sep 2026): the Carlsbad Village sign, the Oceanside Pier,
+   * the Encinitas bluffs. Do not swap these for stock - being visibly,
+   * specifically local is the whole point of these pages. Fallbrook uses the
+   * aerial of her own listing there.
+   */
   areas: [
     {
       title: "Encinitas",
+      slug: "encinitas",
+      cityId: "14668",
       description: "Surf breaks, bluff-top streets, and a laid-back coastal village from Leucadia to Cardiff.",
-      href: "/buy",
-      image: "/photos/gordon-ocean-view.webp",
+      href: "/areas/encinitas",
+      image: "/photos/areas/encinitas.webp",
+      heroImage: "/photos/areas/encinitas.webp",
+      intro: [
+        "Encinitas runs from Leucadia down through Cardiff, and each pocket has its own character: beach bungalows on the 101, family streets east of the freeway, and bluff-top homes with the kind of view people move across the country for.",
+        "Inventory here moves quickly and rarely looks like the listing photos alone suggest. I preview in person and tell you which ones are worth your Saturday.",
+      ],
     },
     {
       title: "Carlsbad",
+      slug: "carlsbad",
+      cityId: "7324",
       description: "Top-rated schools, walkable village streets, and generous lots a short drive from the beach.",
-      href: "/buy",
-      image: "/listings/7212-columbine.webp",
+      href: "/areas/carlsbad",
+      image: "/photos/areas/carlsbad.webp",
+      heroImage: "/photos/areas/carlsbad.webp",
+      // pull the banner crop down to keep the village sign arch in frame
+      heroFocus: "center 78%",
+      intro: [
+        "Carlsbad is where a lot of North County families land and stay: strong schools, a walkable village, and neighborhoods from Olde Carlsbad to La Costa that each price differently for good reasons.",
+        "Buyers here range from first homes in the village to estates near the coast. I work the whole range, and I will tell you honestly where your budget goes furthest.",
+      ],
     },
     {
       title: "Oceanside",
+      slug: "oceanside",
+      cityId: "34097",
       description: "A revitalized downtown, the historic pier, and some of North County's best coastal value.",
-      href: "/buy",
-      image: "/photos/coast-sunset.webp",
+      href: "/areas/oceanside",
+      image: "/photos/areas/oceanside.webp",
+      heroImage: "/photos/areas/oceanside.webp",
+      intro: [
+        "Oceanside has changed fast: the pier and harbor are the same, but downtown now has the restaurants and hotels that used to mean a drive south. It is still the best coastal value in North County.",
+        "South O, Fire Mountain, and the beachside blocks all behave like separate markets. Knowing which one fits you is most of the work.",
+      ],
     },
     {
       title: "Fallbrook",
+      slug: "fallbrook",
+      cityId: "15576",
       description: "Rolling hills, groves, and acreage estates with room to breathe, inland from the coast.",
-      href: "/buy",
+      href: "/areas/fallbrook",
       image: "/photos/fallsbrae-aerial.webp",
+      heroImage: "/photos/fallsbrae-aerial.webp",
+      intro: [
+        "Fallbrook trades the coast for space: groves, rolling hills, and acreage where the nearest neighbor is a walk rather than a wall. It draws people who want room for horses, gardens, or simply quiet.",
+        "Wells, septic, easements, and fire clearance all matter here in ways they do not at the beach. I have sold enough Fallbrook property to know which questions to ask before you fall in love with a view.",
+      ],
     },
   ],
   about: {

@@ -1,11 +1,22 @@
 "use client";
 
+import { site } from "@/content/site";
 import Honeypot from "@/components/leads/Honeypot";
 import { useLeadSubmit } from "@/lib/leads/useLeadSubmit";
 
 /** The /connect page form. Markup and classes match the original so the
  *  existing styling applies unchanged; only the submit behaviour is new. */
-export default function ContactForm({ consent }: { consent: string }) {
+export default function ContactForm({
+  consent,
+  agentName,
+  message,
+}: {
+  consent: string;
+  /** Who the visitor is told will follow up; defaults to the site's agent */
+  agentName?: string;
+  /** Pre-filled message, e.g. the area a visitor is enquiring about */
+  message?: string;
+}) {
   const { status, submit } = useLeadSubmit("contact");
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -25,7 +36,7 @@ export default function ContactForm({ consent }: { consent: string }) {
     return (
       <div className="connect-grid__form connect-grid__form--done">
         <h3>Thank you</h3>
-        <p>Your message is with Carole and she will follow up personally, usually the same day.</p>
+        <p>Your message is with {agentName ?? site.footer.agentName} and she will follow up personally, usually the same day.</p>
       </div>
     );
   }
@@ -37,7 +48,7 @@ export default function ContactForm({ consent }: { consent: string }) {
         <input type="text" name="name" placeholder="Name" required />
         <input type="email" name="email" placeholder="Email" required />
         <input type="tel" name="phone" placeholder="Phone" />
-        <textarea name="message" placeholder="How can we help?" rows={5} />
+        <textarea name="message" placeholder="How can we help?" rows={5} defaultValue={message} />
       </div>
       <label className="newsletter__consent">
         <input type="checkbox" name="termsAccepted" required />

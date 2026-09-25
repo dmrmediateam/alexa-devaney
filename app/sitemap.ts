@@ -17,6 +17,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: "monthly" as const,
         priority: 0.7,
       })),
+    ...site.areas
+      .filter((area) => area.slug)
+      .map((area) => ({
+        url: `${siteUrl}/areas/${area.slug}`,
+        lastModified: now,
+        changeFrequency: "daily" as const,
+        priority: 0.8,
+      })),
     ...portfolioListings().map((listing) => ({
       url: `${siteUrl}${listing.href}`,
       lastModified: now,

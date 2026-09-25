@@ -5,6 +5,8 @@ import ListingsGrid from "@/components/ListingsGrid";
 import ListingsSearchPlaceholder from "@/components/ListingsSearchPlaceholder";
 import RecentClosings from "@/components/RecentClosings";
 import PortfolioSpotlight from "@/components/PortfolioSpotlight";
+import StoryTimeline from "@/components/StoryTimeline";
+import FamilyBand from "@/components/FamilyBand";
 import PropertySearchExperience from "@/components/PropertySearchExperience";
 import ValuationWizard from "@/components/ValuationWizard";
 import type { Listing, SiteContent, SubPage } from "@/content/site";
@@ -185,6 +187,8 @@ export default function SubPageView({
               showPrices={page.recentClosings.showPrices}
             />
           )}
+          {page.showStory && content.story && <StoryTimeline story={content.story} />}
+          {page.showFamily && content.family && <FamilyBand family={content.family} showCta={!page.cta} />}
           {page.cta && (
             <section className="solid-section">
               <div className="boxed-text lp-vertical-paddings" style={{ textAlign: "center" }}>

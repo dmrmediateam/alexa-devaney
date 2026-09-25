@@ -1,6 +1,7 @@
 import Image from "next/image";
 import SiteChrome from "@/components/SiteChrome";
 import CountUpStat from "@/components/home/CountUpStat";
+import FamilyBand from "@/components/FamilyBand";
 import EmblemFlight from "@/components/home/EmblemFlight";
 import type { Listing, SiteContent } from "@/content/site";
 
@@ -183,6 +184,9 @@ export default function HomeNoir({
             </div>
           </div>
         </section>
+
+        {/* ============ FAMILY: who the person behind the sign is ============ */}
+        {content.family && <FamilyBand family={content.family} tone="dark" />}
 
         {/* ============ CTA: fixed background ============ */}
         <section
