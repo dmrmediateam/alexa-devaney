@@ -21,9 +21,12 @@ import type { ListingPhoto } from "@/lib/idx/types";
 export default function ListingGallery({
   photos,
   alt,
+  overlay,
 }: {
   photos: ListingPhoto[];
   alt: string;
+  /** Rendered over the top-right of the plate: the save-this-home control. */
+  overlay?: React.ReactNode;
 }) {
   const [index, setIndex] = useState(0);
   const [viewer, setViewer] = useState(false);
@@ -96,6 +99,8 @@ export default function ListingGallery({
               />
             </button>
           ))}
+
+          {overlay}
 
           {count > 1 && (
             <button

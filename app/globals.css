@@ -3980,7 +3980,8 @@ html:has(.hn) { background: #0e0f10; }
   font-weight: 400;
   line-height: 1;
   letter-spacing: -0.5px;
-  color: var(--navy);
+  /* the one figure on the page that should carry the brand accent */
+  color: var(--taupe);
 }
 .ld__address {
   display: flex;
@@ -4002,7 +4003,8 @@ html:has(.hn) { background: #0e0f10; }
   font-weight: 600;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--taupe);
+  /* same ink as the street it sits beside: one address, one colour */
+  color: var(--navy);
 }
 
 .ld__actions { display: grid; gap: 10px; width: min(300px, 100%); }
@@ -5048,18 +5050,6 @@ footer .footer > * { position: relative; z-index: 1; }
 }
 .heart.is-on svg path { fill: var(--taupe); stroke: var(--taupe); }
 .heart.is-on { background: rgba(255, 255, 255, 0.92); }
-
-/* in the detail fold it sits in the flow beside the CTAs, not over a photo */
-.ld__actions .heart {
-  position: static;
-  justify-self: end;
-  background: rgba(21, 26, 28, 0.06);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-.ld__actions .heart:hover { background: rgba(21, 26, 28, 0.12); }
-.ld__actions .heart svg path { stroke: var(--navy); }
-.ld__actions .heart:focus-visible { outline-color: var(--navy); }
 
 @media (prefers-reduced-motion: reduce) {
   .heart, .heart svg path { transition: none; }

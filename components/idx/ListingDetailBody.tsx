@@ -53,7 +53,7 @@ export default function ListingDetailBody({
     address: listing.address.full,
     city: listing.address.city,
     price: listing.price,
-    url: `/listing/${listing.idxId}-${listing.listingId}`,
+    url: listing.detailUrl,
   };
 
   // "At a glance": only what the feed actually carries. San Diego MLS does not
@@ -81,7 +81,11 @@ export default function ListingDetailBody({
       <ListingViewTracker listing={tracked} />
       <ListingBreadcrumbs trail={crumbs} />
 
-      <ListingGallery photos={listing.photos} alt={listing.address.full} />
+      <ListingGallery
+        photos={listing.photos}
+        alt={listing.address.full}
+        overlay={<HeartButton key="heart" listing={tracked} />}
+      />
 
       {/* the fold: address and price under the photo, actions opposite them */}
       <header className="ld__hero lp-container">
@@ -96,7 +100,6 @@ export default function ListingDetailBody({
         </div>
 
         <div className="ld__actions">
-          <HeartButton listing={tracked} />
           <a className="ld__action ld__action--primary" href="#listing-inquiry">
             {primaryCta}
           </a>

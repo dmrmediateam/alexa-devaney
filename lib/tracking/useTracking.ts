@@ -16,6 +16,12 @@ function beacon(payload: Record<string, unknown>): void {
   if (typeof window === "undefined") return;
   // Ensures the visitor cookie exists before the server tries to read it.
   getVisitorId();
+  /* Store listing links absolute. The dashboard that reads these runs on
+     sanity.studio, where a relative /listing/... path points at nothing. */
+  const listing = payload.listing as { url?: string } | undefined;
+  if (listing?.url && listing.url.startsWith("/")) {
+    listing.url = window.location.origin + listing.url;
+  }
   try {
     const body = JSON.stringify(payload);
     // sendBeacon survives the page being closed mid-navigation, which is

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ComponentType } from 'react'
+import { Fragment, useEffect, useState, type ComponentType } from 'react'
 import {
   BarChartIcon,
   BoltIcon,
@@ -14,6 +14,7 @@ import {
   LaunchIcon,
   RobotIcon,
   TrendUpwardIcon,
+  UsersIcon,
 } from '@sanity/icons'
 import { Badge, Box, Button, Card, Flex, Select, Stack, Tab, TabList, Text } from '@sanity/ui'
 import { MetricChart } from './MetricChart'
@@ -21,6 +22,7 @@ import { SpendPlanner } from './SpendPlanner'
 import type { SubmitBudgetRequest } from './budgetRequest'
 import { computeDashboard, monthLabel, num, pct, usd, type ClientSettings, type MonthReport } from './math'
 import { DMR_EMAIL, DMR_SITE } from './tokens'
+import { useVisitors, type Visitor } from './useVisitors'
 
 /**
  * Two-pane layout that mirrors the Studio's Structure tool: a list pane on the left
@@ -30,13 +32,14 @@ import { DMR_EMAIL, DMR_SITE } from './tokens'
  * Studio theme; numbers use DMR Media's Instrument Serif and blue accent.
  */
 
-type Section = 'overview' | 'spend' | 'campaigns' | 'months' | 'roi' | 'playbook' | 'contact'
+type Section = 'overview' | 'spend' | 'campaigns' | 'months' | 'roi' | 'visitors' | 'playbook' | 'contact'
 type MetricKey = 'leads' | 'spend' | 'cpl' | 'commission'
 
 const SECTIONS: { key: Section; title: string; subtitle: string; icon: ComponentType }[] = [
   { key: 'overview', title: 'Overview', subtitle: 'ROI, leads and spend', icon: ChartUpwardIcon },
   { key: 'spend', title: 'Ad spend planner', subtitle: 'Try a budget, see est. ROI', icon: ControlsIcon },
   { key: 'campaigns', title: 'Campaigns', subtitle: 'Where your leads came from', icon: BarChartIcon },
+  { key: 'visitors', title: 'Lead activity', subtitle: 'Homes they viewed and saved', icon: UsersIcon },
   { key: 'months', title: 'Month by month', subtitle: 'Every month since launch', icon: CalendarIcon },
   { key: 'roi', title: 'ROI math', subtitle: 'How the numbers are built', icon: TrendUpwardIcon },
   { key: 'playbook', title: 'Follow-up playbook', subtitle: 'SOP, scripts and texts', icon: DocumentsIcon },
@@ -149,6 +152,7 @@ export function DashboardView({
             {section === 'campaigns' && <Campaigns d={d} />}
             {section === 'months' && <Months d={d} />}
             {section === 'roi' && <RoiMath settings={settings} d={d} />}
+            {section === 'visitors' && <Visitors />}
             {section === 'playbook' && <Playbook settings={settings} />}
             {section === 'contact' && <Contact settings={settings} />}
           </Box>
@@ -256,6 +260,253 @@ function Overview({ settings, d }: { settings: ClientSettings; d: Dash }) {
       </div>
     </Stack>
   )
+}
+
+/* ── Lead activity ────────────────────────────────────────── */
+
+/**
+ * What each lead actually looked at.
+ *
+ * Deliberately has no sample-data fallback: every other pane can show a
+ * plausible example month, but inventing buyers who never existed would be
+ * indistinguishable from real ones and someone would call them.
+ */
+function Visitors() {
+  const state = useVisitors()
+  const [open, setOpen] = useState<string | null>(null)
+
+  if (state.status === 'loading') {
+    return <Box padding={4}><Text size={1} muted>Loading lead activity…</Text></Box>
+  }
+  if (state.status === 'error') {
+    return (
+      <Box padding={4}>
+        <Text size={1} muted>
+          Could not load lead activity. If this site has just been set up, check that
+          SANITY_API_TOKEN and NEXT_PUBLIC_SANITY_PROJECT_ID are set in the hosting
+          environment.
+        </Text>
+      </Box>
+    )
+  }
+
+  const { identified, anonymous, totals } = state
+
+  if (totals.all === 0) {
+    return (
+      <Box padding={4}>
+        <Stack space={3}>
+          <Text size={1} weight="medium">No activity recorded yet.</Text>
+          <Text size={1} muted>
+            The website records which listings each visitor views, saves and searches for,
+            and attaches a name and email as soon as they submit any form. Nothing appears
+            here until someone browses the live site.
+          </Text>
+        </Stack>
+      </Box>
+    )
+  }
+
+  return (
+    <Stack space={4}>
+      <div className="dmr-tiles dmr-tiles-4">
+        <Card className="dmr-tile" padding={4}>
+          <Stack space={3}>
+            <Text size={1} muted>Known leads</Text>
+            <div className="dmr-num">{num(totals.identified)}</div>
+            <Text size={1} muted>Name and email attached</Text>
+          </Stack>
+        </Card>
+        <Card className="dmr-tile" padding={4}>
+          <Stack space={3}>
+            <Text size={1} muted>Total visitors</Text>
+            <div className="dmr-num">{num(totals.all)}</div>
+            <Text size={1} muted>Including anonymous browsers</Text>
+          </Stack>
+        </Card>
+      </div>
+
+      <VisitorTable
+        title="Leads"
+        caption="Someone who gave you their details. The homes below are what they were looking at before and after they did."
+        rows={identified}
+        open={open}
+        setOpen={setOpen}
+        empty="No identified leads yet."
+      />
+
+      <VisitorTable
+        title="Anonymous visitors"
+        caption="Browsing the listings but not in touch yet. If one of them fills in a form, their history here joins up with their name automatically."
+        rows={anonymous}
+        open={open}
+        setOpen={setOpen}
+        empty="No anonymous visitors recorded."
+      />
+    </Stack>
+  )
+}
+
+function VisitorTable({
+  title,
+  caption,
+  rows,
+  open,
+  setOpen,
+  empty,
+}: {
+  title: string
+  caption: string
+  rows: Visitor[]
+  open: string | null
+  setOpen: (id: string | null) => void
+  empty: string
+}) {
+  return (
+    <Stack space={3}>
+      <Stack space={2}>
+        <Text size={1} weight="medium">{title}</Text>
+        <Text size={1} muted>{caption}</Text>
+      </Stack>
+      <div className="dmr-tiles">
+        <Card className="dmr-tile">
+          {rows.length ? (
+            <table className="dmr-table">
+              <thead>
+                <tr>
+                  <th>Who</th>
+                  <th>Saved</th>
+                  <th>Viewed</th>
+                  <th className="dmr-hide-sm">Searches</th>
+                  <th>Last seen</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((v) => {
+                  const isOpen = open === v._id
+                  return (
+                    <Fragment key={v._id}>
+                      <tr>
+                        <td>
+                          <Stack space={2}>
+                            <Text size={1} weight="medium">
+                              {v.name || v.email || `Anonymous · ${(v.visitorId ?? '').slice(0, 8)}`}
+                            </Text>
+                            {(v.email || v.phone) && (
+                              <Text size={1} muted>{[v.email, v.phone].filter(Boolean).join(' · ')}</Text>
+                            )}
+                          </Stack>
+                        </td>
+                        <td>{num(v.saveCount ?? 0)}</td>
+                        <td>{num(v.viewCount ?? 0)}</td>
+                        <td className="dmr-hide-sm">{num(v.searchCount ?? 0)}</td>
+                        <td>{shortDate(v.lastSeen)}</td>
+                        <td>
+                          <Button
+                            mode="bleed"
+                            padding={2}
+                            fontSize={1}
+                            text={isOpen ? 'Hide' : 'Open'}
+                            onClick={() => setOpen(isOpen ? null : v._id)}
+                          />
+                        </td>
+                      </tr>
+                      {isOpen && (
+                        <tr>
+                          <td colSpan={6}>
+                            <VisitorDetail v={v} />
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  )
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <Box padding={4}><Text size={1} muted>{empty}</Text></Box>
+          )}
+        </Card>
+      </div>
+    </Stack>
+  )
+}
+
+function VisitorDetail({ v }: { v: Visitor }) {
+  /* Saved homes lead, because a save is a far stronger signal than a view,
+     and the views read newest first so the last thing they looked at is top. */
+  const views = [...(v.viewed ?? [])].reverse()
+  return (
+    <Box padding={3}>
+      <Stack space={4}>
+        {v.hearted?.length > 0 && (
+          <Stack space={3}>
+            <Text size={1} weight="medium">Saved homes</Text>
+            <Stack space={2}>
+              {v.hearted.map((a, i) => <ActivityRow key={`h${i}`} a={a} />)}
+            </Stack>
+          </Stack>
+        )}
+        {v.searches?.length > 0 && (
+          <Stack space={3}>
+            <Text size={1} weight="medium">Searches</Text>
+            <Stack space={2}>
+              {[...v.searches].reverse().map((s, i) => (
+                <Text key={`s${i}`} size={1} muted>
+                  {s.label}{s.at ? ` · ${shortDate(s.at)}` : ''}
+                </Text>
+              ))}
+            </Stack>
+          </Stack>
+        )}
+        {views.length > 0 && (
+          <Stack space={3}>
+            <Text size={1} weight="medium">
+              Recently viewed{v.viewCount > views.length ? ` (latest ${views.length} of ${v.viewCount})` : ''}
+            </Text>
+            <Stack space={2}>
+              {views.map((a, i) => <ActivityRow key={`v${i}`} a={a} />)}
+            </Stack>
+          </Stack>
+        )}
+        {!v.hearted?.length && !views.length && !v.searches?.length && (
+          <Text size={1} muted>No listing activity recorded for this visitor.</Text>
+        )}
+      </Stack>
+    </Box>
+  )
+}
+
+function ActivityRow({ a }: { a: { address?: string; city?: string; price?: number; url?: string; at?: string } }) {
+  const meta = [a.city, a.price ? usd(a.price) : null, shortDate(a.at)].filter(Boolean).join(' · ')
+  return (
+    <Flex align="center" gap={2}>
+      <Box flex={1} className="dmr-min0">
+        <Text size={1}>{a.address || 'Listing'}</Text>
+        {meta && <Text size={1} muted>{meta}</Text>}
+      </Box>
+      {a.url?.startsWith('http') && (
+        <Button
+          as="a"
+          href={a.url}
+          target="_blank"
+          rel="noreferrer"
+          mode="bleed"
+          padding={2}
+          fontSize={1}
+          icon={LaunchIcon}
+          text="View"
+        />
+      )}
+    </Flex>
+  )
+}
+
+function shortDate(iso?: string): string {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
 
 /* ── Campaigns ────────────────────────────────────────────── */
