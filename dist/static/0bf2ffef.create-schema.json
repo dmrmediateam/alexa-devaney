@@ -441,5 +441,138 @@
     "name": "dmrBudgetRequest",
     "type": "document",
     "title": "DMR · Budget Request"
+  },
+  {
+    "fields": [
+      {
+        "name": "visitorId",
+        "type": "string",
+        "title": "Visitor id"
+      },
+      {
+        "name": "email",
+        "type": "string"
+      },
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "name": "phone",
+        "type": "string"
+      },
+      {
+        "name": "lastFormType",
+        "type": "string",
+        "title": "Last form submitted"
+      },
+      {
+        "name": "firstSeen",
+        "type": "datetime",
+        "title": "First seen"
+      },
+      {
+        "name": "lastSeen",
+        "type": "datetime",
+        "title": "Last seen"
+      },
+      {
+        "name": "identifiedAt",
+        "type": "datetime",
+        "title": "Identified at"
+      },
+      {
+        "of": [
+          {
+            "type": "dmrActivity",
+            "title": "Listing activity"
+          }
+        ],
+        "name": "hearted",
+        "type": "array",
+        "title": "Saved homes"
+      },
+      {
+        "description": "Most recent last. Repeat views are kept: coming back to the same home four times is the signal.",
+        "of": [
+          {
+            "type": "dmrActivity",
+            "title": "Listing activity"
+          }
+        ],
+        "name": "viewed",
+        "type": "array",
+        "title": "Listings viewed"
+      },
+      {
+        "of": [
+          {
+            "type": "dmrSearch",
+            "title": "Search"
+          }
+        ],
+        "name": "searches",
+        "type": "array"
+      }
+    ],
+    "readOnly": true,
+    "name": "dmrVisitor",
+    "type": "document",
+    "title": "DMR · Lead Activity"
+  },
+  {
+    "fields": [
+      {
+        "name": "listingId",
+        "type": "string",
+        "title": "MLS #"
+      },
+      {
+        "name": "address",
+        "type": "string"
+      },
+      {
+        "name": "city",
+        "type": "string"
+      },
+      {
+        "name": "price",
+        "type": "number"
+      },
+      {
+        "name": "url",
+        "type": "string",
+        "title": "URL"
+      },
+      {
+        "name": "at",
+        "type": "datetime"
+      }
+    ],
+    "name": "dmrActivity",
+    "type": "object",
+    "title": "Listing activity"
+  },
+  {
+    "fields": [
+      {
+        "name": "label",
+        "type": "string",
+        "title": "Search"
+      },
+      {
+        "rows": 2,
+        "name": "query",
+        "type": "text",
+        "title": "Filters"
+      },
+      {
+        "name": "at",
+        "type": "datetime"
+      }
+    ],
+    "name": "dmrSearch",
+    "type": "object",
+    "title": "Search"
   }
 ]

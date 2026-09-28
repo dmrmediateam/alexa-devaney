@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import SiteChrome from "@/components/SiteChrome";
 import ListingsBrowser from "@/components/idx/ListingsBrowser";
+import ListingLeadGate from "@/components/idx/ListingLeadGate";
 import ListingsSearchPlaceholder from "@/components/ListingsSearchPlaceholder";
 import { site } from "@/content/site";
 import { filtersFromParams } from "@/lib/idx/filterParams";
@@ -92,6 +93,21 @@ export default async function ListingsPage({ searchParams }: Params) {
           </Suspense>
         </div>
       </section>
+      {/* Carried here so a heart on a result card has something to ask with.
+          autoOpen is off: the view counter belongs to detail pages, and a
+          grid of listings is not "viewing a listing". */}
+      {site.listingGate?.enabled && (
+        <ListingLeadGate
+          address=""
+          mlsNumber=""
+          consent={site.footer.newsletter.consent}
+          agentName={site.footer.agentName}
+          heading={site.listingGate.heading}
+          subheading={site.listingGate.subheading}
+          dismissible={site.listingGate.dismissible}
+          autoOpen={false}
+        />
+      )}
     </SiteChrome>
   );
 }

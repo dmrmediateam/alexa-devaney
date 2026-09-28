@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import SiteChrome from "@/components/SiteChrome";
 import ListingDetailBody from "@/components/idx/ListingDetailBody";
+import ListingLeadGate from "@/components/idx/ListingLeadGate";
 import RecentClosings from "@/components/RecentClosings";
 import { site } from "@/content/site";
 import { findPortfolioListing, portfolioListings, portfolioSlugs, toListingDetail } from "@/lib/portfolio";
@@ -145,6 +146,21 @@ export default async function PropertyPage({ params }: Params) {
           kicker="Also Represented"
           heading="More From the Portfolio"
           showPrices
+        />
+      )}
+      {/* Portfolio pages carry a heart too, so they need something to ask
+          with. Browsing a sold home is not gated: autoOpen stays off. */}
+      {site.listingGate?.enabled && (
+        <ListingLeadGate
+          address={listing.address}
+          mlsNumber={detail.mlsNumber}
+          photo={detail.photos[0]?.url}
+          consent={site.footer.newsletter.consent}
+          agentName={site.footer.agentName}
+          heading={site.listingGate.heading}
+          subheading={site.listingGate.subheading}
+          dismissible={site.listingGate.dismissible}
+          autoOpen={false}
         />
       )}
     </SiteChrome>

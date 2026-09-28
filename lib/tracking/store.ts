@@ -27,6 +27,9 @@ export type TrackedListing = {
   city?: string;
   price?: number;
   url?: string;
+  /* Shown by the registration gate when a heart triggers it. The track route
+     whitelists what it stores, so this never reaches Sanity. */
+  photo?: string;
 };
 
 type SanityConfig = { projectId: string; dataset: string; token: string };

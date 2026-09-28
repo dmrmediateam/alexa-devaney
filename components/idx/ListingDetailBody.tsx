@@ -54,6 +54,7 @@ export default function ListingDetailBody({
     city: listing.address.city,
     price: listing.price,
     url: listing.detailUrl,
+    photo: listing.photos[0]?.url,
   };
 
   // "At a glance": only what the feed actually carries. San Diego MLS does not

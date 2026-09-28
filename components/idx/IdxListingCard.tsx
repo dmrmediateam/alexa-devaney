@@ -35,6 +35,7 @@ export default function IdxListingCard({ listing }: { listing: ListingSummary })
             city: listing.address.city,
             price: listing.price,
             url: listing.detailUrl,
+            photo: listing.primaryPhoto?.url,
           }}
         />
         <div className="listing-card__badges">
