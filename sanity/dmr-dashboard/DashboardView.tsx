@@ -310,7 +310,7 @@ function Visitors() {
 
   return (
     <Stack space={4}>
-      <div className="dmr-tiles dmr-tiles-4">
+      <div className="dmr-tiles dmr-tiles-2">
         <Card className="dmr-tile" padding={4}>
           <Stack space={3}>
             <Text size={1} muted>Known leads</Text>
@@ -499,14 +499,16 @@ function ActivityRow({ a }: { a: { address?: string; city?: string; price?: numb
   return (
     <Flex align="center" gap={2}>
       <Box flex={1} className="dmr-min0">
-        {a.url?.startsWith('http') ? (
-          <a href={a.url} target="_blank" rel="noreferrer" className="dmr-listing-link">
+        <Stack space={2}>
+          {a.url?.startsWith('http') ? (
+            <a href={a.url} target="_blank" rel="noreferrer" className="dmr-listing-link">
+              <Text size={1}>{a.address || 'Listing'}</Text>
+            </a>
+          ) : (
             <Text size={1}>{a.address || 'Listing'}</Text>
-          </a>
-        ) : (
-          <Text size={1}>{a.address || 'Listing'}</Text>
-        )}
-        {meta && <Text size={1} muted>{meta}</Text>}
+          )}
+          {meta && <Text size={1} muted>{meta}</Text>}
+        </Stack>
       </Box>
       {a.url?.startsWith('http') && (
         <Button

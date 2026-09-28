@@ -201,7 +201,14 @@ export const dashboardCss = /* css */ `
 }
 
 /* Lead activity: the address is the link, so it has to look like one */
-.dmr-listing-link { color: inherit; text-decoration: none; border-bottom: 1px solid currentColor; }
+/* inline-block, or the anchor collapses and the line under it rides up */
+.dmr-listing-link {
+  display: inline-block;
+  max-width: 100%;
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+}
 .dmr-listing-link:hover { opacity: 0.7; }
 .dmr-table tbody tr[style*="cursor"]:hover { background: rgba(0, 0, 0, 0.025); }
 `
