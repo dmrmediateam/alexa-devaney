@@ -90,6 +90,8 @@ export interface SubPage {
   title: string;
   preTitle?: string;
   heroImage: string;
+  /** CSS object-position for the banner crop, e.g. "center 35%" */
+  heroFocus?: string;
   /**
    * Search-result title. Write it for the query, not the nav ("Buy a Home in
    * North County San Diego"), and keep it near 60 characters. Falls back to
@@ -711,6 +713,7 @@ export const site: SiteContent = {
         "Ten years helping San Diego families buy and sell, from Encinitas and Carlsbad to Fallbrook. Senior Realtor Associate with The Oppenheim Group in La Jolla.",
       preTitle: "Senior Realtor Associate · The Oppenheim Group",
       heroImage: "/photos/alexa-kitchen.webp",
+      heroFocus: "center 35%",
       showStory: true,
       showFamily: true,
       intro: [
@@ -724,11 +727,6 @@ export const site: SiteContent = {
           image: "/photos/alexa-devaney.webp",
           imageShape: "portrait",
           imageFocus: "center 22%",
-        },
-        {
-          heading: "Family First",
-          text: "Family comes first for me, and buying or selling a home is a family decision. Schools, space to grow, a yard for the dog, time at the beach: I listen for what matters most to your family and keep the process calm, transparent, and personal.",
-          image: "/photos/alexa-family.webp",
         },
         {
           heading: "The Reach of The Oppenheim Group",
@@ -926,7 +924,7 @@ export const site: SiteContent = {
       "So when I say a neighborhood is worth stretching for, or that it is not, the answer comes from living here rather than from a market report.",
     ],
     photos: [
-      { image: "/photos/alexa-family.webp", caption: "Game night, the one thing on the calendar that never moves." },
+      { image: "/photos/alexa-family.webp" },
     ],
     cta: { label: "Let's Connect", href: "/connect" },
   },

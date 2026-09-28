@@ -42,7 +42,15 @@ export default function SubPageView({
         <div className="video-wrapper">
           {/* The banner is this page's LCP element: next/image sizes it per
               viewport, serves AVIF/WebP, and emits the preload. */}
-          <Image src={page.heroImage} alt="" fill sizes="100vw" priority quality={78} />
+          <Image
+            src={page.heroImage}
+            alt=""
+            fill
+            sizes="100vw"
+            priority
+            quality={78}
+            style={page.heroFocus ? { objectPosition: page.heroFocus } : undefined}
+          />
         </div>
         <div className="overlay-component"></div>
         <div className="middle-content-wrapper">

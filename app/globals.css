@@ -636,6 +636,9 @@ ul { list-style: none; }
 
 .boxed-text .lp-h2 { margin-bottom: 28px; }
 
+/* a comfortable measure: the container is 1370px, which at 16px runs past
+   110 characters a line and reads like a legal notice */
+.boxed-text__description { max-width: 74ch; }
 .boxed-text__description p {
   font-size: 16px;
   letter-spacing: 1px;
@@ -1234,7 +1237,7 @@ footer { background: var(--cream); }
 .split-section__media--portrait {
   aspect-ratio: 3 / 4;
   width: 100%;
-  max-width: 470px;
+  max-width: 420px;
   /* auto margins would make this grid item shrink to its content, and a
      fill image has none, so the box collapses to zero */
   justify-self: center;
@@ -1244,6 +1247,7 @@ footer { background: var(--cream); }
 .split-section__text .lp-h2 { margin-bottom: 20px; }
 
 .split-section__text p {
+  max-width: 54ch;
   font-size: 15px;
   line-height: 1.9;
   letter-spacing: 0.3px;
