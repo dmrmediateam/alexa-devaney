@@ -11,7 +11,8 @@
     "sanity": "sanity dev",
     "sanity:build": "sanity build",
     "sanity:deploy": "sanity deploy",
-    "dmr:seed": "node scripts/dmr-seed-settings.mjs"
+    "dmr:seed": "node scripts/dmr-seed-settings.mjs",
+    "google-ads:token": "node scripts/google-ads-refresh-token.mjs"
   },
   "dependencies": {
     "@sanity/client": "^7.27.0",

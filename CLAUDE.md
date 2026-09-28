@@ -262,6 +262,16 @@ implementation is `dmrmediateam/eagan-luxury` -> `sanity/dmr-dashboard/`.
   import time without a projectId, which would fail the whole build over an
   unconfigured dashboard; the route returns 503 instead and the site is fine.
 
+- `app/api/dmr/sync-google-ads/route.ts` (+ `lib/googleAds.ts`) is the SOP's
+  Phase 1 sync: a daily Vercel Cron pulls spend and conversions per campaign
+  through DMR's MCC and writes them into `dmrMonthlyReport`. It does nothing
+  until Report Settings → Data source is "Google Ads sync" with a customer id
+  (Alexa: 9329130664, MCC 9224492796), and it needs the `GOOGLE_ADS_*` vars
+  plus `CRON_SECRET` (bearer token, required here even though /api/warm also
+  accepts the cron header, because this route writes). Backfill a month with
+  `curl -H "Authorization: Bearer $CRON_SECRET" "<site>/api/dmr/sync-google-ads?month=2026-10"`.
+  It lives outside `sanity/dmr-dashboard/` on purpose and needs no module change.
+
 Deploying the Studio is separate from deploying the site: `npm run
 sanity:deploy` after setting `SANITY_STUDIO_SITE_URL`. Variable names are
 listed in `.env.local` and in Step 4 of the SOP.
