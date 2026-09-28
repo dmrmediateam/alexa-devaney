@@ -121,13 +121,15 @@ export default async function PropertyPage({ params }: Params) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(offerLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
-      <nav className="property-crumbs lp-container" aria-label="Breadcrumb">
-        <a href="/portfolio">Portfolio</a>
-        <span aria-hidden="true">·</span>
-        <span>{listing.address}</span>
-      </nav>
-
-      <ListingDetailBody listing={detail} content={site} />
+      <ListingDetailBody
+        listing={detail}
+        content={site}
+        crumbs={[
+          { label: "Home", href: "/" },
+          { label: "Portfolio", href: "/portfolio" },
+          { label: listing.address },
+        ]}
+      />
 
       {listing.mlsHref && (
         <div className="property-mls-link lp-container">

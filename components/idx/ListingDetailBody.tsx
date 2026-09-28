@@ -1,6 +1,7 @@
 import type { SiteContent } from "@/content/site";
 import ListingInquiryForm from "@/components/leads/ListingInquiryForm";
 import ListingStickyCta from "@/components/idx/ListingStickyCta";
+import ListingBreadcrumbs, { type Crumb } from "@/components/idx/ListingBreadcrumbs";
 import type { ListingDetail } from "@/lib/idx/types";
 import { formatPrice, formatSqFt } from "@/lib/idx/display";
 import ListingGallery from "@/components/idx/ListingGallery";
@@ -13,23 +14,36 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 /* ==========================================================================
-   Listing detail: gallery, address block, description, grouped features,
-   and a sticky agent rail. Reads as a brochure, not a database record, so
-   status is small-caps text rather than a colored pill and the photography
-   carries the page.
+   Listing detail: breadcrumbs, gallery, address block, description, grouped
+   features, and a sticky agent rail. Reads as a brochure, not a database
+   record, so status is small-caps text rather than a colored pill and the
+   photography carries the page.
+
+   Order matters up top. The gallery is capped in height and the address and
+   price sit directly under it, so a visitor sees the home, what it is called
+   and what it costs without scrolling — the three things they came for.
    ========================================================================== */
 
 export default function ListingDetailBody({
   listing,
   content,
+  crumbs = [],
 }: {
   listing: ListingDetail;
   content: SiteContent;
+  crumbs?: Crumb[];
 }) {
   const status = STATUS_LABEL[listing.status] ?? "For Sale";
   const lotSize = listing.features.lotSizeAcres
     ? `${listing.features.lotSizeAcres} acres`
     : undefined;
+  const phone = content.contact?.phone;
+  // a closed sale has nothing to tour, so the primary action asks about it instead
+  const showable = listing.status === "active" || listing.status === "comingSoon";
+  const primaryCta = showable ? "Schedule a Private Tour" : "Request Details";
+  const locality = [listing.address.city, listing.address.state, listing.address.postalCode]
+    .filter(Boolean)
+    .join(", ");
 
   // "At a glance": only what the feed actually carries. San Diego MLS does not
   // return tax figures, so no tax row is invented here.
@@ -53,29 +67,33 @@ export default function ListingDetailBody({
 
   return (
     <article className="ld">
-      {/* address, then price directly under it: nothing else competes up here */}
-      <header className="ld__head lp-container">
-        <p className="ld__mls">MLS® {listing.mlsNumber} · {status}</p>
-        <h1 className="ld__address">{listing.address.street}</h1>
-        <p className="ld__locality">
-          {[listing.address.city, listing.address.state, listing.address.postalCode]
-            .filter(Boolean)
-            .join(", ")}
-        </p>
-        <p className="ld__price">{formatPrice(listing.price)}</p>
-      </header>
+      <ListingBreadcrumbs trail={crumbs} />
 
       <ListingGallery photos={listing.photos} alt={listing.address.full} />
 
-      {/* repeat address and price under the photo so the specs are never
-          read without knowing which home, or at what price, they belong to */}
-      <div className="ld__restate lp-container">
-        <p className="ld__restate-address">
-          {listing.address.street}
-          <span>{[listing.address.city, listing.address.state].filter(Boolean).join(", ")}</span>
-        </p>
-        <p className="ld__restate-price">{formatPrice(listing.price)}</p>
-      </div>
+      {/* the fold: address and price under the photo, actions opposite them */}
+      <header className="ld__hero lp-container">
+        <div className="ld__hero-main">
+          <p className="ld__status">{status}</p>
+          {/* street and locality share a baseline: one address, not two lines */}
+          <h1 className="ld__address">
+            <span className="ld__address-street">{listing.address.street}</span>
+            {locality && <span className="ld__address-locality">{locality}</span>}
+          </h1>
+          <p className="ld__price">{formatPrice(listing.price)}</p>
+        </div>
+
+        <div className="ld__actions">
+          <a className="ld__action ld__action--primary" href="#listing-inquiry">
+            {primaryCta}
+          </a>
+          {phone && (
+            <a className="ld__action" href={`tel:${phone.replace(/[^+\d]/g, "")}`}>
+              Call {phone}
+            </a>
+          )}
+        </div>
+      </header>
 
       {keyFacts.length > 0 && (
         <dl className="ld__facts lp-container">
@@ -160,9 +178,9 @@ export default function ListingDetailBody({
                 <p className="ld__agent-title">
                   {content.landing?.designations?.[0] ?? "Realtor"} · {content.footer.brokerage}
                 </p>
-                {content.contact?.phone && (
-                  <a className="ld__agent-phone" href={`tel:${content.contact.phone.replace(/[^+\d]/g, "")}`}>
-                    {content.contact.phone}
+                {phone && (
+                  <a className="ld__agent-phone" href={`tel:${phone.replace(/[^+\d]/g, "")}`}>
+                    {phone}
                   </a>
                 )}
               </div>
@@ -177,7 +195,7 @@ export default function ListingDetailBody({
         </aside>
       </div>
 
-      <ListingStickyCta phone={content.contact?.phone} />
+      <ListingStickyCta phone={phone} />
     </article>
   );
 }

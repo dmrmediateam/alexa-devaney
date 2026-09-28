@@ -3783,7 +3783,7 @@ html:has(.hn) { background: #0e0f10; }
    Listing detail: brochure layout, full-bleed gallery, sticky agent rail
    ========================================================================== */
 
-.ld { padding-top: 73px; }
+.ld { padding-top: 0; }
 
 /* ---- gallery: contained, so the photo reads as a plate rather than a wall ---- */
 .lg {
@@ -3793,69 +3793,57 @@ html:has(.hn) { background: #0e0f10; }
   padding: 0 25px;
   background: none;
 }
-.lg__stage { position: relative; }
-.lg__main {
+/* Mosaic plate: one large photo plus two stacked beside it, height-capped so
+   the address and price that follow it land inside the first screen. */
+.lg__mosaic {
   position: relative;
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  max-height: 60vh;
-  padding: 0;
+  display: grid;
+  grid-template-columns: 1.62fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 6px;
+  height: min(45vh, 500px);
+  min-height: 290px;
+}
+.lg__mosaic--1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.lg__mosaic--2 { grid-template-rows: 1fr; }
+.lg__tile {
+  position: relative;
+  overflow: hidden;
   border: 0;
+  padding: 0;
+  margin: 0;
   background: #101113;
   cursor: zoom-in;
 }
-.lg__main img { object-fit: cover; }
-.lg__nav {
+.lg__tile img { object-fit: cover; transition: transform 0.7s ease; }
+.lg__tile:hover img { transform: scale(1.04); }
+.lg__tile:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; }
+.lg__tile--main { grid-row: 1 / -1; }
+
+.lg__more {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 52px;
-  height: 52px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 9px 16px;
   border: 0;
-  border-radius: 50%;
-  background: rgba(14, 15, 16, 0.45);
-  color: #fff;
-  font-size: 30px;
-  line-height: 1;
-  cursor: pointer;
-  transition: background 0.25s;
-}
-.lg__nav:hover { background: rgba(14, 15, 16, 0.75); }
-.lg__nav--prev { left: 18px; }
-.lg__nav--next { right: 18px; }
-.lg__counter {
-  position: absolute;
-  right: 20px;
-  bottom: 18px;
   background: rgba(14, 15, 16, 0.6);
   color: #fff;
   font-family: var(--heading-font);
-  font-size: 11px;
-  letter-spacing: 2px;
-  padding: 7px 14px;
-}
-.lg__thumbs {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 8px 0 0;
-  background: none;
-  scrollbar-width: thin;
-}
-.lg__thumb {
-  position: relative;
-  flex: 0 0 116px;
-  aspect-ratio: 3 / 2;
-  border: 0;
-  padding: 0;
-  background: #101113;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
   cursor: pointer;
-  opacity: 0.55;
-  transition: opacity 0.25s;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  transition: background 0.25s;
 }
-.lg__thumb img { object-fit: cover; }
-.lg__thumb.is-current, .lg__thumb:hover { opacity: 1; }
+.lg__more:hover { background: rgba(14, 15, 16, 0.86); }
+.lg__more span { font-family: var(--display-font); font-size: 15px; letter-spacing: 0.5px; }
 
 /* ---- full-screen viewer ---- */
 .lgv {
@@ -3925,10 +3913,56 @@ html:has(.hn) { background: #0e0f10; }
   padding-top: 64px;
   padding-bottom: 90px;
 }
-/* address, then price under it; specs live below the photo */
-.ld__head { padding: 52px 25px 28px; }
+/* ---- breadcrumbs: above the gallery, clearing the fixed header ---- */
+.ld-crumbs { padding-top: 106px; padding-bottom: 14px; }
+.ld-crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ld-crumbs li { display: inline-flex; align-items: center; }
+.ld-crumbs a,
+.ld-crumbs li > span {
+  font-family: var(--body-font);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+.ld-crumbs a { color: var(--taupe); border-bottom: 1px solid transparent; transition: color 0.2s; }
+.ld-crumbs a:hover { color: var(--navy); border-bottom-color: currentColor; }
+.ld-crumbs li:last-child > span { color: #55555a; }
+.ld-crumbs__sep {
+  margin: 0 11px;
+  color: rgba(136, 120, 106, 0.55);
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+/* ---- the fold: address and price under the photo, actions opposite ---- */
+.ld__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 30px 48px;
+  margin-top: 26px;
+}
+.ld__status {
+  display: inline-block;
+  padding: 6px 13px;
+  border: 1px solid rgba(136, 120, 106, 0.5);
+  font-family: var(--heading-font);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
 .ld__price {
-  margin-top: 18px;
+  margin-top: 14px;
   font-family: var(--display-font);
   font-size: clamp(26px, 3vw, 36px);
   font-weight: 400;
@@ -3936,65 +3970,56 @@ html:has(.hn) { background: #0e0f10; }
   letter-spacing: -0.5px;
   color: var(--navy);
 }
-.ld__mls {
-  font-family: var(--heading-font);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 2.6px;
-  text-transform: uppercase;
-  color: var(--taupe);
-}
 .ld__address {
-  margin-top: 14px;
-  font-family: var(--display-font);
-  font-size: clamp(32px, 4vw, 52px);
-  font-weight: 300;
-  line-height: 1.15;
-  letter-spacing: -0.8px;
-  color: var(--navy);
-}
-.ld__locality { margin-top: 10px; font-size: 15px; letter-spacing: 0.4px; color: #65656a; }
-/* address + price restated under the photo, above the specs */
-.ld__restate {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 24px;
   flex-wrap: wrap;
-  margin-top: 34px;
-}
-.ld__restate-address {
+  align-items: baseline;
+  gap: 4px 16px;
+  margin-top: 12px;
   font-family: var(--display-font);
-  font-size: clamp(20px, 2vw, 26px);
-  font-weight: 400;
+  font-weight: 300;
+  line-height: 1.1;
   color: var(--navy);
-  line-height: 1.3;
 }
-.ld__restate-address span {
-  display: block;
-  margin-top: 5px;
+.ld__address-street { font-size: clamp(30px, 3.6vw, 46px); letter-spacing: -0.8px; }
+/* the locality trails the street in the same small-caps taupe the spec strip
+   and agent line use, so it reads as one address rather than a second line */
+.ld__address-locality {
   font-family: var(--body-font);
-  font-size: 12px;
+  font-size: clamp(12px, 1.05vw, 14px);
   font-weight: 600;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--taupe);
 }
-.ld__restate-price {
-  font-family: var(--display-font);
-  font-size: clamp(20px, 2vw, 26px);
-  font-weight: 400;
+
+.ld__actions { display: grid; gap: 10px; width: min(300px, 100%); }
+.ld__action {
+  display: grid;
+  place-items: center;
+  min-height: 52px;
+  padding: 0 20px;
+  border: 1px solid var(--navy);
+  font-family: var(--heading-font);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  text-align: center;
   color: var(--navy);
-  white-space: nowrap;
+  transition: background 0.25s, color 0.25s, border-color 0.25s;
 }
+.ld__action:hover { background: var(--navy); color: #fff; }
+.ld__action--primary { background: var(--taupe); border-color: var(--taupe); color: #fff; }
+.ld__action--primary:hover { background: var(--navy); border-color: var(--navy); }
 
 /* spec strip under the gallery */
 .ld__facts {
   display: flex;
   flex-wrap: wrap;
   gap: 18px 56px;
-  margin-top: 20px;
-  padding-top: 26px;
+  margin-top: 16px;
+  padding-top: 20px;
   padding-bottom: 4px;
   border-top: 1px solid rgba(21, 26, 28, 0.1);
 }
@@ -4096,19 +4121,37 @@ html:has(.hn) { background: #0e0f10; }
 
 @media (max-width: 1024px) {
   .ld__layout { grid-template-columns: 1fr; padding-top: 40px; }
-  .ld__head { padding-top: 34px; }
+  .ld__hero { grid-template-columns: 1fr; align-items: start; gap: 24px; }
+  .ld__actions { width: 100%; grid-template-columns: 1fr 1fr; }
   .ld__price { font-size: 26px; }
   .ld__rail-inner { position: static; }
 }
 
+/* below the mosaic's break the lead photo stands alone, still capped */
+@media (max-width: 900px) {
+  .lg__mosaic {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    height: min(42vh, 390px);
+  }
+  .lg__tile:not(.lg__tile--main) { display: none; }
+  .lg__tile--main { grid-row: auto; }
+}
+
+/* one button per row once two of them would each be too narrow for the phone
+   number to sit on a single line */
+@media (max-width: 620px) {
+  .ld__actions { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 768px) {
-  .ld { padding-top: 63px; }
   .lg { padding: 0 16px; }
-  .lg__main { aspect-ratio: 4 / 3; max-height: 52vh; }
-  .lg__nav { width: 42px; height: 42px; font-size: 24px; }
-  .lg__thumb { flex-basis: 104px; }
+  .ld-crumbs { padding-top: 96px; padding-bottom: 12px; font-size: 10.5px; }
+  .ld-crumbs a, .ld-crumbs li > span { font-size: 10px; letter-spacing: 1.4px; }
+  .ld-crumbs li:last-child { display: none; }
+  .ld-crumbs li:nth-last-child(2) .ld-crumbs__sep { display: none; }
+  .ld__hero { margin-top: 20px; }
   .ld__layout { padding-bottom: 40px; }
-  .ld__restate { margin-top: 26px; gap: 6px 18px; }
   .ld__facts { gap: 14px 34px; margin-top: 16px; padding-top: 18px; }
   .ld__facts dt { font-size: 21px; }
   .ld__layout::before { left: -40%; width: min(520px, 90vw); opacity: 0.04; }
@@ -4748,24 +4791,6 @@ footer .footer > * { position: relative; z-index: 1; }
 }
 
 /* ---- /property detail extras ---- */
-.property-crumbs {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-top: 112px;
-  font-family: var(--body-font);
-  font-size: 11px;
-  letter-spacing: 1.8px;
-  text-transform: uppercase;
-  color: var(--taupe);
-}
-
-.property-crumbs + .ld { padding-top: 14px; }
-
-.property-crumbs a { color: var(--taupe); border-bottom: 1px solid transparent; }
-.property-crumbs a:hover { color: var(--navy); border-bottom-color: currentColor; }
-.property-crumbs span:last-child { color: #55555a; }
-
 .property-mls-link { padding-bottom: 10px; }
 
 .property-mls-link a {
@@ -4781,8 +4806,6 @@ footer .footer > * { position: relative; z-index: 1; }
 .property-mls-link a:hover { color: var(--navy); }
 
 @media (max-width: 768px) {
-  .property-crumbs { padding-top: 96px; font-size: 10.5px; letter-spacing: 1.4px; }
-  .property-crumbs span:last-child { display: none; }
 }
 
 

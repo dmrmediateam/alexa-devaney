@@ -5,11 +5,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ListingPhoto } from "@/lib/idx/types";
 
 /* ==========================================================================
-   Full-bleed listing gallery with a full-screen viewer.
+   Listing gallery: a mosaic plate (one large photo, two stacked beside it)
+   over a full-screen viewer.
+
+   The mosaic rather than a carousel-plus-thumbnail-strip is deliberate: it
+   is capped in height, so the address and price that follow it stay inside
+   the first screen on load. Any tile opens the viewer at that photo, which
+   is where stepping, swiping and keyboard control live.
 
    The first photo is the page's LCP element: next/image gives it priority
    (which emits the preload) and resizes it for the viewport; everything else
-   is lazy. Fixed aspect ratios mean nothing shifts as images arrive.
+   is lazy.
    ========================================================================== */
 
 export default function ListingGallery({
@@ -29,6 +35,11 @@ export default function ListingGallery({
     (delta: number) => setIndex((i) => (i + delta + count) % count),
     [count],
   );
+
+  const open = useCallback((at: number) => {
+    setIndex(at);
+    setViewer(true);
+  }, []);
 
   // Keyboard control while the viewer is open, and scroll lock behind it
   useEffect(() => {
@@ -51,62 +62,52 @@ export default function ListingGallery({
   if (count === 0) return null;
   const current = photos[Math.min(index, count - 1)];
 
+  // The mosaic shows at most three photos; the rest live behind the counter.
+  const tiles = photos.slice(0, 3);
+
   return (
     <>
       <section className="lg" aria-label="Property photos">
-        <div className="lg__stage">
-          <button
-            type="button"
-            className="lg__main"
-            onClick={() => setViewer(true)}
-            aria-label={`Open photo ${index + 1} of ${count} full screen`}
-            onTouchStart={(e) => { touchStart.current = e.touches[0].clientX; }}
-            onTouchEnd={(e) => {
-              if (touchStart.current === null) return;
-              const dx = e.changedTouches[0].clientX - touchStart.current;
-              if (Math.abs(dx) > 45) step(dx < 0 ? 1 : -1);
-              touchStart.current = null;
-            }}
-          >
-            {/* next/image resizes the MLS original and emits the preload for
-                the first photo, which is this page's LCP element */}
-            <Image
-              src={current.url}
-              alt={current.caption || alt}
-              fill
-              sizes="(max-width: 1200px) 100vw, 1400px"
-              priority={index === 0}
-              loading={index === 0 ? undefined : "lazy"}
-              quality={78}
-            />
-          </button>
+        <div className={`lg__mosaic lg__mosaic--${Math.min(count, 3)}`}>
+          {tiles.map((photo, i) => (
+            <button
+              type="button"
+              key={photo.url}
+              className={`lg__tile${i === 0 ? " lg__tile--main" : ""}`}
+              onClick={() => open(i)}
+              aria-label={`Open photo ${i + 1} of ${count} full screen`}
+              onTouchStart={(e) => { touchStart.current = e.touches[0].clientX; }}
+              onTouchEnd={(e) => {
+                if (touchStart.current === null) return;
+                const dx = e.changedTouches[0].clientX - touchStart.current;
+                touchStart.current = null;
+                // a swipe on the plate steps the lead photo rather than opening
+                if (Math.abs(dx) > 45) step(dx < 0 ? 1 : -1);
+              }}
+            >
+              <Image
+                src={i === 0 ? current.url : photo.url}
+                alt={i === 0 ? current.caption || alt : ""}
+                fill
+                sizes={i === 0 ? "(max-width: 900px) 100vw, 850px" : "(max-width: 900px) 50vw, 520px"}
+                priority={i === 0}
+                loading={i === 0 ? undefined : "lazy"}
+                quality={i === 0 ? 78 : 70}
+              />
+            </button>
+          ))}
 
           {count > 1 && (
-            <>
-              <button type="button" className="lg__nav lg__nav--prev" aria-label="Previous photo" onClick={() => step(-1)}>&#8249;</button>
-              <button type="button" className="lg__nav lg__nav--next" aria-label="Next photo" onClick={() => step(1)}>&#8250;</button>
-              <span className="lg__counter" aria-hidden="true">{index + 1} / {count}</span>
-            </>
+            <button
+              type="button"
+              className="lg__more"
+              onClick={() => open(0)}
+              aria-label={`View all ${count} photos`}
+            >
+              <span>{count}</span> Photos
+            </button>
           )}
         </div>
-
-        {count > 1 && (
-          <div className="lg__thumbs" role="tablist" aria-label="Photo thumbnails">
-            {photos.slice(0, 14).map((photo, i) => (
-              <button
-                type="button"
-                key={photo.url}
-                role="tab"
-                aria-selected={i === index}
-                aria-label={`Photo ${i + 1}`}
-                className={`lg__thumb${i === index ? " is-current" : ""}`}
-                onClick={() => setIndex(i)}
-              >
-                <Image src={photo.url} alt="" fill sizes="140px" quality={60} loading="lazy" />
-              </button>
-            ))}
-          </div>
-        )}
       </section>
 
       {viewer && (

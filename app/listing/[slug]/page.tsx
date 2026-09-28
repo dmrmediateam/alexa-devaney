@@ -92,7 +92,15 @@ export default async function ListingPage({ params }: Params) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(offerLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      <ListingDetailBody listing={listing} content={site} />
+      <ListingDetailBody
+        listing={listing}
+        content={site}
+        crumbs={[
+          { label: "Home", href: "/" },
+          { label: "Listings", href: "/listings" },
+          { label: listing.address.full },
+        ]}
+      />
       {site.listingGate?.enabled && (
         <ListingLeadGate
           address={listing.address.full}
