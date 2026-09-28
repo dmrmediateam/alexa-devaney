@@ -71,6 +71,7 @@ export function legalDocs(content: SiteContent): LegalDoc[] {
           list: [
             "Contact details you submit through forms: name, email address, phone number, and the content of your messages.",
             "Real estate preferences: saved searches, saved properties, price ranges, and areas of interest.",
+            "Property activity: which listings you view, save, and search for, recorded against an identifier stored on your device.",
             "Usage data collected automatically: pages visited, time on site, referring pages, browser type, device information, and IP address.",
             "Cookies and similar technologies used for analytics and to remember your preferences.",
           ],
@@ -89,6 +90,14 @@ export function legalDocs(content: SiteContent): LegalDoc[] {
           heading: "Analytics and Advertising",
           paragraphs: [
             "This site may use analytics services (such as Google Analytics) to understand site usage. Analytics providers may set cookies and receive usage data as described in their own privacy policies. Where advertising measurement is used, it is configured to respect applicable consent requirements.",
+          ],
+        },
+        {
+          heading: "Property Activity and Saved Homes",
+          paragraphs: [
+            "When you browse listings on this site we record which properties you view and save, along with the searches you run. This is stored against a random identifier kept in your browser, not against your name, for as long as that identifier remains on your device.",
+            "If you later submit a form, register to view listing details, or otherwise give us your contact details, that activity record is linked to the information you provided and becomes visible to the agent as part of your inquiry. We do this so we can answer you with an understanding of what you are actually looking for.",
+            "You can clear this at any time by clearing your browser cookies and site data, or by contacting us using the details below to request deletion. California residents have additional rights described under Your Rights and Choices.",
           ],
         },
         {

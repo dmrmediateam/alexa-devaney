@@ -1,6 +1,7 @@
 import ListingImage from "@/components/ListingImage";
 import type { ListingSummary } from "@/lib/idx/types";
 import { formatPrice, formatSqFt } from "@/lib/idx/display";
+import HeartButton from "@/components/idx/HeartButton";
 
 const STATUS_LABEL: Record<string, string> = {
   active: "For Sale",
@@ -26,6 +27,16 @@ export default function IdxListingCard({ listing }: { listing: ListingSummary })
         ) : (
           <div className="listing-card__nophoto">Photo Coming Soon</div>
         )}
+        <HeartButton
+          size="sm"
+          listing={{
+            listingId: listing.mlsNumber,
+            address: listing.address.full,
+            city: listing.address.city,
+            price: listing.price,
+            url: listing.detailUrl,
+          }}
+        />
         <div className="listing-card__badges">
           <span>{STATUS_LABEL[listing.status] ?? "For Sale"}</span>
           {listing.mlsNumber && <span>MLS&reg; {listing.mlsNumber}</span>}

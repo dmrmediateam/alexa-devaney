@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { isSpam } from "@/lib/spam-filter";
 import { emailAgent, emailLead, smsAgent } from "@/lib/leads/notify";
 import { LEAD_CAPTURED_COOKIE } from "@/lib/leads/captured";
+import { VISITOR_COOKIE } from "@/lib/tracking/visitor";
+import { identify } from "@/lib/tracking/store";
 
 /**
  * Lead intake for every form on the site.
@@ -39,6 +41,28 @@ async function forwardToWebhook(payload: Record<string, unknown>): Promise<boole
     console.error("[Lead] webhook failed", { error: String(error) });
     return false;
   }
+}
+
+function visitorFromCookie(request: Request): string | null {
+  const header = request.headers.get("cookie");
+  if (!header) return null;
+  const hit = header.split("; ").find((c) => c.startsWith(`${VISITOR_COOKIE}=`));
+  if (!hit) return null;
+  const raw = decodeURIComponent(hit.slice(VISITOR_COOKIE.length + 1));
+  return /^[a-zA-Z0-9._-]{8,64}$/.test(raw) ? raw : null;
+}
+
+async function stitchIdentity(request: Request, lead: Record<string, unknown>): Promise<boolean> {
+  const visitorId = visitorFromCookie(request);
+  if (!visitorId) return false;
+  const text = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
+  const name = text(lead.name) ?? [text(lead.firstName), text(lead.lastName)].filter(Boolean).join(" ");
+  return identify(visitorId, {
+    email: text(lead.email),
+    phone: text(lead.phone),
+    name: name || undefined,
+    formType: text(lead.formType),
+  });
 }
 
 export async function POST(request: Request) {
@@ -89,6 +113,13 @@ export async function POST(request: Request) {
     emailAgent(payload),
     smsAgent(payload),
     emailLead(payload),
+    /*
+     * Identity stitching. Everything this visitor browsed anonymously becomes
+     * attributable to them from here on, which is the whole point of the
+     * activity record. Included in the same allSettled so a Sanity outage
+     * cannot take a lead down with it.
+     */
+    stitchIdentity(request, lead),
   ]);
   const ok = (r: PromiseSettledResult<boolean>) => r.status === "fulfilled" && r.value;
 

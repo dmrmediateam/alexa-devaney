@@ -147,4 +147,125 @@ export const dmrBudgetRequest = defineType({
   },
 })
 
-export const dmrSchemaTypes = [dmrClientSettings, dmrMonthlyReport, dmrBudgetRequest]
+/**
+ * A website visitor and everything they have done on the listings.
+ *
+ * ONE DOCUMENT PER VISITOR, never one per event. A document per listing view
+ * would put a busy site past Sanity's document ceiling in weeks; this tops out
+ * at the client's lead count. The site writes these through /api/track and
+ * /api/lead (see lib/tracking/store.ts in the site repo) - nobody fills them
+ * in by hand, so every field is readOnly.
+ *
+ * `email` is only present once the visitor submitted a form. Before that the
+ * record is an anonymous id, and the browsing history attached to it becomes
+ * personal data at the moment those two are joined. Whatever site carries this
+ * needs that disclosed in its privacy policy.
+ */
+export const dmrVisitor = defineType({
+  name: 'dmrVisitor',
+  title: 'DMR · Lead Activity',
+  type: 'document',
+  readOnly: true,
+  fields: [
+    defineField({ name: 'visitorId', title: 'Visitor id', type: 'string' }),
+    defineField({ name: 'email', title: 'Email', type: 'string' }),
+    defineField({ name: 'name', title: 'Name', type: 'string' }),
+    defineField({ name: 'phone', title: 'Phone', type: 'string' }),
+    defineField({ name: 'lastFormType', title: 'Last form submitted', type: 'string' }),
+    defineField({ name: 'firstSeen', title: 'First seen', type: 'datetime' }),
+    defineField({ name: 'lastSeen', title: 'Last seen', type: 'datetime' }),
+    defineField({ name: 'identifiedAt', title: 'Identified at', type: 'datetime' }),
+    defineField({
+      name: 'hearted',
+      title: 'Saved homes',
+      type: 'array',
+      of: [defineArrayMember({ type: 'dmrActivity' })],
+    }),
+    defineField({
+      name: 'viewed',
+      title: 'Listings viewed',
+      description: 'Most recent last. Repeat views are kept: coming back to the same home four times is the signal.',
+      type: 'array',
+      of: [defineArrayMember({ type: 'dmrActivity' })],
+    }),
+    defineField({
+      name: 'searches',
+      title: 'Searches',
+      type: 'array',
+      of: [defineArrayMember({ type: 'dmrSearch' })],
+    }),
+  ],
+  orderings: [
+    { title: 'Most recent', name: 'recent', by: [{ field: 'lastSeen', direction: 'desc' }] },
+    { title: 'Newest lead', name: 'identified', by: [{ field: 'identifiedAt', direction: 'desc' }] },
+  ],
+  preview: {
+    select: {
+      email: 'email',
+      name: 'name',
+      visitorId: 'visitorId',
+      lastSeen: 'lastSeen',
+      viewed: 'viewed',
+      hearted: 'hearted',
+    },
+    prepare: ({ email, name, visitorId, lastSeen, viewed, hearted }) => {
+      const views = Array.isArray(viewed) ? viewed.length : 0
+      const saves = Array.isArray(hearted) ? hearted.length : 0
+      const when = lastSeen ? new Date(lastSeen).toLocaleDateString() : 'never'
+      return {
+        // An anonymous visitor still deserves a readable row: the id is all we have.
+        title: name || email || `Anonymous · ${String(visitorId ?? '').slice(0, 8)}`,
+        subtitle: `${views} viewed · ${saves} saved · last seen ${when}`,
+      }
+    },
+  },
+})
+
+/** One listing touch: a view or a save. */
+export const dmrActivity = defineType({
+  name: 'dmrActivity',
+  title: 'Listing activity',
+  type: 'object',
+  fields: [
+    defineField({ name: 'listingId', title: 'MLS #', type: 'string' }),
+    defineField({ name: 'address', title: 'Address', type: 'string' }),
+    defineField({ name: 'city', title: 'City', type: 'string' }),
+    defineField({ name: 'price', title: 'Price', type: 'number' }),
+    defineField({ name: 'url', title: 'URL', type: 'string' }),
+    defineField({ name: 'at', title: 'At', type: 'datetime' }),
+  ],
+  preview: {
+    select: { address: 'address', city: 'city', price: 'price', at: 'at' },
+    prepare: ({ address, city, price, at }) => ({
+      title: address || 'Listing',
+      subtitle: [
+        city,
+        price ? `$${Math.round(price).toLocaleString()}` : null,
+        at ? new Date(at).toLocaleDateString() : null,
+      ]
+        .filter(Boolean)
+        .join(' · '),
+    }),
+  },
+})
+
+/** One search the visitor ran, kept as a human label plus the raw filter set. */
+export const dmrSearch = defineType({
+  name: 'dmrSearch',
+  title: 'Search',
+  type: 'object',
+  fields: [
+    defineField({ name: 'label', title: 'Search', type: 'string' }),
+    defineField({ name: 'query', title: 'Filters', type: 'text', rows: 2 }),
+    defineField({ name: 'at', title: 'At', type: 'datetime' }),
+  ],
+  preview: {
+    select: { label: 'label', at: 'at' },
+    prepare: ({ label, at }) => ({
+      title: label || 'Search',
+      subtitle: at ? new Date(at).toLocaleDateString() : undefined,
+    }),
+  },
+})
+
+export const dmrSchemaTypes = [dmrClientSettings, dmrMonthlyReport, dmrBudgetRequest, dmrVisitor, dmrActivity, dmrSearch]

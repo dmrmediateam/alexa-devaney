@@ -7,6 +7,7 @@ import LocationAutocomplete, { freeTextSelection } from "@/components/idx/Locati
 import FilterSelect from "@/components/idx/FilterSelect";
 import { PROPERTY_TYPES } from "@/lib/idx/propertyTypes";
 import { filtersFromParams, paramsFromFilters } from "@/lib/idx/filterParams";
+import { trackSearch } from "@/lib/tracking/useTracking";
 import type { SearchFilters, SearchResponse } from "@/lib/idx/types";
 
 /* ==========================================================================
@@ -74,6 +75,32 @@ export default function ListingsBrowser({
     },
     [filters, pathname, fetchResults],
   );
+
+  /*
+   * Saved searches: what this visitor is actually shopping for, which is the
+   * signal behind "a new home matched your search" follow-up.
+   *
+   * Watches the filter set rather than hooking applyFilters, because that also
+   * runs for page turns and a page turn is not a new search. Page and sort are
+   * excluded for the same reason, an unfiltered browse is not a search either,
+   * and the debounce collapses someone dragging a price slider into one entry
+   * instead of thirty.
+   */
+  const lastTrackedSearch = useRef<string>("");
+  useEffect(() => {
+    const { page: _page, sort: _sort, pageSize: _pageSize, ...criteria } = filters;
+    const hasCriteria = Object.values(criteria).some(
+      (v) => v !== undefined && v !== null && v !== "",
+    );
+    if (!hasCriteria) return;
+    const key = JSON.stringify(criteria);
+    if (key === lastTrackedSearch.current) return;
+    const timer = setTimeout(() => {
+      lastTrackedSearch.current = key;
+      trackSearch(criteria as Record<string, unknown>);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [filters]);
 
   // back/forward restores the URL's filters
   useEffect(() => {

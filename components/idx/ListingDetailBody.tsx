@@ -5,6 +5,8 @@ import ListingBreadcrumbs, { type Crumb } from "@/components/idx/ListingBreadcru
 import type { ListingDetail } from "@/lib/idx/types";
 import { formatPrice, formatSqFt } from "@/lib/idx/display";
 import ListingGallery from "@/components/idx/ListingGallery";
+import ListingViewTracker from "@/components/idx/ListingViewTracker";
+import HeartButton from "@/components/idx/HeartButton";
 
 const STATUS_LABEL: Record<string, string> = {
   active: "For Sale",
@@ -44,6 +46,15 @@ export default function ListingDetailBody({
   const locality = [listing.address.city, listing.address.state, listing.address.postalCode]
     .filter(Boolean)
     .join(", ");
+  /* The handful of fields the activity record stores. Both the view tracker
+     and the heart read this, so they can never disagree about the listing. */
+  const tracked = {
+    listingId: listing.mlsNumber,
+    address: listing.address.full,
+    city: listing.address.city,
+    price: listing.price,
+    url: `/listing/${listing.idxId}-${listing.listingId}`,
+  };
 
   // "At a glance": only what the feed actually carries. San Diego MLS does not
   // return tax figures, so no tax row is invented here.
@@ -67,6 +78,7 @@ export default function ListingDetailBody({
 
   return (
     <article className="ld">
+      <ListingViewTracker listing={tracked} />
       <ListingBreadcrumbs trail={crumbs} />
 
       <ListingGallery photos={listing.photos} alt={listing.address.full} />
@@ -84,6 +96,7 @@ export default function ListingDetailBody({
         </div>
 
         <div className="ld__actions">
+          <HeartButton listing={tracked} />
           <a className="ld__action ld__action--primary" href="#listing-inquiry">
             {primaryCta}
           </a>

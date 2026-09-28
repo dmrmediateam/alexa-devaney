@@ -131,7 +131,6 @@ export default function ListingGallery({
               height={1333}
               sizes="94vw"
               quality={82}
-              style={{ width: "auto", height: "auto", maxWidth: "94vw", maxHeight: "88vh" }}
             />
           </div>
           {count > 1 && (

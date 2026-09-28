@@ -40,6 +40,31 @@ export const dmrStructureItems = (S: StructureBuilder) => [
           S.listItem()
             .title('Budget Requests')
             .child(S.documentTypeList('dmrBudgetRequest').title('Budget Requests').defaultOrdering([{ field: '_createdAt', direction: 'desc' }])),
+          /* Written by the site, not by hand. Identified leads first: an
+             anonymous browser is interesting, a named one is actionable. */
+          S.listItem()
+            .title('Lead Activity')
+            .child(
+              S.list()
+                .title('Lead Activity')
+                .items([
+                  S.listItem()
+                    .title('Identified leads')
+                    .child(
+                      S.documentList()
+                        .title('Identified leads')
+                        .filter('_type == "dmrVisitor" && defined(email)')
+                        .defaultOrdering([{ field: 'lastSeen', direction: 'desc' }]),
+                    ),
+                  S.listItem()
+                    .title('All visitors')
+                    .child(
+                      S.documentTypeList('dmrVisitor')
+                        .title('All visitors')
+                        .defaultOrdering([{ field: 'lastSeen', direction: 'desc' }]),
+                    ),
+                ]),
+            ),
         ]),
     ),
 ]

@@ -3858,8 +3858,16 @@ html:has(.hn) { background: #0e0f10; }
   display: grid;
   place-items: center;
 }
-.lgv__stage { max-width: 94vw; max-height: 88vh; }
-.lgv__stage img { max-width: 94vw; max-height: 88vh; object-fit: contain; display: block; }
+/* A definite box, not max-* on an auto-sized image.
+   MLS photos are often only ~1024px wide. With `width: auto` the browser lays
+   the image out at its DENSITY-CORRECTED intrinsic size: it picks the 1920w
+   srcset candidate for sizes="94vw", the optimizer refuses to upscale past the
+   1024px source, and the result is laid out at 1024 / (1920/1354) = 722px -
+   barely half the frame. Sizing the stage and filling it with object-fit:
+   contain takes the density maths out of the layout entirely. A small source
+   is scaled up and will be a little soft, which beats a postage stamp. */
+.lgv__stage { width: 94vw; height: 88vh; }
+.lgv__stage img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .lgv__close {
   position: absolute;
   top: 18px;
@@ -5000,4 +5008,60 @@ footer .footer > * { position: relative; z-index: 1; }
 
 @media (max-width: 900px) {
   .area-page__cta-grid { grid-template-columns: 1fr; gap: 32px; }
+}
+
+/* ==========================================================================
+   Save-this-home heart (listing cards + listing detail fold)
+
+   Over photography on cards, so it carries its own scrim rather than relying
+   on the image behind it being dark enough.
+   ========================================================================== */
+.heart {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(14, 15, 16, 0.42);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transition: background 0.22s ease, transform 0.22s ease;
+}
+.heart--sm { width: 34px; height: 34px; }
+.heart:hover { background: rgba(14, 15, 16, 0.66); transform: scale(1.06); }
+.heart:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.heart svg { width: 19px; height: 19px; }
+.heart--sm svg { width: 17px; height: 17px; }
+.heart svg path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.7;
+  stroke-linejoin: round;
+  transition: fill 0.22s ease, stroke 0.22s ease;
+}
+.heart.is-on svg path { fill: var(--taupe); stroke: var(--taupe); }
+.heart.is-on { background: rgba(255, 255, 255, 0.92); }
+
+/* in the detail fold it sits in the flow beside the CTAs, not over a photo */
+.ld__actions .heart {
+  position: static;
+  justify-self: end;
+  background: rgba(21, 26, 28, 0.06);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.ld__actions .heart:hover { background: rgba(21, 26, 28, 0.12); }
+.ld__actions .heart svg path { stroke: var(--navy); }
+.ld__actions .heart:focus-visible { outline-color: var(--navy); }
+
+@media (prefers-reduced-motion: reduce) {
+  .heart, .heart svg path { transition: none; }
+  .heart:hover { transform: none; }
 }
