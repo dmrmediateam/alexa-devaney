@@ -163,9 +163,14 @@ export const dmrBudgetRequest = defineType({
  */
 export const dmrVisitor = defineType({
   name: 'dmrVisitor',
-  title: 'DMR · Lead Activity',
+  title: 'DMR · Simplified Lead Activity',
   type: 'document',
-  readOnly: true,
+  /*
+   * Editable on purpose. The site writes these, but the agent needs to be
+   * able to correct a name, tidy a duplicate, or delete someone who asks to
+   * be removed - which for a record tying a person's browsing to their email
+   * is not a nicety, it is the deletion path the privacy policy promises.
+   */
   fields: [
     defineField({ name: 'visitorId', title: 'Visitor id', type: 'string' }),
     defineField({ name: 'email', title: 'Email', type: 'string' }),
@@ -231,7 +236,12 @@ export const dmrActivity = defineType({
     defineField({ name: 'address', title: 'Address', type: 'string' }),
     defineField({ name: 'city', title: 'City', type: 'string' }),
     defineField({ name: 'price', title: 'Price', type: 'number' }),
-    defineField({ name: 'url', title: 'URL', type: 'string' }),
+    defineField({
+      name: 'url',
+      title: 'Listing page',
+      type: 'url',
+      description: 'Opens this home on the website.',
+    }),
     defineField({ name: 'at', title: 'At', type: 'datetime' }),
   ],
   preview: {

@@ -206,6 +206,7 @@ export default function ListingDetailBody({
             <ListingInquiryForm
               address={listing.address.full}
               listingId={listing.mlsNumber}
+              listingUrl={listing.detailUrl}
               consent={content.footer.newsletter.consent}
             />
           </div>

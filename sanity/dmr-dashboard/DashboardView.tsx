@@ -17,6 +17,7 @@ import {
   UsersIcon,
 } from '@sanity/icons'
 import { Badge, Box, Button, Card, Flex, Select, Stack, Tab, TabList, Text } from '@sanity/ui'
+import { IntentLink } from 'sanity/router'
 import { MetricChart } from './MetricChart'
 import { SpendPlanner } from './SpendPlanner'
 import type { SubmitBudgetRequest } from './budgetRequest'
@@ -39,7 +40,7 @@ const SECTIONS: { key: Section; title: string; subtitle: string; icon: Component
   { key: 'overview', title: 'Overview', subtitle: 'ROI, leads and spend', icon: ChartUpwardIcon },
   { key: 'spend', title: 'Ad spend planner', subtitle: 'Try a budget, see est. ROI', icon: ControlsIcon },
   { key: 'campaigns', title: 'Campaigns', subtitle: 'Where your leads came from', icon: BarChartIcon },
-  { key: 'visitors', title: 'Lead activity', subtitle: 'Homes they viewed and saved', icon: UsersIcon },
+  { key: 'visitors', title: 'Simplified Lead Activity', subtitle: 'Homes they viewed and saved', icon: UsersIcon },
   { key: 'months', title: 'Month by month', subtitle: 'Every month since launch', icon: CalendarIcon },
   { key: 'roi', title: 'ROI math', subtitle: 'How the numbers are built', icon: TrendUpwardIcon },
   { key: 'playbook', title: 'Follow-up playbook', subtitle: 'SOP, scripts and texts', icon: DocumentsIcon },
@@ -387,7 +388,12 @@ function VisitorTable({
                   const isOpen = open === v._id
                   return (
                     <Fragment key={v._id}>
-                      <tr>
+                      {/* The whole row toggles: a one-word button is a small
+                          target for the main thing anyone does here. */}
+                      <tr
+                        onClick={() => setOpen(isOpen ? null : v._id)}
+                        style={{ cursor: 'pointer' }}
+                      >
                         <td>
                           <Stack space={2}>
                             <Text size={1} weight="medium">
@@ -402,14 +408,24 @@ function VisitorTable({
                         <td>{num(v.viewCount ?? 0)}</td>
                         <td className="dmr-hide-sm">{num(v.searchCount ?? 0)}</td>
                         <td>{shortDate(v.lastSeen)}</td>
-                        <td>
-                          <Button
-                            mode="bleed"
-                            padding={2}
-                            fontSize={1}
-                            text={isOpen ? 'Hide' : 'Open'}
-                            onClick={() => setOpen(isOpen ? null : v._id)}
-                          />
+                        <td onClick={(e) => e.stopPropagation()}>
+                          <Flex gap={1} align="center">
+                            <Button
+                              mode="bleed"
+                              padding={2}
+                              fontSize={1}
+                              text={isOpen ? 'Hide' : 'Open'}
+                              onClick={() => setOpen(isOpen ? null : v._id)}
+                            />
+                            {/* Rename, correct or delete this person's record */}
+                            <IntentLink
+                              intent="edit"
+                              params={{ id: v._id, type: 'dmrVisitor' }}
+                              style={{ textDecoration: 'none' }}
+                            >
+                              <Button mode="bleed" padding={2} fontSize={1} text="Edit" />
+                            </IntentLink>
+                          </Flex>
                         </td>
                       </tr>
                       {isOpen && (
@@ -483,7 +499,13 @@ function ActivityRow({ a }: { a: { address?: string; city?: string; price?: numb
   return (
     <Flex align="center" gap={2}>
       <Box flex={1} className="dmr-min0">
-        <Text size={1}>{a.address || 'Listing'}</Text>
+        {a.url?.startsWith('http') ? (
+          <a href={a.url} target="_blank" rel="noreferrer" className="dmr-listing-link">
+            <Text size={1}>{a.address || 'Listing'}</Text>
+          </a>
+        ) : (
+          <Text size={1}>{a.address || 'Listing'}</Text>
+        )}
         {meta && <Text size={1} muted>{meta}</Text>}
       </Box>
       {a.url?.startsWith('http') && (
@@ -496,7 +518,7 @@ function ActivityRow({ a }: { a: { address?: string; city?: string; price?: numb
           padding={2}
           fontSize={1}
           icon={LaunchIcon}
-          text="View"
+          text="Open"
         />
       )}
     </Flex>

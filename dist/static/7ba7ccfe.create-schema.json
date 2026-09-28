@@ -515,10 +515,9 @@
         "type": "array"
       }
     ],
-    "readOnly": true,
     "name": "dmrVisitor",
     "type": "document",
-    "title": "DMR · Lead Activity"
+    "title": "DMR · Simplified Lead Activity"
   },
   {
     "fields": [
@@ -540,9 +539,31 @@
         "type": "number"
       },
       {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Opens this home on the website.",
         "name": "url",
-        "type": "string",
-        "title": "URL"
+        "type": "url",
+        "title": "Listing page"
       },
       {
         "name": "at",

@@ -64,6 +64,7 @@ export default function ListingLeadGate({
   consent,
   agentName,
   photo,
+  listingUrl,
   freeViews = 0,
   dismissible = false,
   heading,
@@ -78,6 +79,8 @@ export default function ListingLeadGate({
   agentName: string;
   /** The listing's own hero photo: the visitor registers to see THIS home */
   photo?: string;
+  /** Path to this home's page, for the alert email. */
+  listingUrl?: string;
   freeViews?: number;
   dismissible?: boolean;
   heading: string;
@@ -149,6 +152,7 @@ export default function ListingLeadGate({
       phone: String(data.get("phone") ?? "").trim(),
       address: pending?.address ?? address,
       mlsNumber: pending?.listingId ?? mlsNumber,
+      listingUrl: pending?.url ?? listingUrl,
       company: String(data.get("company") ?? ""),
       website: String(data.get("website") ?? ""),
     });

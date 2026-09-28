@@ -53,17 +53,36 @@ function leadName(payload: LeadPayload): string {
 }
 
 /** Fields worth putting in front of an agent, in the order they matter. */
-function summaryRows(payload: LeadPayload): Array<[string, string]> {
+/** A row's optional third member is a link the value should point at. */
+type Row = [label: string, value: string, href?: string];
+
+/** Absolute, because an email client has no origin to resolve a path against. */
+function absoluteListingUrl(payload: LeadPayload): string | undefined {
+  const url = str(payload, "listingUrl");
+  if (!url) return undefined;
+  if (/^https?:\/\//i.test(url)) return url;
+  const base = site.meta.siteUrl?.replace(/\/$/, "");
+  return base ? `${base}${url.startsWith("/") ? "" : "/"}${url}` : undefined;
+}
+
+function summaryRows(payload: LeadPayload): Row[] {
   const skip = new Set([
     "formType", "name", "firstName", "lastName", "company", "website",
-    "source", "submittedAt",
+    "source", "submittedAt", "listingUrl",
   ]);
-  const rows: Array<[string, string]> = [];
-  const push = (label: string, value: string) => value && rows.push([label, value]);
+  const rows: Row[] = [];
+  const push = (label: string, value: string, href?: string) =>
+    value && rows.push([label, value, href]);
 
   push("Phone", str(payload, "phone"));
   push("Email", str(payload, "email"));
-  push("Property", [str(payload, "address"), str(payload, "address2")].filter(Boolean).join(", "));
+  /* The property links to its own page, so the agent can open the home the
+     lead is asking about without searching for it. */
+  push(
+    "Property",
+    [str(payload, "address"), str(payload, "address2")].filter(Boolean).join(", "),
+    absoluteListingUrl(payload),
+  );
   push("City", [str(payload, "city"), str(payload, "zip")].filter(Boolean).join(" "));
   // Qualifying answers sit directly under the contact details: they decide how
   // fast this lead gets called back.
@@ -151,11 +170,15 @@ export async function emailAgent(payload: LeadPayload): Promise<boolean> {
   const { qualified, label: verdict, tag } = qualify(payload);
 
   const rowsHtml = rows
-    .map(
-      ([k, v]) =>
+    .map(([k, v, href]) => {
+      const value = href
+        ? `<a href="${escapeHtml(href)}" style="color:#1A1A1A">${escapeHtml(v)}</a>`
+        : escapeHtml(v);
+      return (
         `<tr><td style="padding:7px 18px 7px 0;color:#8C8377;font-size:12px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;vertical-align:top">${escapeHtml(k)}</td>` +
-        `<td style="padding:7px 0;color:#1A1A1A;font-size:15px">${escapeHtml(v)}</td></tr>`,
-    )
+        `<td style="padding:7px 0;color:#1A1A1A;font-size:15px">${value}</td></tr>`
+      );
+    })
     .join("");
 
   /* Dark masthead carrying the verdict, so the answer is visible in the

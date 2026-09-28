@@ -10,10 +10,13 @@ import { useLeadSubmit } from "@/lib/leads/useLeadSubmit";
 export default function ListingInquiryForm({
   address,
   listingId,
+  listingUrl,
   consent,
 }: {
   address: string;
   listingId: string;
+  /** Path to this home's page, so the alert email can link straight to it. */
+  listingUrl?: string;
   consent: string;
 }) {
   const { status, submit } = useLeadSubmit("listing-inquiry", "listing_inquiry");
@@ -28,6 +31,7 @@ export default function ListingInquiryForm({
       message: String(data.get("message") ?? "").trim(),
       address,
       mlsNumber: listingId,
+      listingUrl,
       company: String(data.get("company") ?? ""),
       website: String(data.get("website") ?? ""),
     });

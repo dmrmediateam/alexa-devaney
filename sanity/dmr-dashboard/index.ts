@@ -43,10 +43,10 @@ export const dmrStructureItems = (S: StructureBuilder) => [
           /* Written by the site, not by hand. Identified leads first: an
              anonymous browser is interesting, a named one is actionable. */
           S.listItem()
-            .title('Lead Activity')
+            .title('Simplified Lead Activity')
             .child(
               S.list()
-                .title('Lead Activity')
+                .title('Simplified Lead Activity')
                 .items([
                   S.listItem()
                     .title('Identified leads')
