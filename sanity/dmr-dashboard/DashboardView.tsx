@@ -460,19 +460,25 @@ function VisitorTable({
 type ActivityGroup = VisitorActivity & { count: number }
 
 function groupActivity(items: VisitorActivity[]): ActivityGroup[] {
+  /* Collected into an array alongside the lookup rather than spreading
+     byKey.values(): this module is copied into client repos whose tsconfig
+     targets ES5, where spreading a Map iterator needs downlevelIteration. */
+  const groups: ActivityGroup[] = []
   const byKey = new Map<string, ActivityGroup>()
   for (const a of items) {
     const key = a.listingId || a.url || a.address || 'unknown'
     const seen = byKey.get(key)
     if (!seen) {
-      byKey.set(key, { ...a, count: 1 })
+      const group: ActivityGroup = { ...a, count: 1 }
+      byKey.set(key, group)
+      groups.push(group)
       continue
     }
     seen.count += 1
     if (a.at && (!seen.at || a.at > seen.at)) seen.at = a.at
   }
   // Newest first: the last home they looked at is the one worth calling about.
-  return [...byKey.values()].sort((x, y) => (y.at ?? '').localeCompare(x.at ?? ''))
+  return groups.sort((x, y) => (y.at ?? '').localeCompare(x.at ?? ''))
 }
 
 function VisitorDetail({ v }: { v: Visitor }) {
