@@ -24,7 +24,13 @@ export interface LocationSelection {
 }
 
 interface CityOption { id: string; name: string; state?: string }
-interface Suggestion { kind: "city" | "neighborhood"; label: string; cityId?: string }
+type SuggestionKind = "city" | "neighborhood";
+interface Suggestion { kind: SuggestionKind; label: string; cityId?: string }
+
+const GROUP_LABEL: Record<SuggestionKind, string> = {
+  city: "Cities",
+  neighborhood: "Neighborhoods",
+};
 
 const MAX_PER_GROUP = 6;
 
@@ -92,14 +98,21 @@ export default function LocationAutocomplete({
 
   const suggestions = useMemo<Suggestion[]>(() => {
     const term = debounced.trim().toLowerCase();
-    if (!index || term.length < 2) return [];
+    if (term.length < 2 || !index) return [];
+    /*
+     * Match on word starts, not anywhere in the string. A plain `includes`
+     * answered "enci" with Valencia (val-ENCI-a) and Via Valencia, which is
+     * how a short query ended up looking like a random place list.
+     */
+    const matches = (name: string) =>
+      name.toLowerCase().split(/[^a-z0-9]+/i).some((word) => word.startsWith(term));
     const startsFirst = (a: string, b: string) => {
       const aStarts = a.toLowerCase().startsWith(term) ? 0 : 1;
       const bStarts = b.toLowerCase().startsWith(term) ? 0 : 1;
       return aStarts - bStarts || a.localeCompare(b);
     };
     const cities = index.cities
-      .filter((c) => c.name.toLowerCase().includes(term))
+      .filter((c) => matches(c.name))
       .sort((a, b) => startsFirst(a.name, b.name))
       .slice(0, MAX_PER_GROUP)
       .map<Suggestion>((c) => ({
@@ -108,7 +121,7 @@ export default function LocationAutocomplete({
         cityId: c.id,
       }));
     const neighborhoods = index.neighborhoods
-      .filter((n) => n.toLowerCase().includes(term))
+      .filter(matches)
       .sort(startsFirst)
       .slice(0, MAX_PER_GROUP)
       .map<Suggestion>((n) => ({ kind: "neighborhood", label: n }));
@@ -127,16 +140,13 @@ export default function LocationAutocomplete({
   }, []);
 
   function choose(s: Suggestion) {
-    const label = s.kind === "city" ? s.label.split(",")[0] : s.label;
+    const label = s.kind === "city" ? s.label.split(",")[0].trim() : s.label;
     onChange(label);
     setQuery(label);
     setOpen(false);
     setActive(-1);
-    onSelect(
-      s.kind === "city"
-        ? { label, cityId: s.cityId, city: label }
-        : { label, subdivision: s.label },
-    );
+    if (s.kind === "city") onSelect({ label, cityId: s.cityId, city: label });
+    else onSelect({ label, subdivision: s.label });
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -161,7 +171,6 @@ export default function LocationAutocomplete({
     if (e.key === "Escape") { setOpen(false); setActive(-1); }
   }
 
-  const cityCount = suggestions.filter((s) => s.kind === "city").length;
   const showList = open && suggestions.length > 0;
 
   return (
@@ -190,41 +199,33 @@ export default function LocationAutocomplete({
 
       {showList && (
         <ul className="loc__menu" id={listId} role="listbox" aria-label="Locations">
-          {cityCount > 0 && <li className="loc__group" role="presentation">Cities</li>}
-          {suggestions.map((s, i) =>
-            s.kind === "neighborhood" && i === cityCount ? (
-              <li key="nb-head-and-first" role="presentation" className="loc__group-wrap">
-                <span className="loc__group" role="presentation">Neighborhoods</span>
-                <button
-                  type="button"
-                  id={`${inputId}-opt-${i}`}
-                  role="option"
-                  aria-selected={i === active}
-                  className={`loc__option${i === active ? " is-active" : ""}`}
-                  onMouseEnter={() => setActive(i)}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => choose(s)}
-                >
-                  {s.label}
-                </button>
+          {suggestions.map((s, i) => {
+            // A header wherever the kind changes, so a third group needs no
+            // new special case the way the old two-group markup did.
+            const startsGroup = i === 0 || suggestions[i - 1].kind !== s.kind;
+            const option = (
+              <button
+                type="button"
+                id={`${inputId}-opt-${i}`}
+                role="option"
+                aria-selected={i === active}
+                className={`loc__option${i === active ? " is-active" : ""}`}
+                onMouseEnter={() => setActive(i)}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => choose(s)}
+              >
+                {s.label}
+              </button>
+            );
+            return startsGroup ? (
+              <li key={`${s.kind}-${s.label}`} role="presentation" className="loc__group-wrap">
+                <span className="loc__group" role="presentation">{GROUP_LABEL[s.kind]}</span>
+                {option}
               </li>
             ) : (
-              <li key={`${s.kind}-${s.label}`} role="presentation">
-                <button
-                  type="button"
-                  id={`${inputId}-opt-${i}`}
-                  role="option"
-                  aria-selected={i === active}
-                  className={`loc__option${i === active ? " is-active" : ""}`}
-                  onMouseEnter={() => setActive(i)}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => choose(s)}
-                >
-                  {s.label}
-                </button>
-              </li>
-            ),
-          )}
+              <li key={`${s.kind}-${s.label}`} role="presentation">{option}</li>
+            );
+          })}
         </ul>
       )}
     </div>

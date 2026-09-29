@@ -2502,6 +2502,134 @@ a:hover > .hn-link::after,
 
 .hn-hero__actions { display: flex; gap: 18px; flex-wrap: wrap; }
 
+/* ---- Hero MLS search --------------------------------------------------
+   Glass over the video rather than a solid card: the hero footage is the
+   reason this variant exists, and a white box parked on it reads as an ad.
+   Square corners and .hn-btn's type scale, because the rest of this site has
+   no rounded anything. The bar (not the input) is the positioning context,
+   so the suggestion menu spans the whole frame however wide the buttons get. */
+.hs { width: min(820px, 100%); margin: 0 0 30px; }
+.hs__bar {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 6px 6px 6px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.hs__bar:hover { border-color: rgba(255, 255, 255, 0.38); }
+.hs__bar:focus-within {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.42);
+}
+.hs__icon {
+  width: 19px;
+  height: 19px;
+  flex: none;
+  align-self: center;
+  margin-right: 13px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.hs .loc { position: static; display: flex; }
+.hs .loc__input {
+  align-self: stretch;
+  padding: 12px 14px 12px 0;
+  font-size: 15px;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+.hs .loc__input::placeholder { color: rgba(255, 255, 255, 0.64); }
+.hs .loc__menu {
+  left: -1px;
+  right: -1px;
+  top: calc(100% + 9px);
+  /* set from JS to the room left inside the hero's clipped box */
+  max-height: var(--hs-menu-max, 340px);
+}
+.hs[data-menu-up="1"] .loc__menu {
+  top: auto;
+  bottom: calc(100% + 9px);
+  animation-name: locMenuUpIn;
+  z-index: 120;
+  border-radius: 0;
+  border-color: rgba(21, 26, 28, 0.06);
+}
+
+/* A pair inset inside the glass, not two slabs welded to its edge: the hard
+   edge-to-edge block was the harsh part. Square corners stay; the softening
+   comes from the inset, a lighter type scale and a shared hairline gap. */
+.hs__actions { display: flex; flex: none; align-items: stretch; gap: 6px; }
+.hs__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+  padding: 14px 26px;
+  background: #f4f1ec;
+  color: #101010;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: var(--body-font);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hs__btn:hover { background: #fff; }
+/* inset ring rather than a border, so the ghost keeps the solid one's height */
+.hs__btn--ghost {
+  background: rgba(244, 241, 236, 0.07);
+  color: #f4f1ec;
+  box-shadow: inset 0 0 0 1px rgba(244, 241, 236, 0.32);
+}
+.hs__btn--ghost:hover {
+  background: rgba(244, 241, 236, 0.16);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(244, 241, 236, 0.6);
+}
+
+.hs__quick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 15px; }
+.hs__quick-label {
+  margin-right: 2px;
+  font-family: var(--heading-font);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+.hs__chip {
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  padding: 7px 15px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f1ec;
+  cursor: pointer;
+  font-family: var(--body-font);
+  font-size: 12.5px;
+  transition: background 0.22s ease, border-color 0.22s ease;
+}
+.hs__chip:hover { background: rgba(255, 255, 255, 0.17); border-color: rgba(255, 255, 255, 0.5); }
+
+/* narrow: the buttons drop to their own full-width row under the field */
+@media (max-width: 860px) {
+  .hs__bar { flex-wrap: wrap; padding: 6px 6px 6px 18px; row-gap: 6px; }
+  .hs .loc { flex: 1 1 200px; }
+  .hs__actions { flex: 1 0 100%; }
+  .hs__btn { flex: 1; padding: 14px 16px; font-size: 11px; letter-spacing: 1.2px; }
+  .hs .loc__menu { top: calc(100% + 9px); }
+}
+
 .hn-hero__scroll {
   position: absolute;
   left: 50%;
@@ -2565,6 +2693,7 @@ a:hover > .hn-link::after,
 /* hero text load-in (nav sequence comes from .load-anim) */
 .load-anim .hn-hero .pre-title { animation: navItemFade 1.1s ease 1.3s both; }
 .load-anim .hn-hero__title { animation: logoReveal 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.9s both; }
+.load-anim .hs { animation: navItemFade 1.1s ease 1.55s both; }
 .load-anim .hn-hero__actions { animation: navItemFade 1.1s ease 1.7s both; }
 
 /* ---- statement ---- */
@@ -3744,6 +3873,10 @@ html:has(.hn) { background: #0e0f10; }
 }
 @keyframes locMenuIn {
   from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes locMenuUpIn {
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) { .loc__menu { animation: none; } }

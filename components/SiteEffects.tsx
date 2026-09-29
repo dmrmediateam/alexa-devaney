@@ -28,7 +28,13 @@ export default function SiteEffects() {
         return;
       }
       const y = window.scrollY;
-      const threshold = hero.offsetHeight * 0.55;
+      /*
+       * Turn solid almost immediately. At 55% of the hero the transparent
+       * wordmark spent half a screen of scrolling sitting on top of the hero
+       * headline with nothing behind it, which read as a rendering fault
+       * rather than a design. Capped so a tall hero does not delay it.
+       */
+      const threshold = Math.min(hero.offsetHeight * 0.12, 110);
 
       if (y > threshold) {
         if (!navbar.classList.contains("scrolled")) {

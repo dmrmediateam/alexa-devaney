@@ -10,8 +10,14 @@ import { NextResponse } from "next/server";
  * GET ?placeId=ChIJ...    -> { address, city, zip }
  */
 
-/* Bias suggestions toward North County San Diego (centered on Carlsbad) */
-const MARKET_BIAS = {
+/*
+ * North County San Diego, centered on Carlsbad. This RESTRICTS rather than
+ * biases: a soft bias still floated a Brooklyn street to the top of "2200
+ * Ocean St", and an address outside the market is noise in both places this
+ * feeds - there are no MLS results for it, and it is not a home she can
+ * value. Out-of-area input simply falls through to free text.
+ */
+const MARKET_AREA = {
   circle: { center: { latitude: 33.1581, longitude: -117.3506 }, radius: 45000 },
 };
 
@@ -60,7 +66,7 @@ export async function GET(request: Request) {
         input,
         includedRegionCodes: ["us"],
         includedPrimaryTypes: ["street_address", "premise", "subpremise"],
-        locationBias: MARKET_BIAS,
+        locationRestriction: MARKET_AREA,
         ...(sessionToken ? { sessionToken } : {}),
       }),
     });

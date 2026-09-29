@@ -1,6 +1,7 @@
 import 'server-only';
 import { unstable_cache } from 'next/cache';
 import { idxRequest } from './request';
+import { MARKET_CITIES } from './config';
 
 /* ==========================================================================
    The MLS's own location index: cities (with IDs) and neighborhoods.
@@ -102,6 +103,23 @@ export async function primaryIdxId(): Promise<string> {
   }
 }
 
+/*
+ * The combined-MLS city feed is the whole state: typing "enci" offered Encino
+ * and Valencia, neither of which this agent sells in, and a search for either
+ * returns nothing. Suggestions are scoped to the cities the site actually
+ * serves (IDX_MARKET_CITIES). Free-typed text still searches anywhere, so
+ * nothing is blocked, it is just no longer suggested.
+ */
+function scopeToMarket(cities: CityOption[]): CityOption[] {
+  if (!MARKET_CITIES.length) return cities;
+  const served = new Set(MARKET_CITIES.map((c) => c.toLowerCase()));
+  const scoped = cities.filter((c) => served.has(c.name.toLowerCase()));
+  // A market list that matches nothing is a misconfiguration, not a reason to
+  // ship an empty autocomplete.
+  return scoped.length ? scoped : cities;
+}
+
 export async function getLocationIndex(): Promise<LocationIndex> {
-  return cachedLocationIndex(await primaryIdxId());
+  const index = await cachedLocationIndex(await primaryIdxId());
+  return { ...index, cities: scopeToMarket(index.cities) };
 }

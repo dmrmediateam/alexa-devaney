@@ -3,6 +3,7 @@ import SiteChrome from "@/components/SiteChrome";
 import CountUpStat from "@/components/home/CountUpStat";
 import FamilyBand from "@/components/FamilyBand";
 import EmblemFlight from "@/components/home/EmblemFlight";
+import HeroSearch from "@/components/home/HeroSearch";
 import type { Listing, SiteContent } from "@/content/site";
 
 /* ==========================================================================
@@ -48,10 +49,16 @@ export default function HomeNoir({
           <div className="hn-hero__content lp-container">
             <h5 className="pre-title">{content.hero.preTitle}</h5>
             <h1 className="lp-h1 hn-hero__title">{content.hero.title}</h1>
-            <div className="hn-hero__actions">
-              <a href={content.intro.ctaHref} className="hn-btn">{content.intro.ctaLabel}</a>
-              <a href={content.cta.buttonHref} className="hn-btn hn-btn--ghost">{content.cta.buttonLabel}</a>
-            </div>
+            {/* One control, not a search bar plus two buttons that went to the
+                same two places. "Search Homes" is the bar's own submit now,
+                and "Let's Connect" sits beside it inside the same frame. */}
+            <HeroSearch
+              areas={(content.areas ?? [])
+                .slice(0, 4)
+                .map((a) => ({ label: a.title, cityId: a.cityId }))}
+              connectLabel={content.cta.buttonLabel}
+              connectHref={content.cta.buttonHref}
+            />
           </div>
           {content.brand.emblem && (
             // eslint-disable-next-line @next/next/no-img-element
