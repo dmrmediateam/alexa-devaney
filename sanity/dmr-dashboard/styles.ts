@@ -200,15 +200,65 @@ export const dashboardCss = /* css */ `
   .dmr-month select { min-width: 0; }
 }
 
-/* Lead activity: the address is the link, so it has to look like one */
-/* inline-block, or the anchor collapses and the line under it rides up */
-.dmr-listing-link {
-  display: inline-block;
-  max-width: 100%;
-  color: inherit;
-  text-decoration: none;
-  border-bottom: 1px solid currentColor;
+/* Lead activity: rows are one grid, so addresses, prices and times line up
+   down the panel. The whole row is the link - no underline running the full
+   width of the pane, and no ragged "Open" column chasing the right edge. */
+.dmr-acts {
+  display: grid;
+  gap: 1px;
+  background: var(--card-border-color);
+  border: 1px solid var(--card-border-color);
+  border-radius: 3px;
+  overflow: hidden;
 }
-.dmr-listing-link:hover { opacity: 0.7; }
+.dmr-act {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px 136px 18px;
+  align-items: center;
+  column-gap: 16px;
+  padding: 11px 14px;
+  background: var(--card-bg-color);
+  color: var(--card-fg-color);
+  font-size: 13px;
+  text-decoration: none;
+}
+/* matching trailing column, so a search timestamp sits on the same
+   vertical as a listing one */
+.dmr-act-search { grid-template-columns: minmax(0, 1fr) 136px 18px; }
+a.dmr-act { cursor: pointer; }
+a.dmr-act:hover { background: var(--card-border-color); }
+a.dmr-act:hover .dmr-act-addr { text-decoration: underline; text-underline-offset: 3px; }
+.dmr-act-main { min-width: 0; display: grid; gap: 3px; }
+.dmr-act-addr { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.dmr-act-meta { font-size: 12px; color: var(--card-muted-fg-color); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dmr-act-rep {
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--card-border-color);
+  color: var(--card-fg-color);
+  font-size: 11px;
+}
+.dmr-act-price { text-align: right; white-space: nowrap; }
+.dmr-act-when { text-align: right; white-space: nowrap; font-size: 12px; color: var(--card-muted-fg-color); }
+.dmr-act-go { display: inline-flex; font-size: 18px; color: var(--card-muted-fg-color); opacity: 0; }
+a.dmr-act:hover .dmr-act-go { opacity: 1; }
+
+/* section headings above each group */
+.dmr-act-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--card-muted-fg-color); }
+.dmr-act-count {
+  display: inline-grid; place-items: center; min-width: 20px; height: 18px;
+  padding: 0 6px; border-radius: 999px;
+  background: var(--card-border-color); color: var(--card-fg-color);
+  font-size: 11px; font-weight: 500;
+}
+.dmr-act-note { font-size: 11px; color: var(--card-muted-fg-color); }
+
+@media (max-width: 800px) {
+  .dmr-act, .dmr-act-search { grid-template-columns: minmax(0, 1fr) auto; row-gap: 2px; }
+  .dmr-act-price, .dmr-act-when { grid-column: 2; }
+  .dmr-act-go { display: none; }
+}
+
 .dmr-table tbody tr[style*="cursor"]:hover { background: rgba(0, 0, 0, 0.025); }
 `

@@ -7,6 +7,8 @@ import {
   LISTING_VIEWS_STORAGE,
   hasCapturedFlag,
   markCapturedLocally,
+  readDismissals,
+  recordDismissal,
 } from "@/lib/leads/captured";
 import {
   CAPTURE_REQUEST_EVENT,
@@ -29,6 +31,16 @@ import type { TrackedListing } from "@/lib/tracking/store";
 
 const CRAWLER =
   /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|embedly|lighthouse|adsbot|mediapartners/i;
+
+/*
+ * Milliseconds before the way out appears, indexed by how many times this
+ * visitor has already used it. "Not now" sitting next to the button the
+ * instant the modal lands is the cheapest click on the screen and almost
+ * everyone takes it; making it arrive after the ask has been read costs an
+ * interested browser a few seconds and costs a determined one nothing.
+ * null = no way out at all: by the third ask they have seen it twice.
+ */
+const SKIP_DELAY_MS: (number | null)[] = [6000, 12000, null];
 
 function readViews(): number {
   try {
@@ -99,8 +111,13 @@ export default function ListingLeadGate({
   const [pending, setPending] = useState<TrackedListing | null>(null);
   const { status, submit } = useLeadSubmit("listing-registration", "listing_registration");
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  /* Read once per mount: reading it during render would flip the escape hatch
+     on mid-modal if another tab wrote to storage. */
+  const dismissals = useRef(0);
+  const [skipReady, setSkipReady] = useState(false);
 
   useEffect(() => {
+    dismissals.current = readDismissals();
     if (CRAWLER.test(navigator.userAgent)) return;
     if (hasCapturedFlag()) return;
     if (!autoOpen) return;
@@ -129,6 +146,19 @@ export default function ListingLeadGate({
     window.addEventListener(CAPTURE_REQUEST_EVENT, onRequest);
     return () => window.removeEventListener(CAPTURE_REQUEST_EVENT, onRequest);
   }, []);
+
+  /* Hold the escape hatch back until the ask has had time to land, and drop
+     it entirely once they have used it twice. A heart-triggered modal always
+     gets one eventually: they clicked to save a home, and an accidental click
+     needs a way back out. */
+  useEffect(() => {
+    if (!open) return;
+    setSkipReady(false);
+    const delay = SKIP_DELAY_MS[Math.min(dismissals.current, SKIP_DELAY_MS.length - 1)];
+    if (delay === null && !pending) return;
+    const timer = window.setTimeout(() => setSkipReady(true), delay ?? SKIP_DELAY_MS[0]!);
+    return () => window.clearTimeout(timer);
+  }, [open, pending]);
 
   // Body scroll lock, restored exactly as found, plus the open/close signal
   useEffect(() => {
@@ -204,6 +234,14 @@ export default function ListingLeadGate({
           <h2 className="gate__heading" id="gate-heading">{shownHeading}</h2>
           <p className="gate__sub">{shownSub}</p>
 
+          {/* Removing the easy way out only works paired with a reason to
+              stay: the ask has to say what registering buys. */}
+          <ul className="gate__perks">
+            <li>Every photo and price change</li>
+            <li>Saved homes on any device</li>
+            <li>Alerts for homes like this</li>
+          </ul>
+
           <form className="gate__form" onSubmit={handleSubmit}>
             <Honeypot idSuffix="listing-gate" />
             <input name="name" type="text" placeholder="Full Name" autoComplete="name" required />
@@ -219,19 +257,23 @@ export default function ListingLeadGate({
             {status === "error" && (
               <p className="gate__error">Something went wrong. Please try again.</p>
             )}
+            <p className="gate__trust">Your details stay with {agentName}. Never sold, never shared.</p>
           </form>
 
-          {(dismissible || pending) && (
+          {(dismissible || pending) && skipReady && (
             <button
               type="button"
               className="gate__skip"
               onClick={() => {
+                dismissals.current = recordDismissal();
                 discardPendingCapture();
                 setPending(null);
                 setOpen(false);
               }}
             >
-              Not now
+              {pending
+                ? "Cancel"
+                : "No thanks \u2014 browse without saved homes or price alerts"}
             </button>
           )}
         </div>

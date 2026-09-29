@@ -23,7 +23,7 @@ import { SpendPlanner } from './SpendPlanner'
 import type { SubmitBudgetRequest } from './budgetRequest'
 import { computeDashboard, monthLabel, num, pct, usd, type ClientSettings, type MonthReport } from './math'
 import { DMR_EMAIL, DMR_SITE } from './tokens'
-import { useVisitors, type Visitor } from './useVisitors'
+import { useVisitors, type Visitor, type VisitorActivity } from './useVisitors'
 
 /**
  * Two-pane layout that mirrors the Studio's Structure tool: a list pane on the left
@@ -449,81 +449,125 @@ function VisitorTable({
   )
 }
 
+/* ── Lead activity detail ───────────────────────────────────
+
+   Coming back to the same home four times is the signal, but a list that
+   prints one address six times is unreadable, so identical listings collapse
+   into a single row carrying the repeat count and the latest time. Rows are a
+   fixed grid: that is what keeps prices and timestamps in a straight line
+   down the panel instead of every row finding its own edge. */
+
+type ActivityGroup = VisitorActivity & { count: number }
+
+function groupActivity(items: VisitorActivity[]): ActivityGroup[] {
+  const byKey = new Map<string, ActivityGroup>()
+  for (const a of items) {
+    const key = a.listingId || a.url || a.address || 'unknown'
+    const seen = byKey.get(key)
+    if (!seen) {
+      byKey.set(key, { ...a, count: 1 })
+      continue
+    }
+    seen.count += 1
+    if (a.at && (!seen.at || a.at > seen.at)) seen.at = a.at
+  }
+  // Newest first: the last home they looked at is the one worth calling about.
+  return [...byKey.values()].sort((x, y) => (y.at ?? '').localeCompare(x.at ?? ''))
+}
+
 function VisitorDetail({ v }: { v: Visitor }) {
-  /* Saved homes lead, because a save is a far stronger signal than a view,
-     and the views read newest first so the last thing they looked at is top. */
-  const views = [...(v.viewed ?? [])].reverse()
+  /* Saved homes lead, because a save is a far stronger signal than a view. */
+  const saved = groupActivity(v.hearted ?? [])
+  const views = groupActivity(v.viewed ?? [])
+  const searches = [...(v.searches ?? [])].reverse()
+  const nothing = !saved.length && !views.length && !searches.length
+
   return (
     <Box padding={3}>
-      <Stack space={4}>
-        {v.hearted?.length > 0 && (
-          <Stack space={3}>
-            <Text size={1} weight="medium">Saved homes</Text>
-            <Stack space={2}>
-              {v.hearted.map((a, i) => <ActivityRow key={`h${i}`} a={a} />)}
-            </Stack>
-          </Stack>
-        )}
-        {v.searches?.length > 0 && (
-          <Stack space={3}>
-            <Text size={1} weight="medium">Searches</Text>
-            <Stack space={2}>
-              {[...v.searches].reverse().map((s, i) => (
-                <Text key={`s${i}`} size={1} muted>
-                  {s.label}{s.at ? ` · ${shortDate(s.at)}` : ''}
-                </Text>
+      {nothing ? (
+        <Text size={1} muted>No listing activity recorded for this visitor.</Text>
+      ) : (
+        <Stack space={4}>
+          {saved.length > 0 && (
+            <DetailSection label="Saved homes" count={v.saveCount ?? saved.length}>
+              {saved.map((a, i) => <ActivityRow key={`h${i}`} a={a} verb="saved" />)}
+            </DetailSection>
+          )}
+          {views.length > 0 && (
+            <DetailSection
+              label="Recently viewed"
+              count={v.viewCount ?? views.length}
+              note={v.viewCount > views.length ? `latest ${views.length} shown` : undefined}
+            >
+              {views.map((a, i) => <ActivityRow key={`v${i}`} a={a} verb="viewed" />)}
+            </DetailSection>
+          )}
+          {searches.length > 0 && (
+            <DetailSection label="Searches" count={v.searchCount ?? searches.length}>
+              {searches.map((s, i) => (
+                <div className="dmr-act dmr-act-search" key={`s${i}`}>
+                  <span className="dmr-act-main">
+                    <span className="dmr-act-addr">{s.label || 'Search'}</span>
+                  </span>
+                  <span className="dmr-act-when">{when(s.at)}</span>
+                  <span className="dmr-act-go" />
+                </div>
               ))}
-            </Stack>
-          </Stack>
-        )}
-        {views.length > 0 && (
-          <Stack space={3}>
-            <Text size={1} weight="medium">
-              Recently viewed{v.viewCount > views.length ? ` (latest ${views.length} of ${v.viewCount})` : ''}
-            </Text>
-            <Stack space={2}>
-              {views.map((a, i) => <ActivityRow key={`v${i}`} a={a} />)}
-            </Stack>
-          </Stack>
-        )}
-        {!v.hearted?.length && !views.length && !v.searches?.length && (
-          <Text size={1} muted>No listing activity recorded for this visitor.</Text>
-        )}
-      </Stack>
+            </DetailSection>
+          )}
+        </Stack>
+      )}
     </Box>
   )
 }
 
-function ActivityRow({ a }: { a: { address?: string; city?: string; price?: number; url?: string; at?: string } }) {
-  const meta = [a.city, a.price ? usd(a.price) : null, shortDate(a.at)].filter(Boolean).join(' · ')
+function DetailSection({
+  label,
+  count,
+  note,
+  children,
+}: {
+  label: string
+  count: number
+  note?: string
+  children: React.ReactNode
+}) {
   return (
-    <Flex align="center" gap={2}>
-      <Box flex={1} className="dmr-min0">
-        <Stack space={2}>
-          {a.url?.startsWith('http') ? (
-            <a href={a.url} target="_blank" rel="noreferrer" className="dmr-listing-link">
-              <Text size={1}>{a.address || 'Listing'}</Text>
-            </a>
-          ) : (
-            <Text size={1}>{a.address || 'Listing'}</Text>
-          )}
-          {meta && <Text size={1} muted>{meta}</Text>}
-        </Stack>
-      </Box>
-      {a.url?.startsWith('http') && (
-        <Button
-          as="a"
-          href={a.url}
-          target="_blank"
-          rel="noreferrer"
-          mode="bleed"
-          padding={2}
-          fontSize={1}
-          icon={LaunchIcon}
-          text="Open"
-        />
-      )}
-    </Flex>
+    <Stack space={3}>
+      <Flex align="center" gap={2}>
+        <span className="dmr-act-label">{label}</span>
+        <span className="dmr-act-count">{num(count)}</span>
+        {note && <span className="dmr-act-note">{note}</span>}
+      </Flex>
+      <div className="dmr-acts">{children}</div>
+    </Stack>
+  )
+}
+
+function ActivityRow({ a, verb }: { a: ActivityGroup; verb: string }) {
+  const href = a.url?.startsWith('http') ? a.url : undefined
+  const inner = (
+    <>
+      <span className="dmr-act-main">
+        <span className="dmr-act-addr">{a.address || 'Listing'}</span>
+        <span className="dmr-act-meta">
+          {a.city || '—'}
+          {a.count > 1 && <span className="dmr-act-rep">{verb} {a.count}×</span>}
+        </span>
+      </span>
+      <span className="dmr-act-price">{a.price ? usd(a.price) : ''}</span>
+      <span className="dmr-act-when">{when(a.at)}</span>
+      <span className="dmr-act-go">{href ? <LaunchIcon /> : null}</span>
+    </>
+  )
+  // The whole row is the link when there is one: a row-wide target beats a
+  // word at the far right, and it drops the ragged "Open" column entirely.
+  return href ? (
+    <a className="dmr-act" href={href} target="_blank" rel="noreferrer" title={a.address}>
+      {inner}
+    </a>
+  ) : (
+    <div className="dmr-act">{inner}</div>
   )
 }
 
@@ -531,6 +575,28 @@ function shortDate(iso?: string): string {
   if (!iso) return '—'
   const d = new Date(iso)
   return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
+/* Date AND time: knowing someone looked at a home at 11pm last night, twice,
+   is the difference between a cold call and a warm one. */
+function when(iso?: string): string {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return '—'
+  const time = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+  const today = new Date()
+  const days = Math.round(
+    (new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime() -
+      new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()) / 86400000,
+  )
+  if (days === 0) return `Today, ${time}`
+  if (days === 1) return `Yesterday, ${time}`
+  const date = d.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    ...(d.getFullYear() === today.getFullYear() ? {} : { year: 'numeric' }),
+  })
+  return `${date}, ${time}`
 }
 
 /* ── Campaigns ────────────────────────────────────────────── */

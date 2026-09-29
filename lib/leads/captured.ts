@@ -29,3 +29,34 @@ export function markCapturedLocally(): void {
     /* cookie already carries this; nothing to do */
   }
 }
+
+/**
+ * How many times this visitor has waved the gate away.
+ *
+ * The escape hatch stays (a wall with no door reads as hostile, and the
+ * listing underneath is indexable precisely because nothing is hidden), but it
+ * gets harder to reach each time: later in the modal's life on the first two
+ * passes, and gone on the third. Someone on their fourth listing is not
+ * browsing idly.
+ */
+export const GATE_DISMISSALS_STORAGE = "listing_gate_dismissals";
+
+export function readDismissals(): number {
+  try {
+    return Number(window.localStorage.getItem(GATE_DISMISSALS_STORAGE) ?? "0") || 0;
+  } catch {
+    // Storage blocked: treat every visit as the first, so the way out stays
+    // reachable rather than trapping someone who cannot be counted.
+    return 0;
+  }
+}
+
+export function recordDismissal(): number {
+  const next = readDismissals() + 1;
+  try {
+    window.localStorage.setItem(GATE_DISMISSALS_STORAGE, String(next));
+  } catch {
+    /* nothing to persist to; the gate simply stays as forgiving as it was */
+  }
+  return next;
+}

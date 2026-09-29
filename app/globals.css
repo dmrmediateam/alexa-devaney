@@ -4261,7 +4261,7 @@ html[data-modal-open="true"] .ld-bar { display: none !important; }
 }
 
 /* right: the ask */
-.gate__panel { padding: 52px 52px 44px; overflow-y: auto; }
+.gate__panel { padding: 38px 48px 32px; overflow-y: auto; }
 .gate__eyebrow {
   font-family: var(--heading-font);
   font-size: 11px;
@@ -4279,9 +4279,35 @@ html[data-modal-open="true"] .ld-bar { display: none !important; }
   letter-spacing: -0.5px;
   color: var(--navy);
 }
-.gate__sub { margin-top: 16px; font-size: 15px; line-height: 1.7; color: #5d5d60; }
+.gate__sub { margin-top: 12px; font-size: 14.5px; line-height: 1.6; color: #5d5d60; }
 
-.gate__form { margin-top: 32px; display: grid; gap: 4px; }
+/* Two short claims per row rather than a stacked list: the reason to register
+   has to sit above the fold alongside the button, not push it under it. */
+.gate__perks {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 18px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #3f3f43;
+}
+.gate__perks li { position: relative; padding-left: 18px; }
+.gate__perks li::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 5px;
+  width: 9px;
+  height: 5px;
+  border-left: 1.5px solid var(--navy);
+  border-bottom: 1.5px solid var(--navy);
+  transform: rotate(-45deg);
+}
+.gate__trust { margin-top: 12px; font-size: 11.5px; line-height: 1.6; color: #8a8a8f; text-align: center; }
+.gate__form { margin-top: 18px; display: grid; gap: 4px; }
 .gate__form input[type="text"],
 .gate__form input[type="email"],
 .gate__form input[type="tel"] {
@@ -4304,20 +4330,20 @@ html[data-modal-open="true"] .ld-bar { display: none !important; }
   display: flex;
   gap: 12px;
   align-items: flex-start;
-  margin-top: 22px;
+  margin-top: 16px;
   font-size: 11.5px;
-  line-height: 1.7;
+  line-height: 1.6;
   color: #6c6c71;
 }
 .gate__consent input { width: 18px; height: 18px; flex: none; margin-top: 2px; accent-color: var(--navy); }
 
 .gate__submit {
-  margin-top: 26px;
+  margin-top: 20px;
   width: 100%;
   border: 0;
   background: var(--navy);
   color: #fff;
-  padding: 19px;
+  padding: 17px;
   cursor: pointer;
   font-family: var(--heading-font);
   font-size: 12px;
@@ -4329,30 +4355,69 @@ html[data-modal-open="true"] .ld-bar { display: none !important; }
 .gate__submit:hover { background: var(--taupe); }
 .gate__submit:disabled { opacity: 0.6; cursor: default; }
 .gate__error { margin-top: 10px; font-size: 12px; color: #b91c1c; }
+/* Fades in rather than appearing, which keeps it from pulling the eye off
+   the button the moment the timer fires. */
 .gate__skip {
   display: block;
-  margin: 18px auto 0;
+  margin: 14px auto 0;
+  max-width: 34ch;
+  animation: gate-skip-in 0.6s ease both;
   background: none;
   border: 0;
   cursor: pointer;
-  font-size: 11px;
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
-  color: #8a8a8f;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: #a2a2a7;
   text-decoration: underline;
   text-underline-offset: 4px;
+}
+.gate__skip:hover { color: #6f6f75; }
+@keyframes gate-skip-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .gate__skip { animation: none; } }
+
+/* Short desktop windows: the submit button below the fold costs more than
+   any amount of breathing room above it. Reclaim the chrome, not the copy. */
+@media (min-width: 901px) and (max-height: 800px) {
+  .gate { padding: 14px; }
+  .gate__card { max-height: calc(100vh - 28px); }
+  .gate__panel { padding: 26px 40px 24px; }
+  .gate__heading { font-size: 26px; }
+  .gate__sub { margin-top: 10px; font-size: 14px; }
+  .gate__perks { margin-top: 12px; }
+  .gate__form { margin-top: 14px; }
+  .gate__form input[type="text"],
+  .gate__form input[type="email"],
+  .gate__form input[type="tel"] { padding: 14px 2px; }
+  .gate__consent { margin-top: 12px; line-height: 1.5; }
+  .gate__submit { margin-top: 14px; padding: 15px; }
 }
 
 @media (max-width: 900px) {
   .gate { padding: 0; place-items: stretch; }
   .gate__card { grid-template-columns: 1fr; width: 100%; max-height: 100vh; }
   /* keep the home visible but let the form win the fold */
-  .gate__media { height: 30vh; min-height: 170px; }
+  /* the photo earns less room than the button does */
+  .gate__media { height: 21vh; min-height: 130px; }
   .gate__address { left: 20px; right: 20px; bottom: 16px; font-size: 11px; letter-spacing: 1.8px; }
-  .gate__panel { padding: 28px 22px calc(28px + env(safe-area-inset-bottom)); }
+  .gate__panel { padding: 24px 22px calc(24px + env(safe-area-inset-bottom)); }
   .gate__heading { font-size: 26px; }
   .gate__sub { font-size: 14px; margin-top: 12px; }
-  .gate__form { margin-top: 22px; }
+  .gate__perks { margin-top: 12px; gap: 6px 14px; font-size: 12px; }
+  .gate__form { margin-top: 16px; }
+  .gate__consent { margin-top: 12px; }
+  .gate__submit { margin-top: 14px; padding: 16px; }
+}
+
+/* Small phones: there is not room for the photo, the pitch, three fields and
+   the TCPA paragraph at once. The perk list goes - the subheading already
+   makes the case - so the button stays on screen. */
+@media (max-width: 900px) and (max-height: 720px) {
+  .gate__media { height: 15vh; min-height: 96px; }
+  .gate__perks { display: none; }
+  .gate__heading { font-size: 23px; }
+  .gate__sub { font-size: 13.5px; }
 }
 
 
