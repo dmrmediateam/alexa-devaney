@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import AddressAutocomplete from "@/components/landing/AddressAutocomplete";
 import Honeypot from "@/components/leads/Honeypot";
 import { site } from "@/content/site";
 import { getAttribution } from "@/lib/attribution";
@@ -116,15 +115,15 @@ export default function ValuationForm() {
       <div className="lp-card__fields">
         {step === 1 ? (
           <>
-            <AddressAutocomplete
+            {/* Plain field: the browser's own address autofill covers this,
+                and City and ZIP below are collected directly. */}
+            <input
               className="lp-input"
               placeholder="Street Address"
               value={fields.address}
-              onChange={(v) => setFields((f) => ({ ...f, address: v }))}
-              onResolved={({ address, city, zip }) =>
-                setFields((f) => ({ ...f, address, city: city || f.city, zip: zip || f.zip }))
-              }
+              onChange={set("address")}
               required
+              autoComplete="address-line1"
             />
             <input
               className="lp-input"

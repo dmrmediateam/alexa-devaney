@@ -1,7 +1,7 @@
 import 'server-only';
 import { unstable_cache } from 'next/cache';
 import { idxRequest } from './request';
-import { MARKET_CITIES } from './config';
+import { MARKET_CITIES, MARKET_NEIGHBORHOODS } from './config';
 
 /* ==========================================================================
    The MLS's own location index: cities (with IDs) and neighborhoods.
@@ -20,7 +20,19 @@ export interface CityOption {
   state?: string;
 }
 
+/** `value` is what the search query matches on, `label` is what is shown. */
+export interface NeighborhoodOption {
+  label: string;
+  value: string;
+}
+
 export interface LocationIndex {
+  cities: CityOption[];
+  neighborhoods: NeighborhoodOption[];
+}
+
+/** What the MLS fetch produces before scoping and display formatting. */
+interface RawLocationIndex {
   cities: CityOption[];
   neighborhoods: string[];
 }
@@ -50,6 +62,17 @@ function normalizeCities(raw: unknown): CityOption[] {
   return cities.sort((a, b) => a.name.localeCompare(b.name));
 }
 
+/*
+ * The MLS's subdivision dictionary is 2,700+ names spanning the whole state,
+ * and it mixes two populations that are easy to tell apart:
+ *
+ *   "LA COSTA", "CARLSBAD EAST"      - San Diego MLS areas (110 of them)
+ *   "Agoura (850)", "Del Cabo (DC)"  - out-of-area legacy names, mixed case
+ *                                      and carrying an MLS code in brackets
+ *
+ * Only the first population belongs in a San Diego agent's search box; the
+ * second is where "random places" came from. Everything else is dropped here.
+ */
 function normalizeNeighborhoods(raw: unknown): string[] {
   const items: unknown[] = Array.isArray(raw) ? raw : Object.values((raw ?? {}) as object);
   const seen = new Set<string>();
@@ -57,16 +80,52 @@ function normalizeNeighborhoods(raw: unknown): string[] {
   for (const item of items) {
     const value = typeof item === 'string' ? item : String((item as { name?: string })?.name ?? '');
     const name = value.trim();
-    // Feed values carry an MLS code suffix, e.g. "Olde Carlsbad (OCB)"
-    const cleaned = name.replace(/\s*\([^)]*\)\s*$/, '').trim();
-    if (!cleaned || cleaned.length < 3 || seen.has(cleaned.toLowerCase())) continue;
-    seen.add(cleaned.toLowerCase());
-    out.push(cleaned);
+    if (!name || name.length < 3) continue;
+    if (name.includes('(')) continue;          // carries an out-of-area MLS code
+    if (name !== name.toUpperCase()) continue; // mixed case marks the same set
+    if (name === 'OUT OF AREA') continue;      // the feed's own catch-all bucket
+    if (seen.has(name)) continue;
+    seen.add(name);
+    out.push(name);
   }
   return out.sort((a, b) => a.localeCompare(b));
 }
 
-async function fetchLocationIndex(idxId: string): Promise<LocationIndex> {
+/*
+ * Of those 110, keep the ones this agent actually sells in. An area belongs to
+ * a served city when stripping the MLS's directional wrapper leaves that
+ * city's name: "CARLSBAD EAST" and "SOUTH ESCONDIDO" and "LAKE SAN MARCOS" are
+ * in, while "CHULA VISTA" is not - which a plain "contains VISTA" test would
+ * have got wrong. Neighborhoods whose name carries no town at all (La Costa,
+ * Leucadia, Aviara) come from IDX_MARKET_NEIGHBORHOODS.
+ */
+const DIRECTIONAL = /^(north|south|east|west|northeast|northwest|southeast|southwest|lake|old|olde|downtown)\s+|\s+(north|south|east|west|northeast|northwest|southeast|southwest)$/gi;
+
+function scopeNeighborhoods(names: string[]): string[] {
+  if (!MARKET_CITIES.length) return names;
+  const served = new Set(MARKET_CITIES.map((c) => c.toLowerCase()));
+  const extra = new Set(MARKET_NEIGHBORHOODS.map((n) => n.toLowerCase()));
+  return names.filter((name) => {
+    const lower = name.toLowerCase();
+    // An area named exactly after a served city is already offered as a city,
+    // and the city carries an MLS id, so it is the better of the two.
+    if (served.has(lower)) return false;
+    if (extra.has(lower)) return true;
+    return served.has(lower.replace(DIRECTIONAL, '').trim());
+  });
+}
+
+/** The feed shouts every area name; titles read better in a menu. */
+function displayCase(name: string): string {
+  const small = new Set(['of', 'the', 'at', 'on', 'by', 'de', 'del', 'la', 'las', 'los', 'el']);
+  return name
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word, i) => (i > 0 && small.has(word) ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+    .join(' ');
+}
+
+async function fetchLocationIndex(idxId: string): Promise<RawLocationIndex> {
   const [cities, neighborhoods] = await Promise.all([
     idxRequest<unknown>('/clients/cities/combinedActiveMLS', {
       revalidateSeconds: LOCATION_REVALIDATE_SECONDS,
@@ -121,5 +180,12 @@ function scopeToMarket(cities: CityOption[]): CityOption[] {
 
 export async function getLocationIndex(): Promise<LocationIndex> {
   const index = await cachedLocationIndex(await primaryIdxId());
-  return { ...index, cities: scopeToMarket(index.cities) };
+  return {
+    cities: scopeToMarket(index.cities),
+    neighborhoods: scopeNeighborhoods(index.neighborhoods).map((name) => ({
+      label: displayCase(name),
+      // the feed's exact string: aw_subdivision matches on it, not on the label
+      value: name,
+    })),
+  };
 }

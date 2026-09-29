@@ -149,8 +149,9 @@ iframes:
   /api/listings when IDX is connected, and filter the config's placeholder
   listings in memory when it is not, so search works in either state.
 - Sell page carries the 3-step valuation wizard (`valuation: true`, optional
-  `valuationImage`): address with MLS-backed autocomplete, property details,
-  contact + TCPA consent. Front-end only; wire the submit to the client CRM.
+  `valuationImage`): plain address fields (no third-party autocomplete - a
+  seller's own home is not in the MLS, which is the point of the form),
+  property details, contact + TCPA consent. Front-end only; wire the submit to the client CRM.
 - Data layer lives in `lib/idx/` - `request.ts` is the ONLY file that may
   call api.idxbroker.com. Components consume normalized types from
   `lib/idx/types.ts` only, never raw IDX shapes.
@@ -180,6 +181,7 @@ Per-client setup is env vars in Vercel (never in the repo):
 IDX_API_KEY=...            # required for live data
 IDX_ANCILLARY_KEY=...      # optional partner key (higher limits, detail access)
 IDX_MARKET_CITIES=Naples,Bonita Springs,Marco Island   # cached browse pool
+IDX_MARKET_NEIGHBORHOODS=Old Naples,Port Royal          # extra MLS areas to suggest
 IDX_OFFICE_IDS=abc123      # marks "our listings" vs full MLS
 ```
 

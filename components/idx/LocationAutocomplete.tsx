@@ -24,8 +24,10 @@ export interface LocationSelection {
 }
 
 interface CityOption { id: string; name: string; state?: string }
+/** value = the string the MLS search matches on; label = what we show */
+interface NeighborhoodOption { label: string; value: string }
 type SuggestionKind = "city" | "neighborhood";
-interface Suggestion { kind: SuggestionKind; label: string; cityId?: string }
+interface Suggestion { kind: SuggestionKind; label: string; value?: string; cityId?: string }
 
 const GROUP_LABEL: Record<SuggestionKind, string> = {
   city: "Cities",
@@ -34,7 +36,7 @@ const GROUP_LABEL: Record<SuggestionKind, string> = {
 
 const MAX_PER_GROUP = 6;
 
-let indexPromise: Promise<{ cities: CityOption[]; neighborhoods: string[] }> | null = null;
+let indexPromise: Promise<{ cities: CityOption[]; neighborhoods: NeighborhoodOption[] }> | null = null;
 function loadIndex() {
   if (!indexPromise) {
     indexPromise = fetch("/api/locations")
@@ -74,7 +76,7 @@ export default function LocationAutocomplete({
   const reactId = useId();
   const inputId = id ?? `loc-${reactId}`;
   const listId = `${inputId}-listbox`;
-  const [index, setIndex] = useState<{ cities: CityOption[]; neighborhoods: string[] } | null>(null);
+  const [index, setIndex] = useState<{ cities: CityOption[]; neighborhoods: NeighborhoodOption[] } | null>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState(value);
   const [active, setActive] = useState(-1);
@@ -104,8 +106,13 @@ export default function LocationAutocomplete({
      * answered "enci" with Valencia (val-ENCI-a) and Via Valencia, which is
      * how a short query ended up looking like a random place list.
      */
-    const matches = (name: string) =>
-      name.toLowerCase().split(/[^a-z0-9]+/i).some((word) => word.startsWith(term));
+    const matches = (name: string) => {
+      const lower = name.toLowerCase();
+      // Whole-string prefix first, so a typed "la c" still finds La Costa;
+      // then each word, so "costa" finds it too.
+      if (lower.startsWith(term)) return true;
+      return lower.split(/[^a-z0-9]+/).some((word) => word.startsWith(term));
+    };
     const startsFirst = (a: string, b: string) => {
       const aStarts = a.toLowerCase().startsWith(term) ? 0 : 1;
       const bStarts = b.toLowerCase().startsWith(term) ? 0 : 1;
@@ -121,10 +128,10 @@ export default function LocationAutocomplete({
         cityId: c.id,
       }));
     const neighborhoods = index.neighborhoods
-      .filter(matches)
-      .sort(startsFirst)
+      .filter((n) => matches(n.label) || matches(n.value))
+      .sort((a, b) => startsFirst(a.label, b.label))
       .slice(0, MAX_PER_GROUP)
-      .map<Suggestion>((n) => ({ kind: "neighborhood", label: n }));
+      .map<Suggestion>((n) => ({ kind: "neighborhood", label: n.label, value: n.value }));
     return [...cities, ...neighborhoods];
   }, [index, debounced]);
 
@@ -146,7 +153,8 @@ export default function LocationAutocomplete({
     setOpen(false);
     setActive(-1);
     if (s.kind === "city") onSelect({ label, cityId: s.cityId, city: label });
-    else onSelect({ label, subdivision: s.label });
+    // the feed's exact string, not the prettified label, or the query misses
+    else onSelect({ label, subdivision: s.value ?? s.label });
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {

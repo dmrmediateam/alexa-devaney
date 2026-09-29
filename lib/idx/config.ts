@@ -8,6 +8,10 @@ import 'server-only';
    IDX_ANCILLARY_KEY  - optional partner key (raises rate limit, unlocks detail)
    IDX_MARKET_CITIES  - comma-separated city names forming the cached browse
                         pool (e.g. "Naples,Bonita Springs,Marco Island")
+   IDX_MARKET_NEIGHBORHOODS - extra MLS area names to suggest beyond those
+                        derived from the market cities (e.g. "La Costa",
+                        "Leucadia" - neighborhoods whose name does not
+                        contain the town they sit in)
    IDX_OFFICE_IDS     - comma-separated office ids marking "our listings"
    ========================================================================== */
 
@@ -22,6 +26,8 @@ export const MARKET_CITIES: readonly string[] = csvEnv("IDX_MARKET_CITIES");
 
 /** First few market cities: the fast-fallback set when the pool is cold */
 export const CORE_MARKET_CITIES: readonly string[] = MARKET_CITIES.slice(0, 6);
+
+export const MARKET_NEIGHBORHOODS: readonly string[] = csvEnv("IDX_MARKET_NEIGHBORHOODS");
 
 export const OUR_OFFICE_IDS: readonly string[] = csvEnv("IDX_OFFICE_IDS");
 
