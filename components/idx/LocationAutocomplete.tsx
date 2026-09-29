@@ -98,9 +98,43 @@ export default function LocationAutocomplete({
     loadIndex().then(setIndex);
   }, [index]);
 
+  /*
+   * Load on mount rather than on first focus. The index is the served cities
+   * and neighborhoods only - about 1.4KB - and clicking the field is supposed
+   * to open a populated menu, which it cannot do while the fetch is still in
+   * flight. Deferred to idle so it never competes with the first paint.
+   */
+  useEffect(() => {
+    const idle = window.requestIdleCallback?.bind(window) ?? ((fn: () => void) => window.setTimeout(fn, 200));
+    const handle = idle(() => loadIndex().then(setIndex));
+    return () => {
+      if (window.cancelIdleCallback && typeof handle === "number") window.cancelIdleCallback(handle);
+    };
+  }, []);
+
   const suggestions = useMemo<Suggestion[]>(() => {
     const term = debounced.trim().toLowerCase();
-    if (term.length < 2 || !index) return [];
+    if (!index) return [];
+    /*
+     * No query yet (the field was just clicked): offer the whole served list
+     * rather than nothing. It is short by design, so this doubles as "here is
+     * where we work" for someone who does not know what to type. The menu
+     * scrolls if it has to.
+     */
+    if (!term) {
+      return [
+        ...index.cities.map<Suggestion>((c) => ({
+          kind: "city",
+          label: c.state ? `${c.name}, ${c.state}` : c.name,
+          cityId: c.id,
+        })),
+        ...index.neighborhoods.map<Suggestion>((n) => ({
+          kind: "neighborhood",
+          label: n.label,
+          value: n.value,
+        })),
+      ];
+    }
     /*
      * Match on word starts, not anywhere in the string. A plain `includes`
      * answered "enci" with Valencia (val-ENCI-a) and Via Valencia, which is

@@ -2623,6 +2623,10 @@ a:hover > .hn-link::after,
 
 /* narrow: the buttons drop to their own full-width row under the field */
 @media (max-width: 860px) {
+  /* Denser rows: the menu drops downward on a phone, where the space under
+     the bar is fixed, so the win has to come from the rows themselves. */
+  .hs .loc__option { padding: 10px 16px; font-size: 14px; }
+  .hs .loc__group { padding: 9px 16px 5px; }
   .hs__bar { flex-wrap: wrap; padding: 6px 6px 6px 18px; row-gap: 6px; }
   .hs .loc { flex: 1 1 200px; }
   .hs__actions { flex: 1 0 100%; }

@@ -64,23 +64,41 @@ export default function HeroSearch({
       while (clip && getComputedStyle(clip).overflow === "visible") clip = clip.parentElement;
       const box = clip?.getBoundingClientRect();
       const barBox = bar.getBoundingClientRect();
-      const floor = Math.min(box?.bottom ?? Infinity, window.innerHeight);
+      /*
+       * visualViewport, not innerHeight: on a phone the on-screen keyboard
+       * shrinks the visible area without changing innerHeight, and a menu
+       * sized to innerHeight would open straight under the keyboard.
+       */
+      const viewportBottom = window.visualViewport?.height ?? window.innerHeight;
+      const floor = Math.min(box?.bottom ?? Infinity, viewportBottom);
       const ceiling = Math.max(box?.top ?? 0, 0);
       const below = Math.round(floor - barBox.bottom - 22);
       const above = Math.round(barBox.top - ceiling - 22);
-      /* This hero is bottom-aligned, so there is usually far more room above
-         the bar than under it. Flip upward when that is true rather than
-         squeezing nine suggestions into a 170px slot. */
-      const up = above > below && below < 260;
+      /*
+       * Desktop only: this hero is bottom-aligned, so there is far more room
+       * above the bar than under it, and squeezing the list into a ~170px
+       * slot reads worse than flipping. On phones a menu that opens upward
+       * covers the field you are typing into, so it always drops downward
+       * there and takes whatever room is left.
+       */
+      const isPhone = window.matchMedia("(max-width: 860px)").matches;
+      const up = !isPhone && above > below && below < 260;
       el.dataset.menuUp = up ? "1" : "0";
-      el.style.setProperty("--hs-menu-max", `${Math.max(150, Math.min(340, up ? above : below))}px`);
+      /* No lower bound: a floor taller than the space available is exactly
+         how the menu got clipped by the hero in the first place. */
+      el.style.setProperty("--hs-menu-max", `${Math.max(0, Math.min(340, up ? above : below))}px`);
     };
     update();
     window.addEventListener("resize", update);
     window.addEventListener("scroll", update, { passive: true });
+    // the keyboard opening and closing shows up here, not on window resize
+    window.visualViewport?.addEventListener("resize", update);
+    window.visualViewport?.addEventListener("scroll", update);
     return () => {
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update);
+      window.visualViewport?.removeEventListener("resize", update);
+      window.visualViewport?.removeEventListener("scroll", update);
     };
   }, []);
 
