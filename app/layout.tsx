@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import Analytics from "@/components/Analytics";
 import SiteJsonLd from "@/components/seo/SiteJsonLd";
+import IntroSplash, { INTRO_SCRIPT } from "@/components/IntroSplash";
 import { site } from "@/content/site";
 import "./globals.css";
+import "./intro.css";
 
 const siteUrl = site.meta.siteUrl ?? "https://example.com";
 const ogImage = site.meta.ogImage ?? site.hero.image;
@@ -70,8 +72,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" style={themeVars}>
+    // suppressHydrationWarning: the intro script sets data-intro on <html> before React hydrates
+    <html lang="en" style={themeVars} suppressHydrationWarning>
       <head>
+        {/* Runs before first paint so the first-visit intro never flashes for returning visitors */}
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
         {/* Montserrat is the only typeface The Oppenheim Group brand guide allows */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -81,6 +86,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <IntroSplash content={site} />
         <SiteJsonLd content={site} />
         <Analytics />
         {children}

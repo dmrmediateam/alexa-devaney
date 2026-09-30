@@ -1,0 +1,135 @@
+/* First-visit intro (components/IntroSplash.tsx). Hidden unless the head
+   script has set html[data-intro]; colors come from the theme variables. */
+
+.intro { display: none; }
+
+html[data-intro="play"],
+html[data-intro="leaving"] { overflow: hidden; }
+
+html[data-intro="play"] .intro,
+html[data-intro="leaving"] .intro {
+  display: grid;
+  place-items: center;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  overflow: hidden;
+  background: #2a0409;
+  cursor: default;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+html[data-intro="leaving"] .intro { opacity: 0; pointer-events: none; }
+
+/* Hold the homepage load-in until the intro starts leaving, so the nav and
+   hero still animate in front of the visitor instead of behind the overlay. */
+html[data-intro="play"] .load-anim,
+html[data-intro="play"] .load-anim * { animation-play-state: paused !important; }
+
+/* The glowing orb: brand red at the crown, warming to a pale rose below */
+.intro__orb {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  /* capped by the short side so phones still see a circle, not a band */
+  width: min(92vmax, 150vmin);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  translate: -50% -50%;
+  background: linear-gradient(
+    180deg,
+    #4a0610 0%,
+    #8e1427 20%,
+    var(--taupe) 38%,
+    #c4505e 54%,
+    #d69a9c 72%,
+    #e8d9d4 100%
+  );
+  background-size: 100% 130%;
+  filter: blur(48px);
+  animation: introOrb 3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+html[data-intro="leaving"] .intro__orb { scale: 1.12; transition: scale 0.6s ease-in; }
+
+@keyframes introOrb {
+  from { opacity: 0; scale: 0.86; background-position: 0 0; }
+  35% { opacity: 1; }
+  to { opacity: 1; scale: 1; background-position: 0 100%; }
+}
+
+/* Fine horizontal scan lines, as in the reference */
+.intro__lines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px 4px);
+  pointer-events: none;
+}
+
+.intro__content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 0 24px;
+  text-align: center;
+}
+html[data-intro="leaving"] .intro__content {
+  translate: 0 -10px;
+  transition: translate 0.6s ease-in;
+}
+
+/* Brand assets are red-on-light; render them white on the orb */
+.intro__emblem,
+.intro__wordmark {
+  filter: brightness(0) invert(1) drop-shadow(0 1px 12px rgba(42, 4, 9, 0.35));
+}
+
+.intro__emblem {
+  width: 72px;
+  height: auto;
+  animation: introRise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+}
+
+/* The name with a light sweeping across it, like "Calibrating your mind…" */
+.intro__name {
+  margin: 0;
+  font-family: var(--display-font);
+  font-weight: 300;
+  font-size: clamp(22px, 4.2vw, 40px);
+  letter-spacing: 0.32em;
+  /* optical centring: letter-spacing adds trailing space after the last letter */
+  padding-left: 0.32em;
+  text-transform: uppercase;
+  color: transparent;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.55) 38%,
+    #fff 50%,
+    rgba(255, 255, 255, 0.55) 62%,
+    rgba(255, 255, 255, 0.55) 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 1px 14px rgba(42, 4, 9, 0.35));
+  animation:
+    introRise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both,
+    introSweep 1.8s ease-in-out 0.6s both;
+}
+
+.intro__wordmark {
+  width: clamp(170px, 22vw, 240px);
+  height: auto;
+  animation: introRise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.8s both;
+}
+
+@keyframes introRise {
+  from { opacity: 0; translate: 0 12px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes introSweep {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
