@@ -170,12 +170,39 @@ export default function SiteChrome({
               </ul>
             </div>
             <div className="footer__col footer__col--contact">
-              <h5>Address</h5>
+              {/* SDMLS requires the brokerage name, a phone number and the
+                  physical address to be prominently displayed on the homepage.
+                  The phone previously appeared only in JSON-LD and in the
+                  closed side menu, neither of which is visible. The footer
+                  renders on every page, so keeping all three together here
+                  satisfies the requirement sitewide. Do not drop any of them. */}
+              <h5>Contact</h5>
+              <p className="footer__brokerage-line">{content.footer.brokerage}</p>
               <p>
                 {content.footer.addressLines.map((line, i) => (
                   <span key={i}>{line}{i < content.footer.addressLines.length - 1 && <br />}</span>
                 ))}
               </p>
+              {content.contact?.phone && (
+                <p>
+                  <a href={`tel:${content.contact.phone.replace(/[^+\d]/g, "")}`}>{content.contact.phone}</a>
+                </p>
+              )}
+              {content.contact?.email && (
+                <p>
+                  <a href={`mailto:${content.contact.email}`}>{content.contact.email}</a>
+                </p>
+              )}
+              {/* SDMLS wants the DRE number alongside the contact details, not
+                  only in the compliance strip at the very bottom. */}
+              {content.legal?.licenseNumber && (
+                <p className="footer__dre">
+                  DRE# {content.legal.licenseNumber}
+                  {content.landing?.brokerageLicense
+                    ? ` · ${content.footer.brokerage} DRE# ${content.landing.brokerageLicense}`
+                    : ""}
+                </p>
+              )}
               <h5 className="footer__join">{content.footer.newsletter.heading}</h5>
               <p className="footer__tagline">{content.footer.newsletter.tagline}</p>
 <NewsletterForm consent={content.footer.newsletter.consent} />
@@ -188,10 +215,15 @@ export default function SiteChrome({
               <a href="/legal/accessibility">Accessibility</a>
               <a href="/legal/fair-housing">Fair Housing</a>
             </nav>
-            <details className="footer__legal-panel">
-              <summary>MLS Disclaimer &amp; IDX Information</summary>
+            {/* SDMLS requires this text verbatim in the global footer and
+                VISIBLE on every page carrying IDX data. It used to sit inside
+                a collapsed <details>, which put it in the DOM but not on the
+                page: that is what an MLS display audit fails. Do not move it
+                back behind a toggle, and do not truncate it. */}
+            <section className="footer__mls" aria-label="MLS disclaimer and IDX information">
+              <h6 className="footer__mls-heading">MLS Disclaimer &amp; IDX Information</h6>
               <p>{mlsDisclaimerFor(content)}</p>
-            </details>
+            </section>
             <details className="footer__legal-panel">
               <summary>Fair Housing &amp; Equal Opportunity</summary>
               <div className="footer__eho">

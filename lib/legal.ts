@@ -33,8 +33,21 @@ function brand(content: SiteContent): string {
   return content.footer.brokerage || content.brand.name;
 }
 
+/**
+ * Token substituted with the current year wherever it appears in a stored
+ * disclaimer. SDMLS (and most MLSs) require the compilation copyright year to
+ * track the current year, and a literal year typed into the config is a
+ * compliance breach every January. Write `[CURRENT_YEAR]` in the config text
+ * and it is resolved here, at render, instead.
+ */
+export const CURRENT_YEAR_TOKEN = "[CURRENT_YEAR]";
+
+export function withCurrentYear(text: string): string {
+  return text.split(CURRENT_YEAR_TOKEN).join(String(new Date().getFullYear()));
+}
+
 export function mlsDisclaimerFor(content: SiteContent): string {
-  return content.legal?.mlsDisclaimer ?? GENERIC_MLS_DISCLAIMER;
+  return withCurrentYear(content.legal?.mlsDisclaimer ?? GENERIC_MLS_DISCLAIMER);
 }
 
 export function legalDocs(content: SiteContent): LegalDoc[] {

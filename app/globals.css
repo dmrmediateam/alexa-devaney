@@ -1785,6 +1785,38 @@ footer { background: var(--cream); }
 .footer__eho img { width: 44px; height: 44px; flex: 0 0 auto; opacity: 0.75; }
 .footer__eho p { padding-bottom: 0; }
 
+/* SDMLS disclaimer: always visible, never collapsed. It is the one footer
+   disclosure the MLS audits for, so it reads at the same weight as the
+   accordion panels but without a toggle in front of it. */
+.footer__mls {
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+  padding: 14px 0 16px;
+}
+.footer__mls-heading {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 8px;
+}
+.footer__mls p {
+  font-size: 11.5px;
+  line-height: 1.75;
+  color: #999;
+  max-width: 980px;
+}
+
+/* Brokerage name above the address: SDMLS wants the firm name, phone and
+   physical address visible together. */
+.footer__brokerage-line {
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+
+.footer__dre { font-size: 12px; color: #8a8a8a; margin-top: 10px; }
+
 
 /* ==========================================================================
    Buy page: property search experience
@@ -5256,4 +5288,294 @@ footer .footer > * { position: relative; z-index: 1; }
 @media (prefers-reduced-motion: reduce) {
   .heart, .heart svg path { transition: none; }
   .heart:hover { transform: none; }
+}
+
+/* ==========================================================================
+   Experiences (event access page)
+
+   The category cards carry no photography yet, so the no-photo state is the
+   designed one rather than a fallback: a dark typographic tile that reads as
+   deliberate next to the site's photo-led sections. `.xp-card--photo` adds the
+   image band above the same body when licensed event photography lands.
+   ========================================================================== */
+
+.xp-intro .featured-band__kicker { display: block; margin-bottom: 14px; }
+.xp-intro .lp-h2 { margin-bottom: 24px; }
+
+.xp-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.xp-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--navy);
+  color: var(--white);
+  overflow: hidden;
+}
+
+.xp-card__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.xp-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.001);
+  transition: transform 0.75s ease-out;
+}
+
+.xp-card--photo:hover .xp-card__media img { transform: scale(1.05); }
+
+.xp-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 34px 30px 36px;
+  flex: 1;
+}
+
+.xp-card__pre {
+  font-family: var(--body-font);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+
+.xp-card__title {
+  font-family: var(--display-font);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  line-height: 1.25;
+  color: var(--white);
+}
+
+.xp-card__desc {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* What the experience actually includes. Sentence case, not the uppercase
+   treatment used for category labels: these are the terms a client will hold
+   the partner to, so they have to read as prose. */
+.xp-card__highlights {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 18px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.xp-card__highlights li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.xp-card__highlights li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 7px;
+  height: 1px;
+  background: var(--taupe);
+}
+
+/* Pinned to the bottom of the card so the CTA sits on one line across a row
+   whatever length the inclusions run to. */
+.xp-card__cta {
+  margin-top: auto;
+  padding-top: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  align-self: flex-start;
+  font-family: var(--body-font);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--white);
+  transition: color 0.25s ease;
+}
+
+.xp-card__cta span {
+  transition: transform 0.3s ease;
+}
+
+.xp-card__cta:hover { color: var(--taupe); }
+.xp-card__cta:hover span { transform: translateX(5px); }
+.xp-card__cta:focus-visible { outline: 2px solid var(--taupe); outline-offset: 4px; }
+
+/* Clears the sticky header, which measures 94px at desktop. */
+#enquire { scroll-margin-top: 110px; }
+
+/* ---- Access categories ---- */
+
+.xp-worlds__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0 34px;
+}
+
+.xp-worlds__item {
+  font-family: var(--display-font);
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  line-height: 1.3;
+  color: var(--navy);
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* ---- How it works ---- */
+
+.xp-steps__row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 34px;
+}
+
+.xp-steps__item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(0, 0, 0, 0.14);
+}
+
+.xp-steps__num {
+  font-family: var(--display-font);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2.2px;
+  color: var(--taupe);
+}
+
+.xp-steps__title {
+  font-family: var(--display-font);
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--navy);
+}
+
+.xp-steps__item p {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: #5b5b5b;
+}
+
+/* ---- Enquiry form ---- */
+
+.xp-form__lede {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #5b5b5b;
+  margin-bottom: 22px;
+  max-width: 40ch;
+}
+
+.xp-form__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.xp-form__fields input,
+.xp-form__fields select,
+.xp-form__fields textarea {
+  width: 100%;
+  min-width: 0;
+  font-family: var(--body-font);
+  font-size: 14px;
+  color: var(--navy);
+  background: var(--white);
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 0;
+  padding: 14px 15px;
+  transition: border-color 0.25s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.xp-form__fields textarea { grid-column: 1 / -1; resize: vertical; }
+.xp-form__wide { grid-column: 1 / -1; }
+
+/* The native arrow is removed with `appearance: none` above, so the control
+   needs one drawn back on or a select is indistinguishable from a text box. */
+.xp-form__fields select {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23004F71' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.xp-form__fields select:invalid { color: #8a8a8a; }
+
+.xp-form__fields input:focus,
+.xp-form__fields select:focus,
+.xp-form__fields textarea:focus { border-color: var(--navy); outline: none; }
+
+.xp-form .newsletter__consent { margin-bottom: 22px; color: #777; }
+.xp-form button { border: 0; }
+
+.xp-form__note {
+  margin-top: 20px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #8a8a8a;
+}
+
+.xp-form--done h3 {
+  font-family: var(--display-font);
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--navy);
+  margin-bottom: 12px;
+}
+
+.xp-form--done p { font-size: 15px; line-height: 1.7; color: #5b5b5b; }
+
+@media (max-width: 992px) {
+  .xp-steps__row { grid-template-columns: repeat(2, 1fr); gap: 28px; }
+  .xp-worlds__grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .xp-grid { grid-template-columns: 1fr; }
+  .xp-worlds__grid { grid-template-columns: 1fr; }
+  .xp-steps__row { grid-template-columns: 1fr; }
+  .xp-form__fields { grid-template-columns: 1fr; }
+  .xp-card__body { padding: 28px 24px 30px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-card__media img { transition: none; }
+  .xp-card--photo:hover .xp-card__media img { transform: none; }
+  .xp-card__cta span { transition: none; }
+  .xp-card__cta:hover span { transform: none; }
 }

@@ -239,6 +239,41 @@ drops the `site.stats` proof points under the intro, and
 `recentClosings.showPrices` puts sale prices on the closing cards (right for a
 portfolio, wrong for the seller page, where prices belong in the conversation).
 
+## Experiences page (/experiences)
+
+Alexa's second business: an exclusive partnership with a luxury events group
+that curates access to Formula 1, the Kentucky Derby, private concerts,
+fashion week and the like. The page is lead gen for both sides of her
+practice, so its whole design goal is that the visitor cannot get past her.
+
+- Content is `site.experiences` (`ExperiencesContent`), rendered by the page
+  with `type: "experiences"`. Categories, the how-it-works steps, the form's
+  interest and budget options and the small print are all config.
+- **Never link to the partner, and do not name them.** `partnerName` exists
+  and is deliberately unset: a named partner is a searchable partner, and a
+  visitor who books direct is the one outcome the page exists to prevent.
+  Setting it needs Alexa's and the partner's agreement, and even then it
+  carries no link.
+- Enquiries post as `formType: "experience-inquiry"`, which is registered in
+  `lib/leads/qualify.ts` (always QUALIFIED, labelled with the interest),
+  `lib/leads/notify.ts` (own label, SMS-worthy, its own summary rows) and
+  `LEAD_VALUES`. A new form field only reaches the notification email if it is
+  a string on the payload; add an explicit `push()` row for anything that
+  should sit above the generic ones.
+- Category cards need no photography. Without `image` they render as dark
+  typographic tiles (the designed state, not a fallback); adding `image` to a
+  card switches it to the photo variant with no other change.
+- `featured` (the four showcase experiences) and `categories` (the nine access
+  worlds) are **supplied by the partner**, via Alexa. Do not add an experience
+  they have not sent, and do not embellish the inclusions: those bullets are
+  the terms a client will hold them to. The partner has offered a different
+  mix if Alexa wants one, so swaps come from them, not from us.
+- `categories` renders as **names only**. The partner gave a list and no
+  descriptions, and writing a blurb per world would be inventing claims about
+  what access in each one includes.
+- Do not soften `experiences.note`: it is what keeps the four showcase
+  experiences reading as examples rather than as inventory she holds.
+
 ## DMR client dashboard (Sanity Studio + /client-portal)
 
 Built from the ClickUp SOP "Client Dashboard in Sanity Studio"; the reference
@@ -394,6 +429,28 @@ Rough budget, measured on a cold cache: homepage under 2.6MB fully scrolled
   legal routes.
 - Fill in `site.legal` per client; never remove the compliance accordion or
   listing disclosures.
+
+### SDMLS IDX display requirements (this client, approval pending)
+
+San Diego MLS audits the site before granting IDX approval. Four things are
+load-bearing and must not be "tidied up":
+
+- `site.legal.mlsDisclaimer` is the SDMLS text **verbatim**, including the
+  capitalized sentence. Approval is checked against the exact wording, so do
+  not reword, shorten or re-case it.
+- The disclaimer renders **visible** in the global footer (`.footer__mls`),
+  not inside a `<details>`. It was previously in a collapsed accordion, which
+  puts it in the DOM but not on the page, and that is what an audit fails.
+  It is also repeated in the ad landing footer.
+- `[CURRENT_YEAR]` in the disclaimer resolves at render via
+  `withCurrentYear()` in `lib/legal.ts`. SDMLS requires the compilation
+  copyright year to track the current year, so never replace the token with a
+  literal year. `app/page.tsx` and `app/[slug]/page.tsx` carry
+  `revalidate = 86400` purely so the year rolls over without a redeploy.
+- The footer contact column carries the **brokerage name, physical address,
+  phone and DRE numbers together**. SDMLS wants all of them visible on the
+  homepage; the phone used to exist only in JSON-LD and the closed side menu,
+  which does not count. Do not drop any of the four.
 
 ## Verify before handing off## Verify before handing off
 

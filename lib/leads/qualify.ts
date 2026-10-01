@@ -106,6 +106,22 @@ export function qualify(payload: Record<string, unknown>): Qualification {
   if (formType === "contact") {
     return { qualified: true, label: "General enquiry", tag: "NEW" };
   }
+  /*
+   * Event enquiries are qualified by definition: nobody fills in a form about
+   * a Grand Prix weekend idly, and the form already asks what, when and how
+   * many. The label leads with the interest so the subject line says what the
+   * request is about.
+   */
+  if (formType === "experience-inquiry") {
+    const interest = str(payload, "experienceInterest");
+    const budget = str(payload, "experienceBudget");
+    const dates = str(payload, "experienceDates");
+    return {
+      qualified: true,
+      label: [interest || "Experience enquiry", budget, dates].filter(Boolean).join(" \u00b7 "),
+      tag: "QUALIFIED",
+    };
+  }
   if (formType === "newsletter") {
     return { qualified: false, label: "Newsletter signup", tag: "NEW" };
   }

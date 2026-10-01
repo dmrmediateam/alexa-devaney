@@ -29,11 +29,12 @@ const FORM_LABELS: Record<string, string> = {
   buyer: "Buyer enquiry",
   "listing-inquiry": "Listing enquiry",
   contact: "Contact form",
+  "experience-inquiry": "Experience enquiry",
   newsletter: "Newsletter signup",
 };
 
 /** Only these shout at Carole's phone. A newsletter signup at 2am must not. */
-const SMS_WORTHY = new Set(["home-value", "buyer", "listing-inquiry", "contact"]);
+const SMS_WORTHY = new Set(["home-value", "buyer", "listing-inquiry", "contact", "experience-inquiry"]);
 
 function str(payload: LeadPayload, ...keys: string[]): string {
   for (const key of keys) {
@@ -91,6 +92,11 @@ function summaryRows(payload: LeadPayload): Row[] {
   push("Thinks it's worth", str(payload, "estimatedValue"));
   push("Working with an agent", str(payload, "agentStatus"));
   push("Timeline", str(payload, "timeline"));
+  // Event enquiries: the brief the partner's team needs to quote anything.
+  push("Interested in", str(payload, "experienceInterest"));
+  push("Dates", str(payload, "experienceDates"));
+  push("Guests", str(payload, "partySize"));
+  push("Budget", str(payload, "experienceBudget"));
   push("Landing page", str(payload, "landingPage", "page"));
   push("Campaign", str(payload, "utmCampaign"));
   push("Google click id", str(payload, "gclid"));

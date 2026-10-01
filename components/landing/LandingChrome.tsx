@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { site } from "@/content/site";
+import { mlsDisclaimerFor } from "@/lib/legal";
 
 /**
  * Agent name over the brokerage wordmark (brokerage slightly wider), the same
@@ -111,6 +112,11 @@ export function LandingFooter({ advertisement = false }: { advertisement?: boole
         </div>
 
         <div className="lp-footer__legal">
+          {/* SDMLS-required text, verbatim. These ad pages carry no MLS data,
+              but the requirement is written against the global footer, so an
+              auditor landing here finds it too. Source of truth is
+              site.legal.mlsDisclaimer; the year resolves at render. */}
+          <p>{mlsDisclaimerFor(site)}</p>
           <p>
             The information contained on this website is derived from sources deemed
             reliable but is not guaranteed. All property information should be

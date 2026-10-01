@@ -42,6 +42,10 @@ export const LEAD_VALUES: Record<string, number> = {
   "listing-inquiry": 60,
   "listing-registration": 10,
   contact: 40,
+  // An event enquiry is a qualified, high-ticket conversation and it is the
+  // only lead on the site that is not real estate, so it is worth its own
+  // value rather than being folded into `contact`.
+  "experience-inquiry": 90,
   newsletter: 5,
 };
 

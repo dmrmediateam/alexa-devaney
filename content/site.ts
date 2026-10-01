@@ -82,11 +82,79 @@ export interface TeamMember {
   href?: string;
 }
 
+/**
+ * One of the partner's showcase experiences, supplied by them for this page.
+ *
+ * `image` is optional on purpose. Licensed event photography is a separate
+ * purchase, and a card with no photo renders as a dark typographic tile
+ * rather than a broken frame, so the page ships complete and gains
+ * photography later as a one-line edit per card.
+ */
+export interface ExperienceCard {
+  /** Small letterspaced line above the title, e.g. "Television" */
+  preTitle?: string;
+  /** The experience as the partner names it, e.g. "Wimbledon Debentures" */
+  title: string;
+  /** One or two sentences setting the scene */
+  description: string;
+  /** What is actually included, in the partner's own terms */
+  highlights?: string[];
+  /** Wide photo for the card; omit for the typographic tile */
+  image?: string;
+}
+
+/**
+ * The experiences page: a lead-gen surface for Alexa's event-access
+ * partnership, rendered by a page with type: "experiences".
+ *
+ * The page exists to put her between the visitor and the partner, so it
+ * carries its own enquiry form rather than a link away, and it never links
+ * out to the partner.
+ */
+export interface ExperiencesContent {
+  /**
+   * The partner's name. DELIBERATELY UNSET. Naming them lets a visitor search
+   * the partner and book direct, which is the one outcome this page exists to
+   * prevent. Set it only when Alexa and the partner both agree the name
+   * should appear, and never add a link to their site alongside it.
+   */
+  partnerName?: string;
+  kicker: string;
+  heading: string;
+  intro: string[];
+  /**
+   * The showcase experiences. These are supplied BY THE PARTNER and must not
+   * be invented, embellished or swapped for something that merely sounds
+   * similar. The partner has offered alternatives if Alexa wants a different
+   * mix, so a change here comes from them, not from us.
+   */
+  featured: ExperienceCard[];
+  /**
+   * The partner's access categories, in their own words. Rendered as names
+   * only: the partner gave a list, not descriptions, and writing blurbs for
+   * them would be inventing claims about what access in each world includes.
+   */
+  categories: string[];
+  /** How a request actually runs, which is what puts Alexa in the middle */
+  steps: { title: string; text: string }[];
+  form: {
+    kicker?: string;
+    heading: string;
+    text?: string;
+    /** "What interests you" options; keep these in step with `categories` */
+    interests: string[];
+    /** Budget bands. Omit the field entirely to drop it from the form. */
+    budgets?: string[];
+  };
+  /** Small print under the form (availability, pricing, no-guarantee wording) */
+  note?: string;
+}
+
 export interface SubPage {
   /** URL segment, e.g. "buy" */
   slug: string;
-  /** "standard" = editorial; "search" = IDX search; "connect" = contact; "listings" = listing grid; "team" = roster */
-  type?: "standard" | "search" | "connect" | "listings" | "team";
+  /** "standard" = editorial; "search" = IDX search; "connect" = contact; "listings" = listing grid; "team" = roster; "experiences" = event access + enquiry */
+  type?: "standard" | "search" | "connect" | "listings" | "team" | "experiences";
   title: string;
   preTitle?: string;
   heroImage: string;
@@ -274,6 +342,8 @@ export interface SiteContent {
     tagline?: string;
     members: TeamMember[];
   };
+  /** Event-access page content, rendered by a page with type: "experiences" */
+  experiences?: ExperiencesContent;
   /**
    * Regulatory/compliance values. Boilerplate legal pages (privacy, terms,
    * accessibility, fair housing) and the footer compliance accordion render
@@ -481,6 +551,7 @@ export const site: SiteContent = {
       { label: "Buy", href: "/buy" },
       { label: "Sell", href: "/sell" },
       { label: "Portfolio", href: "/portfolio" },
+      { label: "Experiences", href: "/experiences" },
     ],
     right: [
       { label: "Search Homes", href: "/listings" },
@@ -494,14 +565,154 @@ export const site: SiteContent = {
       { label: "Portfolio", href: "/portfolio" },
       { label: "Search Homes", href: "/listings" },
       { label: "About Alexa", href: "/about" },
+      { label: "Experiences", href: "/experiences" },
       { label: "Let's Connect", href: "/connect" },
     ],
   },
   contact: { phone: "(760) 705-0968", email: "alexa@ogroup.com" },
+  /*
+   * EXPERIENCES.
+   *
+   * The four featured experiences and the nine access categories below were
+   * supplied by the partner (Ryan, via Alexa) specifically for this page, so
+   * they are approved content and are quoted close to his wording. Do not
+   * add an experience he has not sent, and do not embellish the inclusions:
+   * these are the terms a client will hold them to. He has offered a
+   * different mix if Alexa wants one, so swaps come from him.
+   *
+   * The partner is still deliberately not named anywhere on the site (see
+   * `partnerName`). `note` carries the availability and pricing caveat and
+   * should not be softened.
+   */
+  experiences: {
+    kicker: "By Private Introduction",
+    heading: "Access Beyond the Front Row",
+    intro: [
+      "Alongside my real estate practice I hold an exclusive partnership with a luxury events group that curates private access to the events most people only watch on television. Courtside seats, the Masters, Wimbledon, a behind the scenes morning at Studio 8H.",
+      "This is not a ticket service. Every request is curated from scratch: the seats, the table, the access, the travel around it. Because the partnership runs through me, requests come to me first and I coordinate from there, so you have one person accountable for the whole of it.",
+    ],
+    featured: [
+      {
+        preTitle: "Television",
+        title: "The SNL Ultimate Experience",
+        description:
+          "A private behind the scenes tour of the famous Studio 8H on the Thursday, Friday or Saturday morning before the show, hosted by a long standing fixture of Saturday Night Live.",
+        highlights: [
+          "Walked through the studio by someone who has been part of the show for years",
+          "Watch the cast rehearsing",
+          "Photo opportunity at home base, where the host delivers the monologue",
+          "Signed copy of the New York Times bestseller The Art of the SNL Portrait",
+          "Tickets to the on-air show",
+          "Admission to the official cast after party",
+        ],
+      },
+      {
+        preTitle: "Golf",
+        title: "The Masters",
+        description:
+          "Grounds access at Augusta National with the Map & Flag badge, which pairs walking the course with a full day of hospitality.",
+        highlights: [
+          "Masters Tournament admission with the Map & Flag badge",
+          "Two full levels of hospitality space",
+          "Unlimited premium food and beverages throughout the day",
+          "Indoor and outdoor seating",
+          "Live Masters coverage throughout the venue",
+          "Entertainment within Map & Flag",
+          "Dedicated merchandise shop, typically with far shorter lines than the main areas",
+          "Outdoor garden and lounge areas",
+        ],
+      },
+      {
+        preTitle: "Tennis",
+        title: "Wimbledon Debentures",
+        description:
+          "The tradition, prestige and unmistakable elegance of Wimbledon, with premium access to Centre Court and No. 1 Court.",
+        highlights: [
+          "Exceptional seating on Centre Court and No. 1 Court",
+          "Elevated hospitality and refined dining",
+          "The atmosphere of the All England Club",
+        ],
+      },
+      {
+        preTitle: "Basketball",
+        title: "NBA \u201cOn the Wood\u201d Seats",
+        description:
+          "Watch your favorite NBA team up close and personal, from the floor. See and be seen.",
+      },
+    ],
+    categories: [
+      "Sport",
+      "Concerts",
+      "Music Festivals",
+      "Invite-Only Parties, Galas & Events",
+      "Talent-Led Bespoke Experiences",
+      "Food & Wine",
+      "Art",
+      "TV & Film",
+      "Fashion",
+    ],
+    steps: [
+      {
+        title: "Tell Me What You Have in Mind",
+        text: "A specific event, a date, or just an occasion you want to mark. Rough ideas are enough to start, and there is no cost to ask.",
+      },
+      {
+        title: "I Bring It to My Partner",
+        text: "I take the request to my partner's team, who confirm what is genuinely available for your dates and put together options and pricing.",
+      },
+      {
+        title: "You Choose, They Orchestrate",
+        text: "You see the options and the costs before anything is committed. Once you approve, their team handles the arrangements end to end.",
+      },
+      {
+        title: "I Stay With It",
+        text: "I remain your point of contact from the first conversation through the event itself, so there is never a question about who to call.",
+      },
+    ],
+    form: {
+      kicker: "Start the Conversation",
+      heading: "Request an Experience",
+      text: "Tell me what you are interested in and I will come back with what is possible. Every enquiry comes directly to me.",
+      interests: [
+        "Sport",
+        "Concerts",
+        "Music Festivals",
+        "Invite-Only Parties, Galas & Events",
+        "Talent-Led Bespoke Experiences",
+        "Food & Wine",
+        "Art",
+        "TV & Film",
+        "Fashion",
+        "Not sure yet",
+      ],
+      budgets: [
+        "Under $10,000",
+        "$10,000 to $25,000",
+        "$25,000 to $50,000",
+        "$50,000 to $100,000",
+        "$100,000+",
+        "Prefer to discuss",
+      ],
+    },
+    note: "Experiences are curated per request and priced individually. The experiences shown are examples of what has been arranged; availability is confirmed at the time of enquiry and nothing is committed until you approve the arrangements and the cost.",
+  },
+
   legal: {
     licenseNumber: "02031174",
     licenseState: "California DRE",
     mlsName: "San Diego MLS",
+    /*
+     * SDMLS-REQUIRED TEXT. Verbatim from the San Diego MLS IDX Display
+     * Requirements Checklist (Ashley Munoz, MLS approvals). Do not reword,
+     * shorten or re-case any of it: the capitalized sentence is required as
+     * capitalized, and approval is checked against this exact wording.
+     *
+     * `[CURRENT_YEAR]` is resolved at render by lib/legal.ts. SDMLS requires
+     * the compilation copyright year to track the current year, so it must
+     * never be replaced with a literal year.
+     */
+    mlsDisclaimer:
+      "This information is deemed reliable but not guaranteed. You should rely on this information only to decide whether or not to further investigate a particular property. BEFORE MAKING ANY OTHER DECISION, YOU SHOULD PERSONALLY INVESTIGATE THE FACTS (e.g., square footage and lot size) with the assistance of an appropriate professional. You may use this information only to identify properties you may be interested in investigating further. All uses except for personal, noncommercial use in accordance with the foregoing purpose are prohibited. Redistribution or copying of this information, any photographs, or video tours is strictly prohibited. This information is derived from the Internet Data Exchange (IDX) service provided by San Diego MLS. Displayed property listings may be held by a brokerage firm other than the broker and/or agent responsible for this display. The information, photographs, video tours, and the compilation from which they are derived are protected by copyright. Compilation \u00a9 [CURRENT_YEAR] San Diego MLS.",
     governingLaw: "the State of California",
     stateCivilRightsAgency: "California Civil Rights Department",
     lastUpdated: "September 2026",
@@ -819,6 +1030,23 @@ export const site: SiteContent = {
       valuationImage: "/photos/fallsbrae-estate.webp",
     },
     {
+      slug: "experiences",
+      type: "experiences",
+      title: "Experiences",
+      metaTitle: "Private Access to World Class Events",
+      metaDescription:
+        "An exclusive partnership giving Alexa Devaney's clients curated access to Formula 1, the Kentucky Derby, private concerts, fashion week and more. Enquire directly.",
+      preTitle: "An Exclusive Partnership",
+      /*
+       * PLACEHOLDER HERO. This is a San Diego coastal frame standing in until
+       * licensed event photography is bought; it is atmospheric rather than
+       * wrong, but it is not an event. Replace with a wide event image
+       * (Envato workflow in CLAUDE.md) before launch.
+       */
+      heroImage: "/photos/coast-sunset.webp",
+      heroFocus: "center 60%",
+    },
+    {
       slug: "connect",
       type: "connect",
       title: "Let's Connect",
@@ -1075,6 +1303,7 @@ export const site: SiteContent = {
       { label: "Portfolio", href: "/portfolio" },
       { label: "Search Homes", href: "/listings" },
       { label: "About Alexa", href: "/about" },
+      { label: "Experiences", href: "/experiences" },
       { label: "Let's Connect", href: "/connect" },
     ],
     socials: [

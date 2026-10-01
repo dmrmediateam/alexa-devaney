@@ -1,6 +1,7 @@
 import Image from "next/image";
 import SiteChrome from "@/components/SiteChrome";
 import ContactForm from "@/components/leads/ContactForm";
+import ExperienceInquiryForm from "@/components/leads/ExperienceInquiryForm";
 import ListingsGrid from "@/components/ListingsGrid";
 import ListingsSearchPlaceholder from "@/components/ListingsSearchPlaceholder";
 import RecentClosings from "@/components/RecentClosings";
@@ -114,6 +115,8 @@ export default function SubPageView({
         <ListingsBody listings={listings} />
       ) : page.type === "team" ? (
         <TeamBody content={content} page={page} />
+      ) : page.type === "experiences" ? (
+        <ExperiencesBody content={content} page={page} />
       ) : (
         <>
           {page.searchPanel && (
@@ -264,6 +267,196 @@ function ConnectBody({ content }: { content: SiteContent }) {
   );
 }
 
+
+/**
+ * Event-access page: partnership intro, the categories of access, how a
+ * request runs, and the enquiry form.
+ *
+ * Nothing here links to the partner, by design. The partnership is the
+ * agent's to broker and the page's job is to end at her form, so the only
+ * outbound actions are the form, her phone and her email.
+ */
+function ExperiencesBody({ content, page }: { content: SiteContent; page: SubPage }) {
+  const xp = content.experiences;
+  if (!xp) {
+    return (
+      <section className="solid-section">
+        <div className="boxed-text lp-vertical-paddings" style={{ textAlign: "center" }}>
+          <div className="lp-container">
+            <h2 className="lp-h2">Coming Soon</h2>
+            <div className="boxed-text__description">
+              <p>Details of this partnership are on their way. In the meantime, reach out and I will tell you what is possible.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <>
+      {/* ============ THE PARTNERSHIP ============ */}
+      <section className="solid-section">
+        <div className="boxed-text lp-vertical-paddings">
+          <div className="lp-container">
+            <div className="xp-intro reveal">
+              <span className="featured-band__kicker">{xp.kicker}</span>
+              <h2 className="lp-h2">{xp.heading}</h2>
+              <div className="boxed-text__description">
+                {xp.intro.map((text, i) => (
+                  <p key={i}>{text}</p>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ FEATURED EXPERIENCES ============ */}
+      {xp.featured.length > 0 && (
+        <section className="solid-section">
+          <div className="featured-band lp-vertical-paddings">
+            <div className="lp-container">
+              <div className="featured-band__head reveal">
+                <span className="featured-band__kicker">A Sense of the Range</span>
+                <h2 className="lp-h2">Recent Examples</h2>
+              </div>
+              <div className="xp-grid">
+                {xp.featured.map((card, i) => (
+                  <article
+                    className={`xp-card reveal${card.image ? " xp-card--photo" : ""}`}
+                    data-delay={(i % 2) * 100 || undefined}
+                    key={card.title}
+                  >
+                    {card.image && (
+                      <div className="xp-card__media">
+                        <Image
+                          src={card.image}
+                          alt=""
+                          fill
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          quality={78}
+                        />
+                      </div>
+                    )}
+                    <div className="xp-card__body">
+                      {card.preTitle && <span className="xp-card__pre">{card.preTitle}</span>}
+                      <h3 className="xp-card__title">{card.title}</h3>
+                      <p className="xp-card__desc">{card.description}</p>
+                      {card.highlights && card.highlights.length > 0 && (
+                        <ul className="xp-card__highlights">
+                          {card.highlights.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      )}
+                      {/* Plain anchor: the browser does the scrolling, so the
+                          link works without JS. `data-experience` is what the
+                          form listens for to preselect this experience. */}
+                      <a
+                        className="xp-card__cta"
+                        href="#enquire"
+                        data-experience={card.title}
+                      >
+                        Enquire About This
+                        <span aria-hidden="true">&rarr;</span>
+                      </a>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ============ ACCESS CATEGORIES ============ */}
+      {xp.categories.length > 0 && (
+        <section className="solid-section">
+          <div className="xp-worlds lp-vertical-paddings">
+            <div className="lp-container">
+              <div className="featured-band__head reveal">
+                <span className="featured-band__kicker">The Full Picture</span>
+                <h2 className="lp-h2">Worlds You Can Enter</h2>
+              </div>
+              {/* Names only, deliberately: the partner supplied a list of
+                  categories and no descriptions, and writing blurbs would be
+                  inventing claims about what each one includes. */}
+              <ul className="xp-worlds__grid">
+                {xp.categories.map((name, i) => (
+                  <li className="xp-worlds__item reveal" data-delay={(i % 3) * 60 || undefined} key={name}>
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ============ HOW A REQUEST RUNS ============ */}
+      {xp.steps.length > 0 && (
+        <section className="solid-section">
+          <div className="xp-steps lp-vertical-paddings">
+            <div className="lp-container">
+              <div className="featured-band__head reveal">
+                <span className="featured-band__kicker">Through Me, Start to Finish</span>
+                <h2 className="lp-h2">How It Works</h2>
+              </div>
+              <ol className="xp-steps__row">
+                {xp.steps.map((step, i) => (
+                  <li className="xp-steps__item reveal" data-delay={(i % 4) * 100 || undefined} key={step.title}>
+                    <span className="xp-steps__num">{String(i + 1).padStart(2, "0")}</span>
+                    <h3 className="xp-steps__title">{step.title}</h3>
+                    <p>{step.text}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ============ ENQUIRY ============ */}
+      <section className="solid-section" id="enquire">
+        <div className="connect-grid lp-container lp-vertical-paddings">
+          <div className="connect-grid__details reveal">
+            {xp.form.kicker && <span className="featured-band__kicker">{xp.form.kicker}</span>}
+            <h2 className="lp-h2">{xp.form.heading}</h2>
+            {xp.form.text && <p className="xp-form__lede">{xp.form.text}</p>}
+            <p className="connect-grid__brokerage">{content.footer.agentName}</p>
+            {content.contact?.phone && (
+              <p>
+                <a href={`tel:${content.contact.phone.replace(/[^+\d]/g, "")}`}>{content.contact.phone}</a>
+              </p>
+            )}
+            {content.contact?.email && (
+              <p>
+                <a href={`mailto:${content.contact.email}`}>{content.contact.email}</a>
+              </p>
+            )}
+          </div>
+          <ExperienceInquiryForm
+            consent={content.footer.newsletter.consent}
+            agentName={content.footer.agentName}
+            interests={xp.form.interests}
+            featuredInterests={xp.featured.map((card) => card.title)}
+            budgets={xp.form.budgets}
+            note={xp.note}
+          />
+        </div>
+      </section>
+
+      {page.cta && (
+        <section className="solid-section">
+          <div className="boxed-text lp-vertical-paddings" style={{ textAlign: "center" }}>
+            <a href={page.cta.href} className="lp-btn lp-btn--outline">{page.cta.label}</a>
+          </div>
+        </section>
+      )}
+    </>
+  );
+}
 
 /** Exclusive listings grid page */
 function ListingsBody({ listings }: { listings: Listing[] }) {
