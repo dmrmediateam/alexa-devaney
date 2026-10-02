@@ -93,7 +93,7 @@ export default function ExperienceInquiryForm({
 
   const options = featuredInterests.length > 0 && (
     <>
-      <optgroup label="Featured experiences">
+      <optgroup label="Featured access">
         {featuredInterests.map((item) => (
           <option key={item} value={item}>
             {item}

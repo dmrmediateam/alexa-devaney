@@ -551,7 +551,7 @@ export const site: SiteContent = {
       { label: "Buy", href: "/buy" },
       { label: "Sell", href: "/sell" },
       { label: "Portfolio", href: "/portfolio" },
-      { label: "Experiences", href: "/experiences" },
+      { label: "Exclusive Access", href: "/experiences" },
     ],
     right: [
       { label: "Search Homes", href: "/listings" },
@@ -565,7 +565,7 @@ export const site: SiteContent = {
       { label: "Portfolio", href: "/portfolio" },
       { label: "Search Homes", href: "/listings" },
       { label: "About Alexa", href: "/about" },
-      { label: "Experiences", href: "/experiences" },
+      { label: "Exclusive Access", href: "/experiences" },
       { label: "Let's Connect", href: "/connect" },
     ],
   },
@@ -588,23 +588,23 @@ export const site: SiteContent = {
     kicker: "By Private Introduction",
     heading: "Access Beyond the Front Row",
     intro: [
-      "Alongside my real estate practice I hold an exclusive partnership with a luxury events group that curates private access to the events most people only watch on television. Courtside seats, the Masters, Wimbledon, a behind the scenes morning at Studio 8H.",
+      "Alongside my real estate practice I hold an exclusive partnership with a luxury events group that curates private access to the events most people only watch on television. Courtside seats, the Masters, Wimbledon, the US Open, the Met Gala, the Vanity Fair Oscars after party, the Cannes Film Festival, a behind the scenes morning at Studio 8H.",
       "This is not a ticket service. Every request is curated from scratch: the seats, the table, the access, the travel around it. Because the partnership runs through me, requests come to me first and I coordinate from there, so you have one person accountable for the whole of it.",
     ],
     featured: [
+      /*
+       * REPLACES "The SNL Ultimate Experience", pulled at the partner's
+       * request: SNL is a sensitive relationship they do not market widely,
+       * so it may be named in `intro` but must not run as a showcase card.
+       * Unlike the three cards below, this card's wording is OURS, not the
+       * partner's, so it carries no `highlights` -- nothing is promised that
+       * he has not put in writing. Awaiting his sign-off on the swap.
+       */
       {
-        preTitle: "Television",
-        title: "The SNL Ultimate Experience",
+        preTitle: "Film & Television",
+        title: "The Vanity Fair Oscars After Party",
         description:
-          "A private behind the scenes tour of the famous Studio 8H on the Thursday, Friday or Saturday morning before the show, hosted by a long standing fixture of Saturday Night Live.",
-        highlights: [
-          "Walked through the studio by someone who has been part of the show for years",
-          "Watch the cast rehearsing",
-          "Photo opportunity at home base, where the host delivers the monologue",
-          "Signed copy of the New York Times bestseller The Art of the SNL Portrait",
-          "Tickets to the on-air show",
-          "Admission to the official cast after party",
-        ],
+          "The room Hollywood goes to once the ceremony ends. An invitation that is not sold, arranged through the partnership.",
       },
       {
         preTitle: "Golf",
@@ -671,7 +671,7 @@ export const site: SiteContent = {
     ],
     form: {
       kicker: "Start the Conversation",
-      heading: "Request an Experience",
+      heading: "Request Access",
       text: "Tell me what you are interested in and I will come back with what is possible. Every enquiry comes directly to me.",
       interests: [
         "Sport",
@@ -694,7 +694,7 @@ export const site: SiteContent = {
         "Prefer to discuss",
       ],
     },
-    note: "Experiences are curated per request and priced individually. The experiences shown are examples of what has been arranged; availability is confirmed at the time of enquiry and nothing is committed until you approve the arrangements and the cost.",
+    note: "Access is curated per request and priced individually. What is shown here are examples of what has been arranged; availability is confirmed at the time of enquiry and nothing is committed until you approve the arrangements and the cost.",
   },
 
   legal: {
@@ -1032,10 +1032,10 @@ export const site: SiteContent = {
     {
       slug: "experiences",
       type: "experiences",
-      title: "Experiences",
-      metaTitle: "Private Access to World Class Events",
+      title: "Exclusive Sport & Entertainment Access",
+      metaTitle: "Exclusive Sport & Entertainment Access",
       metaDescription:
-        "An exclusive partnership giving Alexa Devaney's clients curated access to Formula 1, the Kentucky Derby, private concerts, fashion week and more. Enquire directly.",
+        "An exclusive partnership giving Alexa Devaney's clients curated access to the Masters, Wimbledon, the US Open, the Met Gala, the Vanity Fair Oscars after party, Cannes and more. Enquire directly.",
       preTitle: "An Exclusive Partnership",
       /*
        * PLACEHOLDER HERO. This is a San Diego coastal frame standing in until
@@ -1303,7 +1303,7 @@ export const site: SiteContent = {
       { label: "Portfolio", href: "/portfolio" },
       { label: "Search Homes", href: "/listings" },
       { label: "About Alexa", href: "/about" },
-      { label: "Experiences", href: "/experiences" },
+      { label: "Exclusive Access", href: "/experiences" },
       { label: "Let's Connect", href: "/connect" },
     ],
     socials: [

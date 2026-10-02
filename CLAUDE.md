@@ -239,12 +239,18 @@ drops the `site.stats` proof points under the intro, and
 `recentClosings.showPrices` puts sale prices on the closing cards (right for a
 portfolio, wrong for the seller page, where prices belong in the conversation).
 
-## Experiences page (/experiences)
+## Exclusive Access page (/experiences)
 
 Alexa's second business: an exclusive partnership with a luxury events group
-that curates access to Formula 1, the Kentucky Derby, private concerts,
-fashion week and the like. The page is lead gen for both sides of her
-practice, so its whole design goal is that the visitor cannot get past her.
+that curates access to the Masters, Wimbledon, the US Open, the Met Gala, the
+Vanity Fair Oscars after party, Cannes and the like. The page is lead gen for
+both sides of her practice, so its whole design goal is that the visitor
+cannot get past her.
+
+The route stays `/experiences` so existing links keep working, but nothing
+user-facing calls it that: the partner asked for "Exclusive Sport &
+Entertainment Access", since the point is access you cannot buy without
+knowing someone, not experiences. Nav reads "Exclusive Access".
 
 - Content is `site.experiences` (`ExperiencesContent`), rendered by the page
   with `type: "experiences"`. Categories, the how-it-works steps, the form's
@@ -271,8 +277,14 @@ practice, so its whole design goal is that the visitor cannot get past her.
 - `categories` renders as **names only**. The partner gave a list and no
   descriptions, and writing a blurb per world would be inventing claims about
   what access in each one includes.
-- Do not soften `experiences.note`: it is what keeps the four showcase
-  experiences reading as examples rather than as inventory she holds.
+- **SNL is named in `intro` only, never as a showcase card.** The partner is
+  the only group that can arrange it and the relationship is sensitive, so
+  they asked for it out of the marketed line-up. The card that took its slot
+  (the Vanity Fair Oscars after party) is ours, not theirs, which is why it
+  carries no `highlights`; it stands until they send a replacement of their
+  own.
+- Do not soften `experiences.note`: it is what keeps the showcase cards
+  reading as examples rather than as inventory she holds.
 
 ## DMR client dashboard (Sanity Studio + /client-portal)
 
