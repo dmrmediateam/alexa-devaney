@@ -5299,8 +5299,55 @@ footer .footer > * { position: relative; z-index: 1; }
    image band above the same body when licensed event photography lands.
    ========================================================================== */
 
+.xp-intro__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.52fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+
 .xp-intro .featured-band__kicker { display: block; margin-bottom: 14px; }
 .xp-intro .lp-h2 { margin-bottom: 24px; }
+
+/* The portrait beside the intro. A taupe ring set off the photo stands in
+   for a frame, so the circle reads as deliberate at any size without a
+   second asset. It enters from the right instead of from below: the triple
+   class beats the shared `.reveal.animated` translateY. */
+.xp-portrait {
+  margin: 0;
+  justify-self: center;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(136, 120, 106, 0.55), 0 0 0 11px var(--cream),
+    0 0 0 12px rgba(136, 120, 106, 0.22);
+}
+
+.xp-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 18%;
+}
+
+.xp-portrait.reveal { transform: translateX(56px); }
+.xp-portrait.reveal.animated { transform: translateX(0); }
+
+@media (max-width: 900px) {
+  .xp-intro__grid { grid-template-columns: 1fr; gap: 36px; }
+  /* Stacked, it sits above the copy, where sliding sideways would read as a
+     glitch rather than an entrance. */
+  .xp-portrait { grid-row: 1; max-width: 220px; }
+  .xp-portrait.reveal { transform: translateY(24px); }
+  .xp-portrait.reveal.animated { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-portrait.reveal,
+  .xp-portrait.reveal.animated { transform: none; }
+}
 
 .xp-grid {
   display: grid;

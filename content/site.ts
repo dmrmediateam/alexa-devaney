@@ -123,6 +123,13 @@ export interface ExperiencesContent {
   heading: string;
   intro: string[];
   /**
+   * Portrait shown beside the intro, in a circular frame. The partnership
+   * runs through Alexa personally, so her face sits next to the claim rather
+   * than further down the page. Falls back to `about.avatar`; set this only
+   * to use a different crop here. A square source is what the frame wants.
+   */
+  portrait?: string;
+  /**
    * The showcase experiences. These are supplied BY THE PARTNER and must not
    * be invented, embellished or swapped for something that merely sounds
    * similar. The partner has offered alternatives if Alexa wants a different

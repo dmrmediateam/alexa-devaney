@@ -278,6 +278,7 @@ function ConnectBody({ content }: { content: SiteContent }) {
  */
 function ExperiencesBody({ content, page }: { content: SiteContent; page: SubPage }) {
   const xp = content.experiences;
+  const portrait = xp?.portrait ?? content.about?.avatar;
   if (!xp) {
     return (
       <section className="solid-section">
@@ -298,7 +299,7 @@ function ExperiencesBody({ content, page }: { content: SiteContent; page: SubPag
       {/* ============ THE PARTNERSHIP ============ */}
       <section className="solid-section">
         <div className="boxed-text lp-vertical-paddings">
-          <div className="lp-container">
+          <div className="lp-container xp-intro__grid">
             <div className="xp-intro reveal">
               <span className="featured-band__kicker">{xp.kicker}</span>
               <h2 className="lp-h2">{xp.heading}</h2>
@@ -308,6 +309,21 @@ function ExperiencesBody({ content, page }: { content: SiteContent; page: SubPag
                 ))}
               </div>
             </div>
+            {/* The portrait slides in from the right rather than up with the
+                rest of the page: `.xp-portrait.reveal` overrides the shared
+                translateY. It is decorative beside the copy it sits next to,
+                so the alt text names her role rather than restating it. */}
+            {portrait && (
+              <figure className="xp-portrait reveal" data-delay="140">
+                <Image
+                  src={portrait}
+                  alt={`${content.footer.agentName}, Senior Realtor Associate`}
+                  width={800}
+                  height={800}
+                  sizes="(max-width: 900px) 220px, 400px"
+                />
+              </figure>
+            )}
           </div>
         </div>
       </section>
