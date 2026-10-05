@@ -595,7 +595,7 @@ export const site: SiteContent = {
     kicker: "By Private Introduction",
     heading: "Access Beyond the Front Row",
     intro: [
-      "Alongside my real estate practice I hold an exclusive partnership with a luxury events group that curates private access to the events most people only watch on television. Courtside seats, the Masters, Wimbledon, the US Open, the Met Gala, the Vanity Fair Oscars after party, the Cannes Film Festival, a behind the scenes morning at Studio 8H.",
+      "Alongside my real estate practice I hold an exclusive partnership with a luxury events group that curates private access to the events most people only watch on television. NBA Courtside seats, The Masters, Wimbledon, US Open tennis, Met Gala, Vanity Fair Oscars after party, Cannes Film Festival, a behind the scenes morning at Studio 8H.",
       "This is not a ticket service. Every request is curated from scratch: the seats, the table, the access, the travel around it. Because the partnership runs through me, requests come to me first and I coordinate from there, so you have one person accountable for the whole of it.",
     ],
     featured: [
