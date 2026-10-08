@@ -5783,6 +5783,9 @@ footer .footer > * { position: relative; z-index: 1; }
 
 .ag-map {
   position: relative;
+  /* MapLibre's scroll-hint overlay is z-index 99999; without its own stacking
+     context it tints the fixed navbar while the page scrolls over the map */
+  isolation: isolate;
   height: var(--ag-h);
   border-radius: 3px;
   overflow: hidden;

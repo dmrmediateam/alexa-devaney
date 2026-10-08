@@ -5,8 +5,6 @@ import type { AreaGuide } from "./types";
 
    Verify before launch:
    - SHELTER: 540 S Coast Hwy 101 comes from a single directory listing.
-   - Encinitas House of Art: no address found anywhere, so it has no pin
-     until Alexa supplies one.
    - Surf breaks (Swami's, Cardiff Reef, Seaside Reef) have no street
      address; their pins sit on the break itself.
    -------------------------------------------------------------------------- */
@@ -105,7 +103,7 @@ export const encinitasGuide: AreaGuide = {
     { id: "la-paloma", name: "La Paloma Theatre", categories: ["arts"], neighborhood: "old-encinitas", address: "471 South Coast Highway 101", note: "Historic 1928 theater and one of Downtown Encinitas' most recognizable cultural landmarks.", coords: [-117.2937, 33.0463] },
     { id: "pacific-view", name: "Pacific View Arts Center", categories: ["arts"], neighborhood: "old-encinitas", address: "380 West F Street", note: "Historic bluff-top campus repurposed for arts and cultural programming.", coords: [-117.2956, 33.0431] },
     { id: "ica-north", name: "ICA North", categories: ["arts"], neighborhood: "new-encinitas", address: "1550 South El Camino Real", note: "The North County campus of the Institute of Contemporary Art San Diego.", coords: [-117.2576, 33.0279] },
-    { id: "house-of-art", name: "Encinitas House of Art", categories: ["arts"], neighborhood: "old-encinitas", note: "Local gallery and creative space highlighting art and community programming." },
+    { id: "house-of-art", name: "Encinitas House of Art", categories: ["arts"], neighborhood: "old-encinitas", address: "812 2nd Street", note: "Local gallery and creative space highlighting art and community programming.", coords: [-117.2945, 33.0416] },
     { id: "olivenhain-hall", name: "Olivenhain Town Hall", categories: ["arts"], neighborhood: "olivenhain", address: "423 Rancho Santa Fe Road", note: "The historic Olivenhain Town Hall area.", coords: [-117.2346, 33.0440] },
 
     /* ---- Wellness & Nature ---- */
