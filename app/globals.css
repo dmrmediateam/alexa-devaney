@@ -1069,13 +1069,16 @@ footer { background: var(--cream); }
 }
 
 .load-anim .navbar .navigation__item { animation: navItemFade 0.9s ease both; }
-.load-anim .header__left .navigation__item:nth-child(1) { animation-delay: 1.15s; }
-.load-anim .header__left .navigation__item:nth-child(2) { animation-delay: 1.27s; }
-.load-anim .header__left .navigation__item:nth-child(3) { animation-delay: 1.39s; }
+/* mirrored ripple outward from the logo: the links nearest it arrive first */
+.load-anim .header__left .navigation__item:nth-last-child(1),
 .load-anim .header__right .navigation__item:nth-child(1) { animation-delay: 1.15s; }
-.load-anim .header__right .navigation__item:nth-child(2) { animation-delay: 1.27s; }
-.load-anim .header__right .navigation__item:nth-child(3) { animation-delay: 1.39s; }
-.load-anim .navbar .hamburger { animation: navItemFade 0.9s ease 1.5s both; }
+.load-anim .header__left .navigation__item:nth-last-child(2),
+.load-anim .header__right .navigation__item:nth-child(2) { animation-delay: 1.25s; }
+.load-anim .header__left .navigation__item:nth-last-child(3),
+.load-anim .header__right .navigation__item:nth-child(3) { animation-delay: 1.35s; }
+.load-anim .header__left .navigation__item:nth-last-child(4),
+.load-anim .header__right .navigation__item:nth-child(4) { animation-delay: 1.45s; }
+.load-anim .navbar .hamburger { animation: navItemFade 0.9s ease 1.55s both; }
 
 /* hero text joins the sequence */
 .load-anim .video-section .text-section::before {
@@ -6221,9 +6224,10 @@ footer .footer > * { position: relative; z-index: 1; }
    .header / .navigation / .navigation__item may become positioned.
    ========================================================================== */
 
+/* every nav link is the same box, so the dropdown trigger (label + caret)
+   lines up exactly with the plain links */
+.navigation__link { display: inline-flex; align-items: center; }
 .navigation__link--button {
-  display: inline-flex;
-  align-items: center;
   gap: 7px;
   padding: 0;
   background: none;
@@ -6233,7 +6237,18 @@ footer .footer > * { position: relative; z-index: 1; }
   cursor: pointer;
 }
 .navigation__link--button:focus-visible { outline: 1px solid currentColor; outline-offset: 6px; }
-.navigation__caret { margin-top: -3px; transition: transform 0.35s cubic-bezier(.22,.8,.24,1); }
+/* invisible bridge across the bar's padding, so a slow pointer travelling
+   from the trigger down to the panel never leaves the menu */
+.navigation__link--button { position: relative; }
+.navigation__item--mega.is-open .navigation__link--button::after {
+  content: "";
+  position: absolute;
+  left: -24px;
+  right: -24px;
+  top: 100%;
+  height: 48px;
+}
+.navigation__caret { margin-top: -4px; transition: transform 0.35s cubic-bezier(.22,.8,.24,1); }
 .navigation__item--mega.is-open .navigation__caret { transform: rotate(180deg); }
 .navigation__item--mega.is-open .navigation__link span::after { transform: scaleX(1); }
 
@@ -6467,11 +6482,11 @@ footer .footer > * { position: relative; z-index: 1; }
 /* Four links each side of the logo: a touch tighter, and the lockup eases
    down on mid-width screens so both halves fit without crowding it. */
 .navigation { gap: clamp(16px, 1.55vw, 28px); }
-@media (max-width: 1560px) {
+@media (min-width: 1341px) and (max-width: 1560px) {
   .header__logo .logo-mark { zoom: 0.86; }
   .navigation__link span { letter-spacing: 1.35px; }
 }
-@media (max-width: 1480px) {
+@media (min-width: 1341px) and (max-width: 1480px) {
   .navbar .header { padding-left: 28px; padding-right: 28px; }
   .header__logo { padding: 0 18px; }
   .header__logo .logo-mark { zoom: 0.78; }
@@ -6517,3 +6532,19 @@ footer .footer > * { position: relative; z-index: 1; }
 .nav-dark .mega__hoods { border-top-color: rgba(255, 255, 255, 0.1); }
 .nav-dark .mega__hoods a { color: rgba(239, 236, 231, 0.8); }
 .nav-dark .mega__hoods a:hover { color: #fff; }
+
+/* Transparent nav over bright hero photography (sky, white walls, aerials)
+   loses its white links; a soft scrim behind the bar keeps them legible and
+   fades away as the bar turns solid. */
+.navbar::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 -46px;
+  z-index: -1;
+  background: linear-gradient(to bottom, rgba(10, 12, 13, 0.5) 0%, rgba(10, 12, 13, 0.28) 55%, rgba(10, 12, 13, 0) 100%);
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.navbar.scrolled::before { opacity: 0; }
+.navbar:not(.scrolled) .navigation__link span,
+.navbar:not(.scrolled) .logo-name { text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35); }
