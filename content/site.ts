@@ -3,6 +3,9 @@
    Swap this file's values per client; no component edits needed.
    ========================================================================== */
 
+import type { AreaGuide } from "./guides/types";
+import { encinitasGuide } from "./guides/encinitas";
+
 export interface NavLink {
   label: string;
   href: string;
@@ -38,6 +41,8 @@ export interface GalleryCard {
    * short line.
    */
   metaDescription?: string;
+  /** Interactive neighborhood guide (map, places, quiz) for the area page */
+  guide?: AreaGuide;
 }
 
 export interface Listing {
@@ -1217,6 +1222,7 @@ export const site: SiteContent = {
       href: "/areas/encinitas",
       image: "/photos/areas/encinitas.webp",
       heroImage: "/photos/areas/encinitas.webp",
+      guide: encinitasGuide,
       intro: [
         "Encinitas runs from Leucadia down through Cardiff, and every pocket has its own character: beach bungalows along the 101, family streets east of the freeway, and bluff-top homes with the views people move across the country for.",
         "Inventory moves quickly here, and photographs rarely tell the whole story. I preview homes in person, so your weekends are spent only on the ones worth seeing.",

@@ -19,6 +19,7 @@
     "@sanity/icons": "^3.8.0",
     "@sanity/ui": "^3.5.5",
     "@sendgrid/mail": "^8.1.6",
+    "maplibre-gl": "5.24.0",
     "next": "^15.4.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

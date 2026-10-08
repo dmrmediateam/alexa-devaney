@@ -4,6 +4,7 @@ import Image from "next/image";
 import SiteChrome from "@/components/SiteChrome";
 import IdxListingCard from "@/components/idx/IdxListingCard";
 import ContactForm from "@/components/leads/ContactForm";
+import AreaGuide from "@/components/guide/AreaGuide";
 import { site } from "@/content/site";
 import { searchListings } from "@/lib/idx/search";
 import { idxConfigured } from "@/lib/idx/config";
@@ -78,6 +79,20 @@ export default async function AreaPage({ params }: Params) {
   const listings = response?.listings ?? [];
   const searchHref = `/listings?cityId=${area.cityId}&city=${encodeURIComponent(area.title)}`;
 
+  const introSection = area.intro && area.intro.length > 0 && (
+    <section className="solid-section">
+      <div className="boxed-text lp-vertical-paddings">
+        <div className="lp-container">
+          <div className="boxed-text__description reveal">
+            {area.intro.map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+
   const breadcrumbLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -109,23 +124,25 @@ export default async function AreaPage({ params }: Params) {
           <div className="text-section">
             <h5 className="pre-title">{site.landing?.serviceArea ?? "North County San Diego"}</h5>
             <h1 className="lp-h1">{area.title}</h1>
+            {area.guide && <p className="ag-hero-tagline">{area.guide.tagline}</p>}
           </div>
         </div>
       </section>
 
-      {area.intro && area.intro.length > 0 && (
-        <section className="solid-section">
-          <div className="boxed-text lp-vertical-paddings">
-            <div className="lp-container">
-              <div className="boxed-text__description reveal">
-                {area.intro.map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+      {/* With a guide, the town speaks first and Alexa's own pitch leads
+          into the listings; without one, the intro opens the page. */}
+      {!area.guide && introSection}
+
+      {area.guide && (
+        <AreaGuide
+          guide={area.guide}
+          areaTitle={area.title}
+          consent={site.footer.newsletter.consent}
+          agent={{ name: site.brand.name, photo: site.about.avatar }}
+        />
       )}
+
+      {area.guide && introSection}
 
       <section className="solid-section">
         <div className="featured-band lp-vertical-paddings">
