@@ -2,6 +2,9 @@ import type { CSSProperties, ReactNode } from "react";
 import Script from "next/script";
 import NewsletterForm from "@/components/leads/NewsletterForm";
 import SiteEffects from "@/components/SiteEffects";
+import CommunitiesMenu from "@/components/nav/CommunitiesMenu";
+import SideMenuCommunities from "@/components/nav/SideMenuCommunities";
+import { communityLinks } from "@/components/nav/communities";
 import type { SiteContent } from "@/content/site";
 import { FAIR_HOUSING_PLEDGE, REALTOR_MARK_NOTICE, mlsDisclaimerFor } from "@/lib/legal";
 
@@ -37,6 +40,16 @@ export default function SiteChrome({
     background: content.theme.background,
   } as CSSProperties;
 
+  const communities = communityLinks(content.areas ?? []);
+  const navItem = (link: SiteContent["nav"]["left"][number]) =>
+    link.dropdown === "communities" && communities.length > 0 ? (
+      <CommunitiesMenu key={link.label} label={link.label} href={link.href} communities={communities} />
+    ) : (
+      <li className="navigation__item" key={link.label}>
+        <a href={link.href} className="navigation__link"><span>{link.label}</span></a>
+      </li>
+    );
+
   return (
     <div
       style={themeVars}
@@ -49,11 +62,7 @@ export default function SiteChrome({
         <div className="header">
           <div className="header__left">
             <ul className="navigation">
-              {content.nav.left.map((link) => (
-                <li className="navigation__item" key={link.label}>
-                  <a href={link.href} className="navigation__link"><span>{link.label}</span></a>
-                </li>
-              ))}
+              {content.nav.left.map(navItem)}
             </ul>
           </div>
           <a href={content.brand.homeHref ?? "/"} className="header__logo" aria-label="Home">
@@ -82,11 +91,7 @@ export default function SiteChrome({
           </a>
           <div className="header__right">
             <ul className="navigation">
-              {content.nav.right.map((link) => (
-                <li className="navigation__item" key={link.label}>
-                  <a href={link.href} className="navigation__link"><span>{link.label}</span></a>
-                </li>
-              ))}
+              {content.nav.right.map(navItem)}
             </ul>
             <button className="hamburger" id="hamburger" aria-label="Open menu"><span></span></button>
           </div>
@@ -102,11 +107,20 @@ export default function SiteChrome({
         <button className="sidemenu__close" id="sidemenu-close" aria-label="Close menu">&times;</button>
         <span className="sidemenu__eyebrow">{content.brand.tagline}</span>
         <ul className="sidemenu__nav">
-          {content.nav.menu.map((link, i) => (
-            <li key={link.label} style={{ transitionDelay: `${80 + i * 45}ms` }}>
-              <a href={link.href}>{link.label}</a>
-            </li>
-          ))}
+          {content.nav.menu.map((link, i) =>
+            link.dropdown === "communities" && communities.length > 0 ? (
+              <SideMenuCommunities
+                key={link.label}
+                label={link.label}
+                communities={communities}
+                style={{ transitionDelay: `${80 + i * 45}ms` }}
+              />
+            ) : (
+              <li key={link.label} style={{ transitionDelay: `${80 + i * 45}ms` }}>
+                <a href={link.href}>{link.label}</a>
+              </li>
+            ),
+          )}
         </ul>
         <div className="sidemenu__contact">
           <span className="sidemenu__contact-name">{content.footer.agentName}</span>
@@ -169,6 +183,21 @@ export default function SiteChrome({
                 ))}
               </ul>
             </div>
+            {communities.length > 0 && (
+              <div className="footer__col footer__col--communities">
+                <h5>Communities</h5>
+                <ul className="footer__communities">
+                  {communities.map((c) => (
+                    <li key={c.href}>
+                      <a href={c.href}>{c.title}</a>
+                      {c.neighborhoods.length > 0 && (
+                        <a className="footer__guide" href={`${c.href}#explore`}>Neighborhood guide</a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div className="footer__col footer__col--contact">
               {/* SDMLS requires the brokerage name, a phone number and the
                   physical address to be prominently displayed on the homepage.

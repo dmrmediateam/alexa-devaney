@@ -9,6 +9,9 @@ import { encinitasGuide } from "./guides/encinitas";
 export interface NavLink {
   label: string;
   href: string;
+  /** "communities" renders the link as the area dropdown (desktop) or an
+   *  expanding list (side menu), built from `areas` */
+  dropdown?: "communities";
 }
 
 export interface GalleryCard {
@@ -559,14 +562,16 @@ export const site: SiteContent = {
     ctaHref: "/connect",
   },
   nav: {
+    // Four and four around the logo: finding a home on the left, Alexa on the right
     left: [
       { label: "Buy", href: "/buy" },
       { label: "Sell", href: "/sell" },
-      { label: "Portfolio", href: "/portfolio" },
-      { label: "Exclusive Access", href: "/experiences" },
+      { label: "Communities", href: "/#communities", dropdown: "communities" },
+      { label: "Search Homes", href: "/listings" },
     ],
     right: [
-      { label: "Search Homes", href: "/listings" },
+      { label: "Portfolio", href: "/portfolio" },
+      { label: "Exclusive Access", href: "/experiences" },
       { label: "About", href: "/about" },
       { label: "Let’s Connect", href: "/connect" },
     ],
@@ -574,8 +579,9 @@ export const site: SiteContent = {
       { label: "Home", href: "/" },
       { label: "Buy a Home", href: "/buy" },
       { label: "Sell Your Home", href: "/sell" },
-      { label: "Portfolio", href: "/portfolio" },
+      { label: "Communities", href: "/#communities", dropdown: "communities" },
       { label: "Search Homes", href: "/listings" },
+      { label: "Portfolio", href: "/portfolio" },
       { label: "About Alexa", href: "/about" },
       { label: "Exclusive Access", href: "/experiences" },
       { label: "Let's Connect", href: "/connect" },

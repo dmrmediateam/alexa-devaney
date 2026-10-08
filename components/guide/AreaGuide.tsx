@@ -8,6 +8,7 @@ import ContactForm from "@/components/leads/ContactForm";
 import type { AreaGuide as AreaGuideData, GuidePlace } from "@/content/guides/types";
 import type { MapCamera } from "./GuideMap";
 import RevealNow from "./RevealNow";
+import { GUIDE_NEIGHBORHOOD_EVENT } from "@/components/nav/communities";
 
 /* ==========================================================================
    Interactive area guide: overview + stats, then the neighborhood/place
@@ -123,6 +124,21 @@ export default function AreaGuide({
     },
     [guide, townView],
   );
+
+  /* Deep links from the Communities menus: `?neighborhood=<id>` on load, or
+     an event when the link is clicked on this page (no reload). */
+  useEffect(() => {
+    const valid = (id: unknown): id is string =>
+      typeof id === "string" && guide.neighborhoods.some((n) => n.id === id);
+    const fromUrl = new URLSearchParams(window.location.search).get("neighborhood");
+    if (valid(fromUrl)) chooseHood(fromUrl);
+    const onPick = (e: Event) => {
+      const id = (e as CustomEvent).detail;
+      if (valid(id)) chooseHood(id);
+    };
+    window.addEventListener(GUIDE_NEIGHBORHOOD_EVENT, onPick);
+    return () => window.removeEventListener(GUIDE_NEIGHBORHOOD_EVENT, onPick);
+  }, [guide.neighborhoods, chooseHood]);
 
   const selectPlace = useCallback(
     (place: GuidePlace, fromMap = false) => {

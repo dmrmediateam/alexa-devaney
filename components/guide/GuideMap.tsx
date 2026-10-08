@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { Map as MapLibreMap, Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { GuidePlace } from "@/content/guides/types";
@@ -48,6 +48,24 @@ export default function GuideMap({
   const markersRef = useRef<Map<string, Marker>>(new Map());
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
+  // The map loads asynchronously; a camera set before then (a deep link to a
+  // neighborhood) must still be where it opens.
+  const cameraRef = useRef(camera);
+  cameraRef.current = camera;
+  const visibleRef = useRef(visibleIds);
+  visibleRef.current = visibleIds;
+  const activeRef = useRef(activeId);
+  activeRef.current = activeId;
+
+  const applyPins = useCallback(() => {
+    markersRef.current.forEach((marker, id) => {
+      const el = marker.getElement();
+      const shown = visibleRef.current.has(id);
+      el.classList.toggle("is-hidden", !shown);
+      el.classList.toggle("is-active", id === activeRef.current);
+      el.tabIndex = shown ? 0 : -1;
+    });
+  }, []);
 
   /* ---- create once ---- */
   useEffect(() => {
@@ -61,9 +79,9 @@ export default function GuideMap({
       const m = new maplibregl.Map({
         container: containerRef.current,
         style: STYLE_URL,
-        ...("bounds" in camera
-          ? { bounds: camera.bounds, fitBoundsOptions: { padding: FIT_PADDING, maxZoom: FIT_MAX_ZOOM } }
-          : { center: camera.center, zoom: camera.zoom }),
+        ...("bounds" in cameraRef.current
+          ? { bounds: cameraRef.current.bounds, fitBoundsOptions: { padding: FIT_PADDING, maxZoom: FIT_MAX_ZOOM } }
+          : { center: cameraRef.current.center, zoom: cameraRef.current.zoom }),
         minZoom: 10.5,
         maxZoom: 17,
         attributionControl: { compact: true },
@@ -73,6 +91,11 @@ export default function GuideMap({
       });
       map = m;
       mapRef.current = m;
+      // The dark style references a wood texture its sprite doesn't ship;
+      // a blank stand-in keeps the console clean (woods are recolored anyway).
+      m.on("styleimagemissing", (e) => {
+        if (!m.hasImage(e.id)) m.addImage(e.id, { width: 1, height: 1, data: new Uint8Array(4) });
+      });
       m.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
 
       // Warm the near-black base toward the site's charcoal, and lift the
@@ -114,6 +137,8 @@ export default function GuideMap({
         const marker = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(place.coords).addTo(m);
         markersRef.current.set(place.id, marker);
       });
+      // Filters may have changed while the map was loading.
+      applyPins();
     })();
 
     return () => {
@@ -127,14 +152,7 @@ export default function GuideMap({
   }, []);
 
   /* ---- visibility + active pin ---- */
-  useEffect(() => {
-    markersRef.current.forEach((marker, id) => {
-      const el = marker.getElement();
-      el.classList.toggle("is-hidden", !visibleIds.has(id));
-      el.classList.toggle("is-active", id === activeId);
-      el.tabIndex = visibleIds.has(id) ? 0 : -1;
-    });
-  });
+  useEffect(applyPins);
 
   /* ---- camera ---- */
   useEffect(() => {

@@ -148,7 +148,7 @@ export default function HomeNoir({
         )}
 
         {/* ============ AREAS: full-width alternating gallery rows ============ */}
-        <section className="hn-areas">
+        <section className="hn-areas" id="communities">
           {content.areas.map((area, i) => (
             <a className={`hn-area${i % 2 === 1 ? " hn-area--flip" : ""}`} href={area.href} key={area.title}>
               <div className="hn-area__media reveal">
