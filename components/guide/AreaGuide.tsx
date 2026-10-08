@@ -73,6 +73,7 @@ export default function AreaGuide({
 
   const hood = guide.neighborhoods.find((n) => n.id === hoodId) ?? null;
   const hoodIndex = hood ? guide.neighborhoods.indexOf(hood) : -1;
+  const askPlace = hood?.name ?? areaTitle;
   const hoodName = useMemo(
     () => Object.fromEntries(guide.neighborhoods.map((n) => [n.id, n.name])),
     [guide.neighborhoods],
@@ -262,6 +263,18 @@ export default function AreaGuide({
                         );
                       })}
                     </ul>
+                  </>
+                ) : (
+                  <>
+                    <span className="ag-kicker">{guide.neighborhoods.length} neighborhoods · {guide.places.length} local favorites</span>
+                    <h3 className="ag-panel__title">All of {areaTitle}</h3>
+                    <p className="ag-panel__desc">
+                      Choose a neighborhood above to see its character and landmarks, or filter by what matters to you.
+                      Tap any pin for the details.
+                    </p>
+                  </>
+                )}
+                {/* Shown for the whole town too, so the ask is there from first view */}
                     <button
                       type="button"
                       ref={askRef}
@@ -276,7 +289,7 @@ export default function AreaGuide({
                         </span>
                       )}
                       <span className="ag-ask__text">
-                        <span className="ag-ask__title">Ask {firstName} about {hood.name}</span>
+                        <span className="ag-ask__title">Ask {firstName} about {askPlace}</span>
                         <span className="ag-ask__sub">{askOpen ? "Tell her what you're looking for" : "Homes, streets and pricing"}</span>
                       </span>
                       <span className="ag-ask__icon" aria-hidden="true">
@@ -290,24 +303,13 @@ export default function AreaGuide({
                       <div className="ag-ask__clip">
                         <RevealNow className="ag-ask__form">
                           <ContactForm
-                            key={hood.id}
+                            key={hoodId ?? "all"}
                             consent={consent}
-                            message={`I'd love to hear about homes in ${hood.name}, ${areaTitle}.`}
+                            message={hood ? `I'd love to hear about homes in ${hood.name}, ${areaTitle}.` : `I'd love to hear about homes in ${areaTitle}.`}
                           />
                         </RevealNow>
                       </div>
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <span className="ag-kicker">{guide.neighborhoods.length} neighborhoods · {guide.places.length} local favorites</span>
-                    <h3 className="ag-panel__title">All of {areaTitle}</h3>
-                    <p className="ag-panel__desc">
-                      Choose a neighborhood above to see its character and landmarks, or filter by what matters to you.
-                      Tap any pin for the details.
-                    </p>
-                  </>
-                )}
               </div>
 
               {/* ---- category chips ---- */}
