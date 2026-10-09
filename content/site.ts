@@ -5,6 +5,9 @@
 
 import type { AreaGuide } from "./guides/types";
 import { encinitasGuide } from "./guides/encinitas";
+import { carlsbadGuide } from "./guides/carlsbad";
+import { oceansideGuide } from "./guides/oceanside";
+import { fallbrookGuide } from "./guides/fallbrook";
 
 export interface NavLink {
   label: string;
@@ -1244,6 +1247,7 @@ export const site: SiteContent = {
       href: "/areas/carlsbad",
       image: "/photos/areas/carlsbad.webp",
       heroImage: "/photos/areas/carlsbad.webp",
+      guide: carlsbadGuide,
       // pull the banner crop down to keep the village sign arch in frame
       heroFocus: "center 78%",
       intro: [
@@ -1261,6 +1265,7 @@ export const site: SiteContent = {
       href: "/areas/oceanside",
       image: "/photos/areas/oceanside.webp",
       heroImage: "/photos/areas/oceanside.webp",
+      guide: oceansideGuide,
       intro: [
         "Oceanside has changed quickly. The pier and harbor are unchanged, but downtown now holds the restaurants and hotels that once meant a drive south, and the coastline remains the best value in North County.",
         "South O, Fire Mountain, and the blocks nearest the sand behave like separate markets. Matching you to the right one is most of the work.",
@@ -1276,6 +1281,7 @@ export const site: SiteContent = {
       href: "/areas/fallbrook",
       image: "/photos/fallsbrae-aerial.webp",
       heroImage: "/photos/fallsbrae-aerial.webp",
+      guide: fallbrookGuide,
       intro: [
         "Fallbrook trades the coastline for space: avocado groves, rolling hills, and acreage with real distance between neighbors. It draws families who want room for horses, gardens, or simply quiet.",
         "Wells, septic, easements, and fire clearance carry weight here that they never do at the beach. I have sold enough Fallbrook property to ask the right questions before you fall for the view.",

@@ -22,6 +22,9 @@ export interface GuideNeighborhood {
   description: string;
   /** Landmarks named in her copy, in her order */
   anchors: string[];
+  /** Camera for a neighborhood with no pinned places (otherwise the map
+   *  frames its pins). Omitted when the area can't be placed with confidence. */
+  focus?: { center: [lng: number, lat: number]; zoom: number };
 }
 
 export interface GuidePlace {
@@ -29,7 +32,9 @@ export interface GuidePlace {
   name: string;
   /** First entry decides the pin and card label; extra entries also match filters */
   categories: string[];
-  neighborhood: string;
+  /** One of the guide's neighborhood ids. Omitted when her copy doesn't tie
+   *  the place to a neighborhood: it then shows in the whole-town view only. */
+  neighborhood?: string;
   address?: string;
   /** Her description, if she gave one */
   note?: string;

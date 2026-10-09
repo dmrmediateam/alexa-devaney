@@ -35,6 +35,7 @@ export default function GuideMap({
   activeId,
   camera,
   onSelect,
+  getPadding,
 }: {
   places: GuidePlace[];
   categoryLabels: Record<string, string>;
@@ -42,6 +43,8 @@ export default function GuideMap({
   activeId: string | null;
   camera: MapCamera;
   onSelect: (id: string) => void;
+  /** Extra room to keep pins clear of anything layered over the map */
+  getPadding?: () => Partial<typeof FIT_PADDING>;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -52,6 +55,9 @@ export default function GuideMap({
   // neighborhood) must still be where it opens.
   const cameraRef = useRef(camera);
   cameraRef.current = camera;
+  const paddingRef = useRef(getPadding);
+  paddingRef.current = getPadding;
+  const padding = () => ({ ...FIT_PADDING, ...(paddingRef.current?.() ?? {}) });
   const visibleRef = useRef(visibleIds);
   visibleRef.current = visibleIds;
   const activeRef = useRef(activeId);
@@ -80,7 +86,7 @@ export default function GuideMap({
         container: containerRef.current,
         style: STYLE_URL,
         ...("bounds" in cameraRef.current
-          ? { bounds: cameraRef.current.bounds, fitBoundsOptions: { padding: FIT_PADDING, maxZoom: FIT_MAX_ZOOM } }
+          ? { bounds: cameraRef.current.bounds, fitBoundsOptions: { padding: padding(), maxZoom: FIT_MAX_ZOOM } }
           : { center: cameraRef.current.center, zoom: cameraRef.current.zoom }),
         minZoom: 10.5,
         maxZoom: 17,
@@ -113,6 +119,11 @@ export default function GuideMap({
         paint("highway_minor", "line-color", "#24282b");
         paint("highway_major_inner", "line-color", "#2d3236");
         paint("highway_motorway_inner", "line-color", "#383d42");
+        // runways and aprons render pure black in this style: tint them like roads
+        paint("aeroway-runway", "line-color", "#2b3034");
+        paint("aeroway-runway-casing", "line-color", "rgba(0,0,0,0)");
+        paint("aeroway-taxiway", "line-color", "#24282b");
+        paint("aeroway-area", "fill-color", "#1d2023");
         for (const id of ["place_suburb", "place_village", "place_town", "place_city", "place_other"]) {
           paint(id, "text-color", "#8d9296");
         }
@@ -160,8 +171,8 @@ export default function GuideMap({
     if (!map) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const duration = reduced ? 0 : 1600;
-    if ("bounds" in camera) map.fitBounds(camera.bounds, { padding: FIT_PADDING, maxZoom: FIT_MAX_ZOOM, duration, essential: true });
-    else map.flyTo({ center: camera.center, zoom: camera.zoom, duration, essential: true });
+    if ("bounds" in camera) map.fitBounds(camera.bounds, { padding: padding(), maxZoom: FIT_MAX_ZOOM, duration, essential: true });
+    else map.flyTo({ center: camera.center, zoom: camera.zoom, padding: padding(), duration, essential: true });
   }, [camera]);
 
   return <div ref={containerRef} className="ag-map__canvas" />;
