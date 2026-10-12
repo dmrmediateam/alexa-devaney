@@ -103,16 +103,18 @@ export async function syncGoogleAds(client: SanityClient, settings: SyncSettings
 
   const existing = await client.fetch<Array<{ _id: string; month: string; campaigns?: StoredCampaign[] }>>(
     `*[_type == "dmrMonthlyReport" && month in $months]{_id, month, campaigns}`,
-    { months: [...byMonth.keys()] },
+    { months: Array.from(byMonth.keys()) },
   );
   const existingByMonth = new Map(existing.map((doc) => [doc.month, doc]));
 
   const tx = client.transaction();
   let campaignCount = 0;
-  for (const [month, campaigns] of byMonth) {
+  /* Array.from rather than spreading or for..of over the Maps: some client
+     repos (eagan-luxury) target ES5, where that needs downlevelIteration. */
+  for (const [month, campaigns] of Array.from(byMonth)) {
     const doc = existingByMonth.get(month);
     const previous = doc?.campaigns ?? [];
-    const next: StoredCampaign[] = [...campaigns]
+    const next: StoredCampaign[] = Array.from(campaigns)
       .map(([id, c]) => {
         const prior = previous.find((p) => p.googleAdsCampaignId === id) ?? previous.find((p) => p.name === c.name);
         return {
