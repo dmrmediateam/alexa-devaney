@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Instrument_Serif, Inter } from 'next/font/google'
+import { STUDIO_ORIGIN } from '@/sanity/dmr-client'
 import './portal.css'
 
 /**
@@ -16,7 +17,7 @@ import './portal.css'
 const serif = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], variable: '--font-dmr-serif' })
 const sans = Inter({ subsets: ['latin'], variable: '--font-dmr-sans' })
 
-const STUDIO_URL = process.env.NEXT_PUBLIC_SANITY_STUDIO_URL || 'https://alexa-devaney.sanity.studio/dashboard'
+const STUDIO_URL = process.env.NEXT_PUBLIC_SANITY_STUDIO_URL || `${STUDIO_ORIGIN}/dashboard`
 const DMR_EMAIL = 'team@dmrmedia.org'
 
 export const metadata: Metadata = {

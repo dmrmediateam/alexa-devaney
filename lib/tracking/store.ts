@@ -13,6 +13,7 @@
  * false, the same way leads behave without SendGrid: the visitor's experience
  * never depends on the reporting backend being wired up.
  */
+import { SANITY_DATASET, SANITY_PROJECT_ID } from "@/sanity/dmr-client";
 
 const API_VERSION = process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2025-01-01";
 const TIMEOUT_MS = 5000;
@@ -35,8 +36,11 @@ export type TrackedListing = {
 type SanityConfig = { projectId: string; dataset: string; token: string };
 
 function config(): SanityConfig | null {
-  const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-  const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
+  // The project id is public and baked in, so production needs exactly one
+  // secret for the dashboard: SANITY_API_TOKEN. Without the token this stays
+  // null and every function here is a no-op.
+  const projectId = SANITY_PROJECT_ID;
+  const dataset = SANITY_DATASET;
   const token = process.env.SANITY_API_TOKEN;
   if (!projectId || !token) return null;
   return { projectId, dataset, token };
@@ -253,4 +257,60 @@ function compact(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 ? 1 : 0)}M`;
   if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
   return String(n);
+}
+
+/**
+ * One `dmrLead` per form submission: the real lead count the dashboard
+ * reports, since Google Ads conversions only see whatever actions are tracked.
+ * Takes the same payload the webhook and emails get. Only the named fields
+ * are kept; the rest of the payload stays in the CRM.
+ */
+export async function recordLead(payload: Record<string, unknown>): Promise<boolean> {
+  if (!trackingConfigured()) return false;
+  const text = (key: string) => {
+    const value = payload[key];
+    return typeof value === "string" && value.trim() ? value.trim().slice(0, 2000) : undefined;
+  };
+  const submittedAt = text("submittedAt") ?? new Date().toISOString();
+  // The month in Eastern time, matching the lead sheet's "Submitted (ET)".
+  const et = Object.fromEntries(
+    new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", year: "numeric", month: "2-digit" })
+      .formatToParts(new Date(submittedAt))
+      .map((part) => [part.type, part.value]),
+  );
+  const page = text("landingPage") ?? text("page");
+  const campaignId = page?.match(/gad_campaignid=(\d+)/)?.[1] ?? text("utmCampaign");
+
+  return mutate([
+    {
+      create: {
+        _id: `lead-${crypto.randomUUID()}`,
+        _type: "dmrLead",
+        month: `${et.year}-${et.month}-01`,
+        submittedAt,
+        name: text("fullName") ?? text("name"),
+        email: text("email"),
+        phone: text("phone"),
+        form: text("formLabel") ?? text("formType"),
+        leadTag: text("leadTag"),
+        qualified: payload.qualified === true,
+        qualificationReason: text("qualificationReason"),
+        paid: Boolean(text("gclid") || text("gbraid") || text("wbraid")),
+        address: [text("address"), text("address2")].filter(Boolean).join(", ") || undefined,
+        city: text("city"),
+        zip: text("zip"),
+        pricePoint: text("pricePoint"),
+        estimatedValue: text("estimatedValue"),
+        financing: text("financing"),
+        agentStatus: text("agentStatus"),
+        timeline: text("timeline"),
+        mlsNumber: text("mlsNumber"),
+        message: text("message"),
+        page,
+        gclid: text("gclid"),
+        campaignId,
+        source: "site",
+      },
+    },
+  ]);
 }

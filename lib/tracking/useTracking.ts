@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getVisitorId, readHearts, writeHearts } from "@/lib/tracking/visitor";
 import { hasCapturedFlag } from "@/lib/leads/captured";
 import type { TrackedListing } from "@/lib/tracking/store";
+import { mayRun } from "@/lib/consent";
 
 /**
  * The single client-side path for listing activity, the way `useLeadSubmit`
@@ -12,9 +13,19 @@ import type { TrackedListing } from "@/lib/tracking/store";
  * one surface quietly missing a piece.
  */
 
-/** Fire and forget. The caller never waits and never sees a failure. */
+/**
+ * Fire and forget. The caller never waits and never sees a failure.
+ *
+ * Added for this site, which carries a cookie notice and honours Global Privacy
+ * Control: recording what someone browses, against an identifier that a later
+ * form submission turns into their name, is exactly the non-essential tracking
+ * the banner asks about. No consent, no beacon and no visitor cookie. Hearts
+ * still work - they are kept in the visitor's own browser - they simply are not
+ * mirrored to us, which is the correct outcome rather than a degraded one.
+ */
 function beacon(payload: Record<string, unknown>): void {
   if (typeof window === "undefined") return;
+  if (!mayRun()) return;
   // Ensures the visitor cookie exists before the server tries to read it.
   getVisitorId();
   /* Store listing links absolute. The dashboard that reads these runs on

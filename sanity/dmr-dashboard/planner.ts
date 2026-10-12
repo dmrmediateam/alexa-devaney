@@ -1,4 +1,4 @@
-import type { ClientSettings } from './math'
+import { roiOf, type ClientSettings } from './math'
 
 /**
  * Ad spend projection. Leads scale with budget at diminishing returns:
@@ -31,7 +31,7 @@ export function makePlanner(settings: ClientSettings, base: Baseline) {
       marginalCpl: leads ? s / (e * leads) : 0,
       commission,
       cost,
-      roi: cost ? (commission - cost) / cost : 0,
+      roi: roiOf(commission, cost),
       closings: leads * settings.closeRate,
     }
   }
@@ -43,7 +43,8 @@ export function makePlanner(settings: ClientSettings, base: Baseline) {
   // Lowest monthly spend where estimated commission covers spend + fee.
   let breakEven: number | null = null
   for (let s = 50; s <= max; s += 25) {
-    if (project(s).roi >= 0) {
+    const p = project(s)
+    if (p.commission >= p.cost) {
       breakEven = s
       break
     }
@@ -62,7 +63,7 @@ export function makePlanner(settings: ClientSettings, base: Baseline) {
   const current = project(base.spend)
   const up = project(base.spend * (1 + STEP_PCT))
   let recommendation: { spend: number; action: 'increase' | 'hold' | 'decrease'; reason: string }
-  if (current.roi < 0) {
+  if (current.commission < current.cost) {
     recommendation = {
       spend: roundTo(base.spend * (1 - STEP_PCT), 50),
       action: 'decrease',

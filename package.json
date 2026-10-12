@@ -12,7 +12,10 @@
     "sanity:build": "sanity build",
     "sanity:deploy": "sanity deploy",
     "dmr:seed": "node scripts/dmr-seed-settings.mjs",
-    "google-ads:token": "node scripts/google-ads-refresh-token.mjs"
+    "google-ads:token": "node scripts/google-ads-refresh-token.mjs",
+    "dmr:import-leads": "sanity exec scripts/import-leads.mjs --with-user-token --",
+    "test:cron": "node scripts/test-cron.mjs",
+    "test:google-ads": "node scripts/test-google-ads.mjs"
   },
   "dependencies": {
     "@sanity/client": "^7.27.0",

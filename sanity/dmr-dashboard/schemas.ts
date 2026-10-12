@@ -22,6 +22,13 @@ export const dmrClientSettings = defineType({
     defineField({ name: 'channels', title: 'Channels', type: 'string', group: 'client', description: 'e.g. "Google Search + Performance Max"' }),
     defineField({ name: 'websiteLabel', title: 'Website label', type: 'string', group: 'client' }),
     defineField({ name: 'mediaBuyer', title: 'Media buyer name', type: 'string', group: 'client' }),
+    defineField({
+      name: 'dmrStartDate',
+      title: 'DMR start date',
+      type: 'date',
+      group: 'client',
+      description: 'When DMR took over the ads. Months before this are left out of the report and the Google Ads sync, so ads we didn\'t run never count toward our numbers.',
+    }),
 
     defineField({ name: 'avgHomePrice', title: 'Average home price', type: 'number', group: 'math', validation: (r) => r.required().positive() }),
     defineField({ name: 'priceSource', title: 'Price source', type: 'string', group: 'math', initialValue: 'Redfin median sale price' }),
@@ -62,6 +69,22 @@ export const dmrClientSettings = defineType({
       group: 'data',
       description: '10 digits, no dashes. Used by the sync job — not a secret.',
       validation: (r) => r.regex(/^\d{10}$/, { name: '10 digits' }),
+    }),
+    // Written by the dashboard's "Sync Google Ads" button and the website, not by hand.
+    defineField({ name: 'syncRequestedAt', type: 'datetime', group: 'data', hidden: true }),
+    defineField({
+      name: 'lastSync',
+      title: 'Last Google Ads sync',
+      type: 'object',
+      group: 'data',
+      readOnly: true,
+      fields: [
+        defineField({ name: 'at', title: 'When', type: 'datetime' }),
+        defineField({ name: 'ok', title: 'Succeeded', type: 'boolean' }),
+        defineField({ name: 'message', title: 'Result', type: 'string' }),
+        defineField({ name: 'months', type: 'number' }),
+        defineField({ name: 'campaigns', type: 'number' }),
+      ],
     }),
   ],
   preview: { select: { title: 'clientName', subtitle: 'market' } },
@@ -278,4 +301,54 @@ export const dmrSearch = defineType({
   },
 })
 
-export const dmrSchemaTypes = [dmrClientSettings, dmrMonthlyReport, dmrBudgetRequest, dmrVisitor, dmrActivity, dmrSearch]
+/**
+ * One lead the site actually received: the "real" lead count behind the
+ * dashboard. Google Ads conversions undercount (they fire on whatever
+ * conversion actions are set up, often qualified leads only), so when a month
+ * has lead records, the report's lead total is their count.
+ *
+ * The site writes one per form submission (/api/lead). Older leads are
+ * imported from the lead sheet with scripts/import-leads.mjs. Holds personal
+ * data, which is why the dataset must stay private.
+ */
+export const dmrLead = defineType({
+  name: 'dmrLead',
+  title: 'DMR · Lead',
+  type: 'document',
+  fields: [
+    defineField({ name: 'month', title: 'Counts toward month', type: 'date', description: 'First of the month', validation: (r) => r.required() }),
+    defineField({ name: 'submittedAt', title: 'Submitted', type: 'datetime' }),
+    defineField({ name: 'name', title: 'Name', type: 'string' }),
+    defineField({ name: 'email', title: 'Email', type: 'string' }),
+    defineField({ name: 'phone', title: 'Phone', type: 'string' }),
+    defineField({ name: 'form', title: 'Form', type: 'string' }),
+    defineField({ name: 'leadTag', title: 'Lead tag', type: 'string', description: 'QUALIFIED, DQ or NEW' }),
+    defineField({ name: 'qualified', title: 'Qualified', type: 'boolean' }),
+    defineField({ name: 'qualificationReason', title: 'Qualification reason', type: 'string' }),
+    defineField({ name: 'paid', title: 'From a Google Ads click', type: 'boolean', description: 'Carried a gclid / gbraid / wbraid' }),
+    defineField({ name: 'address', title: 'Property address', type: 'string' }),
+    defineField({ name: 'city', title: 'City', type: 'string' }),
+    defineField({ name: 'zip', title: 'Zip', type: 'string' }),
+    defineField({ name: 'pricePoint', title: 'Price point', type: 'string' }),
+    defineField({ name: 'estimatedValue', title: 'Estimated value', type: 'string' }),
+    defineField({ name: 'financing', title: 'Financing', type: 'string' }),
+    defineField({ name: 'agentStatus', title: 'Agent status', type: 'string' }),
+    defineField({ name: 'timeline', title: 'Timeline', type: 'string' }),
+    defineField({ name: 'mlsNumber', title: 'MLS number', type: 'string' }),
+    defineField({ name: 'message', title: 'Message', type: 'text', rows: 3 }),
+    defineField({ name: 'page', title: 'Landing page', type: 'string' }),
+    defineField({ name: 'gclid', title: 'Google click id', type: 'string' }),
+    defineField({ name: 'campaignId', title: 'Google Ads campaign id', type: 'string' }),
+    defineField({ name: 'source', title: 'Recorded by', type: 'string', description: 'site or sheet import', readOnly: true }),
+  ],
+  orderings: [{ title: 'Newest', name: 'newest', by: [{ field: 'month', direction: 'desc' }, { field: 'submittedAt', direction: 'desc' }] }],
+  preview: {
+    select: { name: 'name', form: 'form', month: 'month', tag: 'leadTag', paid: 'paid' },
+    prepare: ({ name, form, month, tag, paid }) => ({
+      title: name || 'Lead',
+      subtitle: [form, tag, paid ? 'Google Ads' : 'other source', month?.slice(0, 7)].filter(Boolean).join(' · '),
+    }),
+  },
+})
+
+export const dmrSchemaTypes = [dmrClientSettings, dmrMonthlyReport, dmrLead, dmrBudgetRequest, dmrVisitor, dmrActivity, dmrSearch]

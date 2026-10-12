@@ -1,6 +1,7 @@
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
 import { dmrDashboard, dmrSchemaTypes, dmrStructureItems, dmrTheme, DmrIcon } from './sanity/dmr-dashboard'
+import { DMR_CLIENT, SANITY_DATASET, SANITY_PROJECT_ID } from './sanity/dmr-client'
 
 /**
  * Sanity Studio for Alexa Devaney.
@@ -15,10 +16,10 @@ import { dmrDashboard, dmrSchemaTypes, dmrStructureItems, dmrTheme, DmrIcon } fr
  */
 export default defineConfig({
   name: 'default',
-  title: 'Alexa Devaney',
+  title: DMR_CLIENT.name,
 
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'yy80nmbb',
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
+  projectId: SANITY_PROJECT_ID,
+  dataset: SANITY_DATASET,
 
   icon: DmrIcon,
   theme: dmrTheme,

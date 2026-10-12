@@ -13,16 +13,19 @@ import {
   HelpCircleIcon,
   LaunchIcon,
   RobotIcon,
+  SyncIcon,
   TrendUpwardIcon,
   UsersIcon,
 } from '@sanity/icons'
-import { Badge, Box, Button, Card, Flex, Select, Stack, Tab, TabList, Text } from '@sanity/ui'
+import { Badge, Box, Button, Card, Flex, Select, Stack, Tab, TabList, Text, useToast } from '@sanity/ui'
 import { IntentLink } from 'sanity/router'
 import { MetricChart } from './MetricChart'
 import { SpendPlanner } from './SpendPlanner'
 import type { SubmitBudgetRequest } from './budgetRequest'
+import type { RunGoogleAdsSync } from './googleAdsSync'
 import { computeDashboard, monthLabel, num, pct, usd, type ClientSettings, type MonthReport } from './math'
 import { DMR_EMAIL, DMR_SITE } from './tokens'
+import type { SyncInfo } from './useDashboardData'
 import { useVisitors, type Visitor, type VisitorActivity } from './useVisitors'
 
 /**
@@ -52,11 +55,17 @@ export function DashboardView({
   months,
   isSample,
   submitBudgetRequest,
+  sync,
+  runSync,
+  onSynced,
 }: {
   settings: ClientSettings
   months: MonthReport[]
   isSample: boolean
   submitBudgetRequest: SubmitBudgetRequest
+  sync: SyncInfo
+  runSync: RunGoogleAdsSync
+  onSynced: () => void
 }) {
   const sorted = [...months].sort((a, b) => a.month.localeCompare(b.month))
   const [idx, setIdx] = useState(sorted.length - 1)
@@ -134,6 +143,7 @@ export function DashboardView({
                   ))}
                 </Select>
               </Box>
+              {sync.enabled && <SyncButton sync={sync} runSync={runSync} onSynced={onSynced} isSample={isSample} />}
               <Button
                 as="a"
                 href={mailto(settings, `Question about my ${monthLabel(d.current.month)} report`)}
@@ -166,6 +176,56 @@ export function DashboardView({
 type Dash = ReturnType<typeof computeDashboard>
 
 /* ── List item (mirrors Structure pane items) ─────────────── */
+
+/** Pulls the latest Google Ads numbers through the website, then reloads the report. */
+function SyncButton({
+  sync,
+  runSync,
+  onSynced,
+  isSample,
+}: {
+  sync: SyncInfo
+  runSync: RunGoogleAdsSync
+  onSynced: () => void
+  isSample: boolean
+}) {
+  const toast = useToast()
+  const [busy, setBusy] = useState(false)
+  const last = sync.lastSync
+  const lastLabel = last?.at
+    ? `Last sync ${new Date(last.at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}${last.ok ? '' : ' (failed)'}`
+    : 'Never synced'
+
+  const onClick = async () => {
+    setBusy(true)
+    const result = await runSync()
+    setBusy(false)
+    toast.push({
+      status: result.ok ? 'success' : 'error',
+      title: result.ok ? 'Google Ads synced' : 'Google Ads sync failed',
+      description: result.ok && isSample
+        ? `${result.message} The report stays on sample data until Average home price is set in Report Settings.`
+        : result.message,
+      duration: 10_000,
+    })
+    if (result.ok) onSynced()
+  }
+
+  return (
+    <Button
+      icon={SyncIcon}
+      text={busy ? 'Syncing…' : 'Sync Google Ads'}
+      title={lastLabel}
+      mode="ghost"
+      fontSize={1}
+      padding={2}
+      loading={busy}
+      disabled={busy}
+      onClick={onClick}
+      className="dmr-header-btn"
+    />
+  )
+}
 
 function ListItem({ item, selected, onClick }: { item: { title: string; subtitle: string; icon: ComponentType }; selected: boolean; onClick: () => void }) {
   const Icon = item.icon
@@ -905,7 +965,7 @@ function mailto(settings: ClientSettings, subject: string) {
 
 function glossary(s: ClientSettings, valuePerClose: number): [string, string][] {
   return [
-    ['Estimated ROI', `What your leads are likely worth in commission, minus what you paid for them (ad spend plus our fee), as a percentage of what you paid. 100% means every dollar in came back as two. "Since launch" is the headline because online leads take 100+ days on average to become a closing, so any single month is too short to judge.`],
+    ['Estimated ROI', `What your leads are likely worth in commission, minus what you paid for them (ad spend plus our fee), as a percentage of what you paid. 100% means every dollar in came back as two. It never goes below 0%: 0% means no return yet, whether the leads were worth a little less than you paid or nothing at all. "Since launch" is the headline because online leads take 100+ days on average to become a closing, so any single month is too short to judge.`],
     ['Why it’s a low estimate', `Four choices, each made to understate: a ${pct(s.closeRate)} close rate (online-lead average is 0.4%–1.2%), one side of the commission only, the market’s median price rather than your own average sale, and paid leads only. Repeat business and referrals aren’t counted.`],
     ['Average home price', `${s.priceSource}. It sets the value of one closing: price × ${pct(s.commissionRate)} × ${pct(s.agentSplit)} = ${usd(valuePerClose)}. Send us your own 12-month average sale price and split and we’ll use those instead.`],
     ['Total leads', 'People who gave you their contact details through the ads: form submits, phone calls, sign-ups and Local Services messages. Page views and clicks are never counted as leads.'],

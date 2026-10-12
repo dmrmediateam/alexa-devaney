@@ -4,8 +4,16 @@
  * The math is deliberately a LOW estimate:
  *   value of one closing = avg home price × commission (one side) × agent split
  *   est. commission      = leads × close rate × value of one closing
- *   est. ROI             = (est. commission − (ad spend + fee)) ÷ (ad spend + fee)
+ *   est. ROI             = (est. commission − (ad spend + fee)) ÷ (ad spend + fee),
+ *                          floored at 0%
+ *
+ * ROI never shows negative: 0% means no return yet (the estimated commission
+ * didn't beat what was paid, down to $0 earned). Anything that has to know
+ * whether a month lost money compares commission with cost directly.
  */
+
+/** Estimated ROI, floored at 0 (see above). */
+export const roiOf = (commission: number, cost: number) => (cost ? Math.max(0, (commission - cost) / cost) : 0)
 
 export type Campaign = {
   name: string
@@ -42,6 +50,13 @@ export type ClientSettings = {
   scriptsUrl?: string
   propertyScriptUrl?: string
   dataSource: 'manual' | 'googleAds'
+  /** YYYY-MM-DD. Months before this one are not DMR's and are left out of the report. */
+  dmrStartDate?: string
+}
+
+/** First day of the month DMR started, or null when no start date is set. */
+export function startMonth(dmrStartDate?: string | null): string | null {
+  return dmrStartDate ? `${dmrStartDate.slice(0, 7)}-01` : null
 }
 
 export function monthTotals(m: MonthReport) {
@@ -54,13 +69,12 @@ export function computeDashboard(settings: ClientSettings, months: MonthReport[]
   const sorted = [...months].sort((a, b) => a.month.localeCompare(b.month))
   const valuePerClose = settings.avgHomePrice * settings.commissionRate * settings.agentSplit
   const commissionFor = (leads: number) => leads * settings.closeRate * valuePerClose
-  const roi = (commission: number, cost: number) => (cost ? (commission - cost) / cost : 0)
 
   const rows = sorted.map((m) => {
     const t = monthTotals(m)
     const commission = commissionFor(t.leads)
     const cost = t.spend + settings.monthlyFee
-    return { ...m, ...t, commission, cost, roi: roi(commission, cost) }
+    return { ...m, ...t, commission, cost, roi: roiOf(commission, cost) }
   })
 
   const current = rows[rows.length - 1]
@@ -82,7 +96,7 @@ export function computeDashboard(settings: ClientSettings, months: MonthReport[]
       closings: totalLeads * settings.closeRate,
       commission: totalCommission,
       cost: totalCost,
-      roi: roi(totalCommission, totalCost),
+      roi: roiOf(totalCommission, totalCost),
     },
     breakEvenLeads: current
       ? Math.ceil(current.cost / (settings.closeRate * valuePerClose))

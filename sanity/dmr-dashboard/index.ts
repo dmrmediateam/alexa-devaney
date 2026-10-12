@@ -5,7 +5,8 @@
  *   plugins: [dmrDashboard(), structureTool(...)]   // first = landing page
  *   schema: { types: [...schemaTypes, ...dmrSchemaTypes] }
  *
- * See DMR-CLIENT-DASHBOARD-PLAN.md for the Google Ads hookup.
+ * Template (and setup guide): https://github.com/dmrmediateam/client-portal
+ * Setup SOPs live in ClickUp.
  */
 import { definePlugin } from 'sanity'
 import type { StructureBuilder } from 'sanity/structure'
@@ -15,6 +16,7 @@ import { DmrIcon } from './DmrIcon'
 export { dmrSchemaTypes } from './schemas'
 export { dmrTheme } from './theme'
 export { DmrIcon } from './DmrIcon'
+export { DMR_PORTAL_VERSION } from './version'
 
 /** Full-height Studio tool (not a widget grid) so it can mirror the Structure tool's panes. */
 export const dmrDashboard = definePlugin({
@@ -37,6 +39,9 @@ export const dmrStructureItems = (S: StructureBuilder) => [
           S.listItem()
             .title('Monthly Reports')
             .child(S.documentTypeList('dmrMonthlyReport').title('Monthly Reports').defaultOrdering([{ field: 'month', direction: 'desc' }])),
+          S.listItem()
+            .title('Leads')
+            .child(S.documentTypeList('dmrLead').title('Leads').defaultOrdering([{ field: 'month', direction: 'desc' }, { field: 'submittedAt', direction: 'desc' }])),
           S.listItem()
             .title('Budget Requests')
             .child(S.documentTypeList('dmrBudgetRequest').title('Budget Requests').defaultOrdering([{ field: '_createdAt', direction: 'desc' }])),

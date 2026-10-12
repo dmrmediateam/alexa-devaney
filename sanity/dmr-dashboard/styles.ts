@@ -14,6 +14,8 @@ export const dashboardCss = /* css */ `
 .dmr-pane-header { height: 49px; flex: none; }
 .dmr-list-scroll, .dmr-content-scroll { overflow-y: auto; min-height: 0; }
 .dmr-list-foot { flex: none; }
+.dmr-main { min-height: 0; }
+.dmr-version { flex: none; }
 .dmr-header-sub { color: var(--card-muted-fg-color); font-weight: 400; }
 .dmr-month select { min-width: 150px; }
 .dmr-wordmark { font-family: 'Instrument Serif', Georgia, serif; font-size: 20px; line-height: 1; letter-spacing: -0.02em; color: var(--card-fg-color); }

@@ -1,124 +1,151 @@
+import 'server-only';
+
+/* ==========================================================================
+   Google Ads API (REST) for the DMR dashboard. Env vars, set in Vercel:
+
+   GOOGLE_ADS_DEVELOPER_TOKEN     - DMR's MCC developer token
+   GOOGLE_ADS_CLIENT_ID           - OAuth client (Google Cloud project)
+   GOOGLE_ADS_CLIENT_SECRET
+   GOOGLE_ADS_REFRESH_TOKEN       - refresh token for a user with MCC access
+   GOOGLE_ADS_LOGIN_CUSTOMER_ID   - the MCC id, 10 digits (optional if the
+                                    user has direct access to the client)
+   GOOGLE_ADS_CUSTOMER_ID         - client account, 10 digits (optional:
+                                    falls back to googleAdsCustomerId in the
+                                    Studio's DMR Report Settings)
+   GOOGLE_ADS_API_VERSION         - optional: pin one version (e.g. v24)
+   ========================================================================== */
+
 /**
- * Minimal Google Ads API client for the DMR dashboard sync (server-side only).
- *
- * Plain REST rather than the `google-ads-api` package: the sync needs one
- * query, and the credentials are DMR-wide (one MCC, reused for every client),
- * so the only per-client input is the customer id stored in Report Settings.
- *
- *   GOOGLE_ADS_DEVELOPER_TOKEN     MCC → Tools → API Center (Basic access)
- *   GOOGLE_ADS_CLIENT_ID           Google Cloud OAuth client
- *   GOOGLE_ADS_CLIENT_SECRET       same OAuth client
- *   GOOGLE_ADS_REFRESH_TOKEN       DMR user with MCC access, scope .../auth/adwords
- *   GOOGLE_ADS_LOGIN_CUSTOMER_ID   DMR MCC id, digits only
- *   GOOGLE_ADS_API_VERSION         optional, e.g. v25. Google sunsets each
- *                                  version about a year after release, so
- *                                  bump this when the sync starts failing.
+ * Google releases a version roughly every quarter and sunsets each about a
+ * year later, and a new version's URL answers before its methods exist
+ * ("Method not found"). So instead of pinning one, try newest first and
+ * remember the first that serves the call.
  */
+const API_VERSIONS = process.env.GOOGLE_ADS_API_VERSION
+  ? [process.env.GOOGLE_ADS_API_VERSION]
+  : ['v26', 'v25', 'v24', 'v23', 'v22'];
+let workingVersion: string | null = null;
 
-const API_VERSION = process.env.GOOGLE_ADS_API_VERSION || 'v25'
+/** POST/GET a Google Ads REST path (e.g. "customers/123/googleAds:search") on the first live version. */
+async function adsFetch(path: string, init: RequestInit): Promise<{ res: Response; version: string }> {
+  const versions = workingVersion ? [workingVersion] : API_VERSIONS;
+  let last: { res: Response; version: string } | null = null;
+  for (const version of versions) {
+    const res = await fetch(`https://googleads.googleapis.com/${version}/${path}`, {
+      ...init,
+      cache: 'no-store',
+      signal: AbortSignal.timeout(20_000),
+    });
+    // A 404 from an unreleased or sunset version; any other answer means the method exists.
+    if (res.status !== 404) {
+      workingVersion = version;
+      return { res, version };
+    }
+    last = { res, version };
+  }
+  return last!;
+}
 
-const REQUIRED = [
+const digits = (value: string | undefined) => (value ?? '').replace(/\D/g, '');
+
+const REQUIRED_ENV = [
   'GOOGLE_ADS_DEVELOPER_TOKEN',
   'GOOGLE_ADS_CLIENT_ID',
   'GOOGLE_ADS_CLIENT_SECRET',
   'GOOGLE_ADS_REFRESH_TOKEN',
-  'GOOGLE_ADS_LOGIN_CUSTOMER_ID',
-] as const
+] as const;
 
-/** Names of the Google Ads env vars that are not set (empty when ready). */
+/** Names of the required variables this deployment can't see (names only, never values). */
 export function missingGoogleAdsEnv(): string[] {
-  return REQUIRED.filter((name) => !process.env[name])
+  return REQUIRED_ENV.filter((name) => !process.env[name]);
 }
 
-const digits = (id: string) => id.replace(/\D/g, '')
+export function googleAdsConfigured(): boolean {
+  return missingGoogleAdsEnv().length === 0;
+}
+
+export function envCustomerId(): string | null {
+  return digits(process.env.GOOGLE_ADS_CUSTOMER_ID) || null;
+}
 
 async function accessToken(): Promise<string> {
   const res = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id: process.env.GOOGLE_ADS_CLIENT_ID!,
-      client_secret: process.env.GOOGLE_ADS_CLIENT_SECRET!,
-      refresh_token: process.env.GOOGLE_ADS_REFRESH_TOKEN!,
       grant_type: 'refresh_token',
+      client_id: process.env.GOOGLE_ADS_CLIENT_ID ?? '',
+      client_secret: process.env.GOOGLE_ADS_CLIENT_SECRET ?? '',
+      refresh_token: process.env.GOOGLE_ADS_REFRESH_TOKEN ?? '',
     }),
     cache: 'no-store',
-  })
-  const json = (await res.json().catch(() => ({}))) as { access_token?: string; error?: string }
-  if (!res.ok || !json.access_token) {
-    throw new Error(`Google OAuth token refresh failed (${res.status} ${json.error ?? ''})`.trim())
+    signal: AbortSignal.timeout(15_000),
+  });
+  const body = (await res.json().catch(() => ({}))) as { access_token?: string; error?: string };
+  if (!res.ok || !body.access_token) {
+    // e.g. invalid_grant: the refresh token was revoked or expired
+    throw new Error(`Google OAuth failed (${res.status}${body.error ? `: ${body.error}` : ''})`);
   }
-  return json.access_token
+  return body.access_token;
 }
 
-export type CampaignMonth = {
-  id: string
-  name: string
-  channel: string
-  spend: number
-  leads: number
+interface GoogleAdsErrorBody {
+  error?: {
+    status?: string;
+    message?: string;
+    details?: Array<{ errors?: Array<{ errorCode?: Record<string, string> }> }>;
+  };
 }
 
-type Row = {
-  campaign?: { id?: string; name?: string; advertisingChannelType?: string }
-  metrics?: { costMicros?: string; conversions?: number }
+/** Google's specific reason (DEVELOPER_TOKEN_NOT_APPROVED, USER_PERMISSION_DENIED, ...). */
+async function errorCode(res: Response): Promise<string> {
+  const body = (await res.json().catch(() => ({}))) as GoogleAdsErrorBody;
+  const specific = body.error?.details?.[0]?.errors?.[0]?.errorCode;
+  const reason = (specific && Object.values(specific)[0]) || body.error?.status;
+  const message = body.error?.message ? ` "${body.error.message.slice(0, 160)}"` : '';
+  return reason ? `: ${reason}${message}` : message;
 }
 
-/**
- * Spend and leads per campaign for one month (`YYYY-MM-01`).
- *
- * Leads are the account's `conversions` column, i.e. the conversion actions
- * the account counts as primary, which is the same number the Ryze-built PDF
- * reports. Removed campaigns are included on purpose: if one spent money in
- * the month, leaving it out would understate spend. Rows with no spend and no
- * leads are dropped.
- */
-export async function campaignsForMonth(customerId: string, month: string): Promise<CampaignMonth[]> {
-  const token = await accessToken()
-  const query = `
-    SELECT campaign.id, campaign.name, campaign.advertising_channel_type,
-           metrics.cost_micros, metrics.conversions
-    FROM campaign
-    WHERE segments.month = '${month}'`
+function adsHeaders(accessToken: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${accessToken}`,
+    'developer-token': process.env.GOOGLE_ADS_DEVELOPER_TOKEN ?? '',
+    'Content-Type': 'application/json',
+  };
+  const loginCustomerId = digits(process.env.GOOGLE_ADS_LOGIN_CUSTOMER_ID);
+  if (loginCustomerId) headers['login-customer-id'] = loginCustomerId;
+  return headers;
+}
 
-  const res = await fetch(
-    `https://googleads.googleapis.com/${API_VERSION}/customers/${digits(customerId)}/googleAds:searchStream`,
-    {
+/** Account ids the OAuth user can reach directly (the MCC, usually). For diagnosing 403/404s. */
+export async function listAccessibleCustomers(): Promise<string[]> {
+  const { res } = await adsFetch('customers:listAccessibleCustomers', { headers: adsHeaders(await accessToken()) });
+  if (!res.ok) throw new Error(`listAccessibleCustomers failed (${res.status}${await errorCode(res)})`);
+  const body = (await res.json()) as { resourceNames?: string[] };
+  return (body.resourceNames ?? []).map((name) => name.split('/')[1]);
+}
+
+/** Runs one GAQL query against a client account and returns the rows. */
+export async function googleAdsSearch<T = Record<string, unknown>>(
+  customerId: string,
+  query: string,
+): Promise<T[]> {
+  const headers = adsHeaders(await accessToken());
+
+  const rows: T[] = [];
+  let pageToken: string | undefined;
+  do {
+    const { res, version } = await adsFetch(`customers/${digits(customerId)}/googleAds:search`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'developer-token': process.env.GOOGLE_ADS_DEVELOPER_TOKEN!,
-        'login-customer-id': digits(process.env.GOOGLE_ADS_LOGIN_CUSTOMER_ID!),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query }),
-      cache: 'no-store',
-    },
-  )
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '')
-    throw new Error(`Google Ads query failed (${res.status}): ${detail.slice(0, 500)}`)
-  }
-
-  const batches = (await res.json()) as { results?: Row[] }[]
-  const byId = new Map<string, CampaignMonth>()
-  for (const row of batches.flatMap((b) => b.results ?? [])) {
-    const id = row.campaign?.id
-    if (!id) continue
-    const current = byId.get(id) ?? {
-      id,
-      name: row.campaign?.name ?? `Campaign ${id}`,
-      channel: row.campaign?.advertisingChannelType ?? '',
-      spend: 0,
-      leads: 0,
+      headers,
+      body: JSON.stringify({ query, ...(pageToken ? { pageToken } : {}) }),
+    });
+    if (!res.ok) {
+      throw new Error(`Google Ads ${version} request failed (${res.status}${await errorCode(res)})`);
     }
-    current.spend += Number(row.metrics?.costMicros ?? 0) / 1e6
-    current.leads += Number(row.metrics?.conversions ?? 0)
-    byId.set(id, current)
-  }
-
-  return [...byId.values()]
-    .filter((c) => c.spend > 0 || c.leads > 0)
-    .map((c) => ({ ...c, spend: Math.round(c.spend * 100) / 100, leads: Math.round(c.leads) }))
-    .sort((a, b) => b.spend - a.spend)
+    const body = (await res.json()) as { results?: T[]; nextPageToken?: string };
+    rows.push(...(body.results ?? []));
+    pageToken = body.nextPageToken;
+  } while (pageToken);
+  return rows;
 }
