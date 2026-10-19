@@ -208,6 +208,7 @@ export default function ListingDetailBody({
               listingId={listing.mlsNumber}
               listingUrl={listing.detailUrl}
               consent={content.footer.newsletter.consent}
+              price={listing.price}
             />
           </div>
         </aside>

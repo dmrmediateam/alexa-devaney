@@ -105,6 +105,7 @@ export default async function ListingPage({ params }: Params) {
         <ListingLeadGate
           address={listing.address.full}
           mlsNumber={listing.mlsNumber}
+          price={listing.price}
           consent={site.footer.newsletter.consent}
           agentName={site.footer.agentName}
           photo={listing.photos[0]?.url}

@@ -77,6 +77,7 @@ export default function ListingLeadGate({
   agentName,
   photo,
   listingUrl,
+  price,
   freeViews = 0,
   dismissible = false,
   heading,
@@ -93,6 +94,8 @@ export default function ListingLeadGate({
   photo?: string;
   /** Path to this home's page, for the alert email. */
   listingUrl?: string;
+  /** List price: values the Google Ads conversion */
+  price?: number;
   freeViews?: number;
   dismissible?: boolean;
   heading: string;
@@ -185,7 +188,7 @@ export default function ListingLeadGate({
       listingUrl: pending?.url ?? listingUrl,
       company: String(data.get("company") ?? ""),
       website: String(data.get("website") ?? ""),
-    });
+    }, pending ? pending.price : price);
     if (!ok) return;
     /*
      * Save the answer BEFORE announcing the close. The listener that decides

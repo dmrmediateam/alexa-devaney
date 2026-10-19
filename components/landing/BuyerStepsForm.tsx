@@ -4,7 +4,7 @@ import { useState } from "react";
 import Honeypot from "@/components/leads/Honeypot";
 import { site } from "@/content/site";
 import { getAttribution } from "@/lib/attribution";
-import { LEAD_VALUES, setUserData, trackEvent } from "@/lib/analytics";
+import { fireLeadConversion, parsePriceBand, setUserData, trackEvent } from "@/lib/analytics";
 
 /*
  * Two-step buyer capture for /buyers: one tap on a price band, then contact.
@@ -58,11 +58,13 @@ export default function BuyerStepsForm() {
       if (!res.ok) throw new Error("request failed");
       setUserData({ email: fields.email, phone: fields.phone });
       const qualified = QUALIFIED.has(fields.pricePoint);
+      // The one Ads conversion, valued from the price band they picked
+      const value = fireLeadConversion("buyer", parsePriceBand(fields.pricePoint));
       trackEvent("generate_lead", {
         form_type: "buyer",
         qualified,
         price_point: fields.pricePoint,
-        value: qualified ? LEAD_VALUES.buyer : Math.round(LEAD_VALUES.buyer / 6),
+        value,
         currency: "USD",
       });
       setStatus("done");

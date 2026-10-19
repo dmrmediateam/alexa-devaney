@@ -12,12 +12,15 @@ export default function ListingInquiryForm({
   listingId,
   listingUrl,
   consent,
+  price,
 }: {
   address: string;
   listingId: string;
   /** Path to this home's page, so the alert email can link straight to it. */
   listingUrl?: string;
   consent: string;
+  /** List price: values the Google Ads conversion */
+  price?: number;
 }) {
   const { status, submit } = useLeadSubmit("listing-inquiry", "listing_inquiry");
 
@@ -34,7 +37,7 @@ export default function ListingInquiryForm({
       listingUrl,
       company: String(data.get("company") ?? ""),
       website: String(data.get("website") ?? ""),
-    });
+    }, price);
   }
 
   if (status === "done") {

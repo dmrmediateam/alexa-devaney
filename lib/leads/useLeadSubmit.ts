@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { getAttribution } from "@/lib/attribution";
-import { LEAD_VALUES, setUserData, trackEvent, type ConversionEvent } from "@/lib/analytics";
+import { LEAD_VALUES, fireLeadConversion, setUserData, trackEvent, type ConversionEvent } from "@/lib/analytics";
 import { qualify } from "@/lib/leads/qualify";
 
 export type LeadStatus = "idle" | "submitting" | "done" | "error";
@@ -18,7 +18,8 @@ export type LeadStatus = "idle" | "submitting" | "done" | "error";
 export function useLeadSubmit(formType: string, event: ConversionEvent = "generate_lead") {
   const [status, setStatus] = useState<LeadStatus>("idle");
 
-  async function submit(fields: Record<string, unknown>): Promise<boolean> {
+  /** homeValue: the price of the home this lead is about, when the form knows it */
+  async function submit(fields: Record<string, unknown>, homeValue?: number): Promise<boolean> {
     setStatus("submitting");
     const payload = { formType, ...fields };
     try {
@@ -39,10 +40,11 @@ export function useLeadSubmit(formType: string, event: ConversionEvent = "genera
 
       const q = qualify(payload);
       const base = LEAD_VALUES[formType] ?? 20;
+      const conversionValue = fireLeadConversion(formType, homeValue);
       trackEvent(event, {
         form_type: formType,
         qualified: q.qualified,
-        value: q.qualified ? base : Math.round(base / 6),
+        value: conversionValue ?? (q.qualified ? base : Math.round(base / 6)),
         currency: "USD",
       });
       setStatus("done");

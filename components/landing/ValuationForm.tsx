@@ -5,7 +5,7 @@ import Honeypot from "@/components/leads/Honeypot";
 import { site } from "@/content/site";
 import { getAttribution } from "@/lib/attribution";
 import { qualify } from "@/lib/leads/qualify";
-import { LEAD_VALUES, setUserData, trackEvent } from "@/lib/analytics";
+import { fireLeadConversion, parsePriceBand, setUserData, trackEvent } from "@/lib/analytics";
 
 const VALUE_BANDS = [
   "Under $1.5M", "$1.5M – $2M", "$2M – $3M", "$3M – $5M", "$5M+", "Not sure",
@@ -78,10 +78,12 @@ export default function ValuationForm() {
       // Qualified and disqualified leads are worth very different amounts;
       // reporting the same value for both teaches bidding the wrong thing.
       const q = qualify({ formType: "home-value", ...fields } as Record<string, unknown>);
+      // The one Ads conversion, valued from the price band they picked
+      const value = fireLeadConversion("home-value", parsePriceBand(fields.estimatedValue));
       trackEvent("generate_lead", {
         form_type: "home-value",
         qualified: q.qualified,
-        value: q.qualified ? LEAD_VALUES["home-value"] : Math.round(LEAD_VALUES["home-value"] / 6),
+        value,
         currency: "USD",
       });
       setStatus("done");

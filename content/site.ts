@@ -306,8 +306,17 @@ export interface SiteContent {
     googleAdsId?: string;
     /** GA4 measurement id, e.g. "G-XXXXXXXXXX" */
     ga4Id?: string;
-    /** Maps our semantic events to Google Ads conversion labels */
-    conversions?: Partial<Record<string, string>>;
+    /**
+     * Label of the ONE Google Ads lead conversion every lead form reports to
+     * (the part after the slash in send_to "AW-…/label"). Values per form
+     * are set in lib/analytics.ts.
+     */
+    leadConversionLabel?: string;
+    /**
+     * Market median home price, used to value a lead that carries no home
+     * price of its own (the sell-page valuation wizard, "Not sure" bands).
+     */
+    defaultHomeValue?: number;
   };
   hero: {
     preTitle: string;
@@ -552,6 +561,18 @@ export const site: SiteContent = {
       "https://www.facebook.com/alexa.walker.9822",
       "https://www.ogroup.com/agents/alexa-devaney",
     ],
+  },
+  analytics: {
+    googleAdsId: "AW-18476132444",
+    // leadConversionLabel: the "Website Conversion (Dynamic Value)" label goes
+    // here once the action exists in Ads; until then values are exposed on the
+    // page but no conversion is sent.
+    /*
+     * Redfin median sale price, Sep 2026: Encinitas $2.06M, Carlsbad ~$1.5M,
+     * Oceanside ~$0.87M, Fallbrook ~$0.9M. Carlsbad, the middle of her market,
+     * rounded; it also matches the $1.5M low end she quotes for her own sales.
+     */
+    defaultHomeValue: 1500000,
   },
   hero: {
     preTitle: "North County San Diego · The Oppenheim Group",

@@ -17,6 +17,11 @@ declare global {
   interface Window {
     dataLayer?: Record<string, unknown>[];
     gtag?: (...args: unknown[]) => void;
+    /* Read by the Google tag's "Extract data from your page" settings in
+       Google Ads (JavaScript variable mode). Renaming them breaks that setup. */
+    dmr_conversion_value?: number;
+    dmr_transaction_id?: string;
+    dmr_currency?: string;
   }
 }
 
@@ -49,6 +54,95 @@ export const LEAD_VALUES: Record<string, number> = {
   newsletter: 5,
 };
 
+/* ==========================================================================
+   The one Google Ads lead conversion.
+
+   Every paid lead on the site reports to a single conversion action, valued by
+   what the lead is plausibly worth in commission:
+     home price x 3% commission x 80% agent split x the lead's close rate.
+   A contact form carries no home, so it gets a flat value instead. Forms not
+   listed here (newsletter) are tracked as events but are not Ads conversions.
+   ========================================================================== */
+
+const COMMISSION_RATE = 0.03;
+const AGENT_SPLIT = 0.8;
+
+const LEAD_CONVERSIONS: Record<string, { flat: number } | { closeRate: number }> = {
+  contact: { flat: 250 },
+  "listing-registration": { closeRate: 0.015 }, // IDX forced conversion
+  "listing-inquiry": { closeRate: 0.03 },
+  "home-value": { closeRate: 0.03 },
+  buyer: { closeRate: 0.03 }, // /buyers price-band form
+};
+
+/**
+ * A price band as one home value: "$1.5M – $2M" -> 1750000, "$5M+" -> 5000000.
+ * "Under $X" has no midpoint, so it takes the market fallback capped at X
+ * (an under-$300K pick must not be valued at a $400K median).
+ * Undefined for "Not sure" or anything unparseable, which means "use the fallback".
+ */
+export function parsePriceBand(text: string | undefined): number | undefined {
+  if (!text || /not sure/i.test(text)) return undefined;
+  if (/under/i.test(text)) {
+    const ceiling = parsePriceBand(text.replace(/under/i, ""));
+    const fallback = site.analytics?.defaultHomeValue;
+    if (ceiling === undefined) return undefined;
+    return fallback ? Math.min(ceiling, fallback) : ceiling;
+  }
+  const amounts = [...text.matchAll(/\$?\s*([\d.,]+)\s*([KkMm])?/g)]
+    .map(([, n, unit]) => {
+      const num = parseFloat(n.replace(/,/g, ""));
+      const mult = unit?.toLowerCase() === "m" ? 1e6 : unit?.toLowerCase() === "k" ? 1e3 : 1;
+      return num * mult;
+    })
+    .filter((n) => n >= 10000);
+  if (amounts.length === 0) return undefined;
+  return amounts.reduce((a, b) => a + b, 0) / amounts.length;
+}
+
+/** The conversion value for a lead, or null when this form is not an Ads conversion. */
+export function leadConversionValue(formType: string, homeValue?: number): number | null {
+  const rule = LEAD_CONVERSIONS[formType];
+  if (!rule) return null;
+  if ("flat" in rule) return rule.flat;
+  const price = homeValue && homeValue > 0 ? homeValue : site.analytics?.defaultHomeValue ?? 0;
+  return Math.round(price * COMMISSION_RATE * AGENT_SPLIT * rule.closeRate * 100) / 100;
+}
+
+/**
+ * Fire the lead conversion for a completed form. The value, transaction id and
+ * currency are written to window globals first, so the Google tag's page-data
+ * extraction reads the same numbers the explicit conversion call sends. The
+ * transaction id also lets Google drop a duplicate if the conversion fires twice.
+ */
+export function fireLeadConversion(formType: string, homeValue?: number): number | null {
+  const value = leadConversionValue(formType, homeValue);
+  if (value === null || typeof window === "undefined") return value;
+  const transactionId =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  try {
+    window.dmr_conversion_value = value;
+    window.dmr_transaction_id = transactionId;
+    window.dmr_currency = "USD";
+
+    const adsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || site.analytics?.googleAdsId;
+    const label = site.analytics?.leadConversionLabel;
+    if (adsId && label && typeof window.gtag === "function") {
+      window.gtag("event", "conversion", {
+        send_to: `${adsId}/${label}`,
+        value,
+        currency: "USD",
+        transaction_id: transactionId,
+      });
+    }
+  } catch {
+    // Analytics must never take a form down with it
+  }
+  return value;
+}
+
 export function trackEvent(event: ConversionEvent, params: Record<string, unknown> = {}): void {
   if (typeof window === "undefined") return;
   const payload = { event, ...params };
@@ -59,22 +153,6 @@ export function trackEvent(event: ConversionEvent, params: Record<string, unknow
     if (typeof window.gtag === "function") {
       const { event: _event, ...rest } = payload;
       window.gtag("event", event, rest);
-
-      /*
-       * Fire the Google Ads conversion directly when this event maps to one.
-       * Doing it here rather than in GTM means Smart Bidding gets a signal
-       * without waiting on a container to be built; a GTM container can still
-       * be layered on later, since both read the same dataLayer.
-       */
-      const adsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || site.analytics?.googleAdsId;
-      const label = site.analytics?.conversions?.[event];
-      if (adsId && label) {
-        window.gtag("event", "conversion", {
-          send_to: `${adsId}/${label}`,
-          value: params.value,
-          currency: params.currency ?? "USD",
-        });
-      }
     }
   } catch {
     // Analytics must never take a form down with it
