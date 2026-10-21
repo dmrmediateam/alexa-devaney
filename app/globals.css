@@ -6423,16 +6423,6 @@ footer .footer > * { position: relative; z-index: 1; }
 .sidemenu__nav .sidemenu__sub li { margin: 0; padding: 0; border: 0; opacity: 1; transform: none; }
 .sidemenu__nav .sidemenu__sub a { font-size: 17px; padding: 6px 0; }
 
-.sidemenu__hoods { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: -2px 0 8px; }
-.sidemenu__nav .sidemenu__hoods a {
-  font-family: var(--body-font);
-  font-size: 12px;
-  letter-spacing: 0.3px;
-  padding: 3px 0;
-  color: rgba(247, 246, 244, 0.6);
-}
-.sidemenu__nav .sidemenu__hoods a:hover { color: var(--cream); padding-left: 0; }
-
 /* footer column */
 
 .footer__layout { grid-template-columns: 1.2fr 0.85fr 0.85fr 1.2fr; }
