@@ -19,11 +19,12 @@ import {
 } from '@sanity/icons'
 import { Badge, Box, Button, Card, Flex, Select, Stack, Tab, TabList, Text, useToast } from '@sanity/ui'
 import { IntentLink } from 'sanity/router'
+import { AverageLeadValue } from './AverageLeadValue'
 import { MetricChart } from './MetricChart'
 import { SpendPlanner } from './SpendPlanner'
 import type { SubmitBudgetRequest } from './budgetRequest'
 import type { RunGoogleAdsSync } from './googleAdsSync'
-import { computeDashboard, monthLabel, num, pct, usd, type ClientSettings, type MonthReport } from './math'
+import { computeDashboard, monthLabel, num, pct, usd, usesAdsValues, type ClientSettings, type MonthReport } from './math'
 import { DMR_EMAIL, DMR_SITE } from './tokens'
 import type { SyncInfo } from './useDashboardData'
 import { useVisitors, type Visitor, type VisitorActivity } from './useVisitors'
@@ -37,7 +38,7 @@ import { useVisitors, type Visitor, type VisitorActivity } from './useVisitors'
  */
 
 type Section = 'overview' | 'spend' | 'campaigns' | 'months' | 'roi' | 'visitors' | 'playbook' | 'contact'
-type MetricKey = 'leads' | 'spend' | 'cpl' | 'commission'
+type MetricKey = 'leads' | 'spend' | 'cpl' | 'value'
 
 const SECTIONS: { key: Section; title: string; subtitle: string; icon: ComponentType }[] = [
   { key: 'overview', title: 'Overview', subtitle: 'ROI, leads and spend', icon: ChartUpwardIcon },
@@ -70,7 +71,7 @@ export function DashboardView({
   const sorted = [...months].sort((a, b) => a.month.localeCompare(b.month))
   const [idx, setIdx] = useState(sorted.length - 1)
   const [section, setSection] = useState<Section>('overview')
-  const d = computeDashboard(settings, sorted.slice(0, idx + 1))
+  const d = computeDashboard(settings, sorted.slice(0, idx + 1), usesAdsValues(sorted))
   const active = [...SECTIONS, CONTACT].find((s) => s.key === section)!
 
   return (
@@ -266,7 +267,7 @@ function Overview({ settings, d }: { settings: ClientSettings; d: Dash }) {
     { key: 'leads', label: 'Leads', format: (n) => num(n) },
     { key: 'spend', label: 'Ad spend', format: (n) => usd(n) },
     { key: 'cpl', label: 'Cost per lead', format: (n) => usd(n) },
-    { key: 'commission', label: 'Est. commission', format: (n) => usd(n) },
+    { key: 'value', label: 'Lead value', format: (n) => usd(n) },
   ]
   const active = metrics.find((m) => m.key === metric)!
 
@@ -313,12 +314,13 @@ function Overview({ settings, d }: { settings: ClientSettings; d: Dash }) {
         </Card>
       </div>
 
-      <div className="dmr-tiles dmr-tiles-4">
-        <Tile small label="Est. commission to date" value={usd(d.launch.commission)} />
+      <div className="dmr-tiles dmr-tiles-3">
+        <Tile small label="Lead value to date" value={usd(d.launch.value)} />
         <Tile small label="Invested to date" value={usd(d.launch.cost)} note="Ad spend + DMR fee" />
-        <Tile small label="One closing pays you" value={usd(d.valuePerClose)} />
         <Tile small label="Leads to break even" value={num(d.breakEvenLeads)} note={`You had ${num(cur.leads)} in ${monthLabel(cur.month, 'short')}`} />
       </div>
+
+      <AverageLeadValue settings={settings} d={d} />
     </Stack>
   )
 }
@@ -722,7 +724,7 @@ function Months({ d }: { d: Dash }) {
       <Card className="dmr-tile">
         <table className="dmr-table">
           <thead>
-            <tr><th>Month</th><th>Leads</th><th>Spend</th><th>Cost per lead</th><th className="dmr-hide-sm">Est. commission</th><th>Est. ROI</th></tr>
+            <tr><th>Month</th><th>Leads</th><th>Spend</th><th>Cost per lead</th><th className="dmr-hide-sm">Lead value</th><th>Est. ROI</th></tr>
           </thead>
           <tbody>
             {[...d.rows].reverse().map((r) => (
@@ -731,7 +733,7 @@ function Months({ d }: { d: Dash }) {
                 <td>{num(r.leads)}</td>
                 <td>{usd(r.spend)}</td>
                 <td>{usd(r.cpl)}</td>
-                <td className="dmr-hide-sm">{usd(r.commission)}</td>
+                <td className="dmr-hide-sm">{usd(r.value)}{r.valueSource === 'estimate' && <span className="dmr-muted"> est.</span>}</td>
                 <td>{pct(r.roi)}</td>
               </tr>
             ))}
@@ -750,23 +752,29 @@ function RoiMath({ settings, d }: { settings: ClientSettings; d: Dash }) {
   return (
     <Stack space={4}>
       <div className="dmr-tiles dmr-tiles-2">
-        <MathTile title="What one closing pays you" rows={[
-          [`Average home price · ${settings.market}`, usd(settings.avgHomePrice)],
-          [`× ${pct(settings.commissionRate)} commission, one side only`, usd(settings.avgHomePrice * settings.commissionRate)],
-        ]} total={[`× ${pct(settings.agentSplit)} your split`, usd(d.valuePerClose)]} />
+        <MathTile title="What one lead is worth" rows={
+          cur.valueSource === 'googleAds' && cur.leads
+            ? [
+                [`Google Ads conversion value · ${monthLabel(cur.month, 'short')}`, usd(cur.value)],
+                [`÷ ${num(cur.leads)} leads`, ''],
+              ]
+            : [
+                [`No Google Ads conversion value, so: average home price · ${settings.market}`, usd(settings.avgHomePrice)],
+                [`× ${pct(settings.commissionRate)} commission, one side × ${pct(settings.agentSplit)} your split`, `${usd(d.valuePerClose)} a closing`],
+                [`× ${pct(settings.closeRate)} lead-to-close`, ''],
+              ]
+        } total={['Average lead value', usd(cur.avgLeadValue)]} />
         <MathTile title="What it takes" rows={[
-          ['Leads per month to break even', num(d.breakEvenLeads)],
-          [`Every ${num(1 / settings.closeRate)} leads = 1 closing =`, usd(d.valuePerClose)],
-        ]} />
+          [`Spend ${usd(cur.spend)} + fee ${usd(settings.monthlyFee)}`, usd(cur.cost)],
+          [`÷ ${usd(d.leadValue)} average lead value`, ''],
+        ]} total={['Leads per month to break even', num(d.breakEvenLeads)]} />
         <MathTile title={`This month · ${monthLabel(cur.month)}`} rows={[
-          [`${num(cur.leads)} leads × ${pct(settings.closeRate)} lead-to-close`, `${num(cur.leads * settings.closeRate, 2)} closings`],
-          ['= Estimated commission', usd(cur.commission)],
-          [`Ad spend ${usd(cur.spend)} + fee ${usd(settings.monthlyFee)}`, usd(cur.cost)],
+          [`Lead value · ${num(cur.leads)} leads × ${usd(cur.avgLeadValue)}`, usd(cur.value)],
+          [`÷ ad spend`, usd(cur.spend)],
         ]} total={['Estimated ROI', pct(cur.roi)]} />
         <MathTile title={`Since launch · ${first} to ${monthLabel(cur.month, 'short')}`} rows={[
-          [`${num(d.launch.leads)} leads × ${pct(settings.closeRate)} lead-to-close`, `${num(d.launch.closings, 2)} closings`],
-          ['= Estimated commission', usd(d.launch.commission)],
-          [`Ad spend ${usd(d.launch.spend)} + fees ${usd(d.launch.fees)}`, usd(d.launch.cost)],
+          [`Lead value · ${num(d.launch.leads)} leads × ${usd(d.launch.avgLeadValue)}`, usd(d.launch.value)],
+          [`÷ ad spend`, usd(d.launch.spend)],
         ]} total={['Estimated ROI', pct(d.launch.roi)]} />
       </div>
       <div className="dmr-tiles">
@@ -965,13 +973,14 @@ function mailto(settings: ClientSettings, subject: string) {
 
 function glossary(s: ClientSettings, valuePerClose: number): [string, string][] {
   return [
-    ['Estimated ROI', `What your leads are likely worth in commission, minus what you paid for them (ad spend plus our fee), as a percentage of what you paid. 100% means every dollar in came back as two. It never goes below 0%: 0% means no return yet, whether the leads were worth a little less than you paid or nothing at all. "Since launch" is the headline because online leads take 100+ days on average to become a closing, so any single month is too short to judge.`],
-    ['Why it’s a low estimate', `Four choices, each made to understate: a ${pct(s.closeRate)} close rate (online-lead average is 0.4%–1.2%), one side of the commission only, the market’s median price rather than your own average sale, and paid leads only. Repeat business and referrals aren’t counted.`],
+    ['Average lead value', `What one lead is worth: the conversion value your Google Ads account reports for the month, divided by the month's leads. Est. ROI and the Ad spend planner are built on it. A month Google Ads put no value on counts as $0. Only months without Google Ads values (entered by hand, or before values were set up in Ads) use the low estimate: ${pct(s.closeRate)} close rate × ${usd(valuePerClose)} per closing = ${usd(s.closeRate * valuePerClose)} a lead.`],
+    ['Estimated ROI', `What your leads are worth (their Google Ads conversion value) divided by your ad spend, the same as Google Ads' "Conv. value / cost". 100% means the leads were worth what Google charged; 300% means every ad dollar brought in three dollars of lead value. Our management fee isn't part of ROI; it's counted in "Invested to date" and the break-even numbers. "Since launch" is the headline because online leads take 100+ days on average to become a closing, so any single month is too short to judge.`],
+    ['Why the fallback is a low estimate', `For months without a Google Ads conversion value. Four choices, each made to understate: a ${pct(s.closeRate)} close rate (online-lead average is 0.4%–1.2%), one side of the commission only, the market’s median price rather than your own average sale, and paid leads only. Repeat business and referrals aren’t counted.`],
     ['Average home price', `${s.priceSource}. It sets the value of one closing: price × ${pct(s.commissionRate)} × ${pct(s.agentSplit)} = ${usd(valuePerClose)}. Send us your own 12-month average sale price and split and we’ll use those instead.`],
     ['Total leads', 'People who gave you their contact details through the ads: form submits, phone calls, sign-ups and Local Services messages. Page views and clicks are never counted as leads.'],
     ['Cost per lead vs. industry', `Ad spend divided by leads, compared with the LocaliQ/WordStream real estate benchmark of ${usd(s.industryCpl)} per lead across 13,000+ US campaigns.`],
     ['Ad spend', 'What Google charged for clicks. It goes to Google directly and is separate from our management fee.'],
-    ['Leads per month to break even', `How many leads it takes, at a ${pct(s.closeRate)} close rate, for estimated commission to cover that month’s spend and fee. One month under it isn’t a problem; since launch is what counts.`],
+    ['Leads per month to break even', `How many leads it takes, at your average lead value, to cover that month’s spend and fee. One month under it isn’t a problem; since launch is what counts.`],
     ['Search vs. Performance Max', 'Search catches people typing “homes for sale in your market”: highest intent, highest cost per lead. Performance Max follows people across Google, YouTube and Gmail: cheaper leads, earlier in their decision. Run both through the same follow-up.'],
     ['Sources', 'Close rate: NAR (0.4%–1.2%) via Follow Up Boss; Ylopo 0.5%–1.5%. Commission: Clever 2026 agent survey. Cost per lead: LocaliQ/WordStream 2026 Real Estate benchmarks. Speed to lead: Oldroyd, Lead Response Management study.'],
   ]

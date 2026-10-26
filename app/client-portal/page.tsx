@@ -113,8 +113,9 @@ export default function ClientPortalPage() {
         </div>
 
         <p className="portal__note">
-          A <em>low</em> estimate, on purpose: 1% close rate, one side of the commission, your
-          market&rsquo;s median price.
+          Built on your Google Ads conversion values. Months without one use a <em>low</em>{' '}
+          estimate, on purpose: 1% close rate, one side of the commission, your market&rsquo;s
+          median price.
         </p>
       </aside>
     </div>

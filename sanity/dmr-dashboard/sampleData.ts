@@ -40,10 +40,10 @@ export const sampleMonths: MonthReport[] = [
   {
     month: '2026-08-01',
     campaigns: [
-      { name: 'Performance Max', subtitle: 'vacation-rental buyer forms', spend: 1517, leads: 152 },
-      { name: 'Search · Buyers', subtitle: 'homes for sale', spend: 457, leads: 1 },
-      { name: 'Local Services Ads', subtitle: 'phone + message leads', spend: 437, leads: 5 },
-      { name: 'Search · Sellers', subtitle: 'home value', spend: 42, leads: 1 },
+      { name: 'Performance Max', subtitle: 'vacation-rental buyer forms', spend: 1517, leads: 152, value: 15200 },
+      { name: 'Search · Buyers', subtitle: 'homes for sale', spend: 457, leads: 1, value: 250 },
+      { name: 'Local Services Ads', subtitle: 'phone + message leads', spend: 437, leads: 5, value: 750 },
+      { name: 'Search · Sellers', subtitle: 'home value', spend: 42, leads: 1, value: 300 },
     ],
     footnote: 'PMax leads are form submits. One LSA "get directions" click was not counted.',
   },

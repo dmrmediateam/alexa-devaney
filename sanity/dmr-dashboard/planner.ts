@@ -3,8 +3,11 @@ import { roiOf, type ClientSettings } from './math'
 /**
  * Ad spend projection. Leads scale with budget at diminishing returns:
  *   leads(s) = L0 × (s / S0)^e     (e = settings.spendElasticity, default 0.7)
- * anchored on the selected month's actual spend (S0) and leads (L0). Everything else
- * reuses the report's low-estimate math (close rate × value of one closing).
+ * anchored on a full month's spend (S0) and leads (L0): the selected month,
+ * paced out to the whole month while it's still in progress. Each projected
+ * lead is worth the dashboard's average lead value (Google Ads conversion
+ * value ÷ leads, or the close-rate estimate when Ads has no value), so at
+ * today's budget the planner's ROI (lead value ÷ ad spend) matches the report's.
  */
 
 export const STEP_PCT = 0.2 // DMR guideline: move budgets ~20% per month so bidding can re-learn
@@ -12,16 +15,14 @@ const DEFAULT_ELASTICITY = 0.7
 
 export type Baseline = { spend: number; leads: number }
 
-export function makePlanner(settings: ClientSettings, base: Baseline) {
+export function makePlanner(settings: ClientSettings, base: Baseline, valuePerLead: number) {
   const e = settings.spendElasticity ?? DEFAULT_ELASTICITY
-  const valuePerClose = settings.avgHomePrice * settings.commissionRate * settings.agentSplit
-  const valuePerLead = settings.closeRate * valuePerClose
   const fee = settings.monthlyFee
 
   const leadsAt = (s: number) => (s <= 0 || base.spend <= 0 ? 0 : base.leads * (s / base.spend) ** e)
   const project = (s: number) => {
     const leads = leadsAt(s)
-    const commission = leads * valuePerLead
+    const value = leads * valuePerLead
     const cost = s + fee
     return {
       spend: s,
@@ -29,10 +30,9 @@ export function makePlanner(settings: ClientSettings, base: Baseline) {
       cpl: leads ? s / leads : 0,
       /** Cost of the next lead at this budget (derivative of spend w.r.t. leads). */
       marginalCpl: leads ? s / (e * leads) : 0,
-      commission,
+      value,
       cost,
-      roi: roiOf(commission, cost),
-      closings: leads * settings.closeRate,
+      roi: roiOf(value, s),
     }
   }
 
@@ -40,11 +40,11 @@ export function makePlanner(settings: ClientSettings, base: Baseline) {
   const min = roundTo(Math.max(250, base.spend * 0.25), 50)
   const max = roundTo(Math.max(min + 500, base.spend * 3), 50)
 
-  // Lowest monthly spend where estimated commission covers spend + fee.
+  // Lowest monthly spend where lead value covers spend + fee.
   let breakEven: number | null = null
   for (let s = 50; s <= max; s += 25) {
     const p = project(s)
-    if (p.commission >= p.cost) {
+    if (p.value >= p.cost) {
       breakEven = s
       break
     }
@@ -63,17 +63,17 @@ export function makePlanner(settings: ClientSettings, base: Baseline) {
   const current = project(base.spend)
   const up = project(base.spend * (1 + STEP_PCT))
   let recommendation: { spend: number; action: 'increase' | 'hold' | 'decrease'; reason: string }
-  if (current.commission < current.cost) {
+  if (current.value < current.cost) {
     recommendation = {
       spend: roundTo(base.spend * (1 - STEP_PCT), 50),
       action: 'decrease',
-      reason: 'This month’s estimated commission doesn’t cover spend + fee. Trim one step while we fix cost per lead.',
+      reason: 'This month’s lead value doesn’t cover spend + fee. Trim one step while we fix cost per lead.',
     }
   } else if (up.marginalCpl <= settings.industryCpl && up.roi >= 1) {
     recommendation = {
       spend: roundTo(base.spend * (1 + STEP_PCT), 50),
       action: 'increase',
-      reason: `Each extra lead would still cost about ${usdShort(up.marginalCpl)}, well under the ${usdShort(settings.industryCpl)} industry average. ROI % dips slightly as you scale, but total estimated commission grows.`,
+      reason: `Each extra lead would still cost about ${usdShort(up.marginalCpl)}, well under the ${usdShort(settings.industryCpl)} industry average. ROI % dips slightly as you scale, but total lead value grows.`,
     }
   } else {
     recommendation = {

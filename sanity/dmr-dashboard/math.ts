@@ -1,25 +1,38 @@
 /**
- * Report data shapes + the ROI math from the DMR monthly PDF report.
+ * Report data shapes + the ROI math.
  *
- * The math is deliberately a LOW estimate:
- *   value of one closing = avg home price × commission (one side) × agent split
- *   est. commission      = leads × close rate × value of one closing
- *   est. ROI             = (est. commission − (ad spend + fee)) ÷ (ad spend + fee),
- *                          floored at 0%
+ * What the leads are worth comes from Google Ads for every month the sync
+ * wrote conversion values for, $0 included: a synced month whose leads Ads
+ * put no value on is worth $0, not an estimate. Months without synced values
+ * (entered by hand, synced before v1.2.0) and accounts that have never
+ * reported any conversion value use the DMR monthly PDF's deliberately LOW
+ * estimate instead:
+ *   lead value (Google Ads) = the month's Google Ads conversion value
+ *   lead value (estimate)   = leads × close rate × value of one closing
+ *     value of one closing  = avg home price × commission (one side) × agent split
+ *   average lead value      = lead value ÷ leads
+ *   est. ROI                = lead value (conversion value) ÷ ad spend
  *
- * ROI never shows negative: 0% means no return yet (the estimated commission
- * didn't beat what was paid, down to $0 earned). Anything that has to know
- * whether a month lost money compares commission with cost directly.
+ * ROI is conversion value over ad spend only, the same ratio as Google Ads'
+ * "Conv. value / cost": 100% means the leads were worth what Google charged.
+ * The DMR fee is left out of ROI; break-even and "invested to date" still
+ * count it, so anything that has to know whether a month covered spend + fee
+ * compares value with cost directly.
  */
 
-/** Estimated ROI, floored at 0 (see above). */
-export const roiOf = (commission: number, cost: number) => (cost ? Math.max(0, (commission - cost) / cost) : 0)
+/** Estimated ROI: conversion value ÷ ad spend (see above). */
+export const roiOf = (value: number, adSpend: number) => (adSpend > 0 ? value / adSpend : 0)
+
+/** Where a month's lead value came from. */
+export type ValueSource = 'googleAds' | 'estimate'
 
 export type Campaign = {
   name: string
   subtitle?: string
   spend: number
   leads: number
+  /** Google Ads conversion value (written by the sync). */
+  value?: number
 }
 
 export type MonthReport = {
@@ -59,48 +72,87 @@ export function startMonth(dmrStartDate?: string | null): string | null {
   return dmrStartDate ? `${dmrStartDate.slice(0, 7)}-01` : null
 }
 
+/** How far into a month we are: `day` equals `days` for any month that's over. */
+export function monthProgress(month: string, now = new Date()) {
+  const y = Number(month.slice(0, 4))
+  const m = Number(month.slice(5, 7)) - 1
+  const days = new Date(y, m + 1, 0).getDate()
+  const inProgress = now.getFullYear() === y && now.getMonth() === m
+  return { day: inProgress ? now.getDate() : days, days }
+}
+
 export function monthTotals(m: MonthReport) {
   const spend = m.spendOverride ?? m.campaigns.reduce((s, c) => s + c.spend, 0)
   const leads = m.leadsOverride ?? m.campaigns.reduce((s, c) => s + c.leads, 0)
-  return { spend, leads, cpl: leads ? spend / leads : 0 }
+  /** Google Ads conversion value, $0 included; null when no campaign row carries one (manual or pre-v1.2.0 months). */
+  const adsValue = m.campaigns.some((c) => c.value != null) ? m.campaigns.reduce((s, c) => s + (c.value ?? 0), 0) : null
+  return { spend, leads, cpl: leads ? spend / leads : 0, adsValue }
 }
 
-export function computeDashboard(settings: ClientSettings, months: MonthReport[]) {
+/**
+ * Whether the Google Ads account reports conversion values at all. If no
+ * month ever had any, values aren't set up in Ads, and $0 everywhere would
+ * mean "not tracked", not "worthless": every month keeps the estimate.
+ * Pass every month, not just the ones up to the selected month, so the
+ * month picker can't flip it.
+ */
+export const usesAdsValues = (months: MonthReport[]) => months.some((m) => (monthTotals(m).adsValue ?? 0) > 0)
+
+export function computeDashboard(settings: ClientSettings, months: MonthReport[], adsValuesInUse = usesAdsValues(months)) {
   const sorted = [...months].sort((a, b) => a.month.localeCompare(b.month))
   const valuePerClose = settings.avgHomePrice * settings.commissionRate * settings.agentSplit
-  const commissionFor = (leads: number) => leads * settings.closeRate * valuePerClose
+  /** What one lead is worth when Google Ads has no conversion value to go on. */
+  const estimatedLeadValue = settings.closeRate * valuePerClose
 
   const rows = sorted.map((m) => {
     const t = monthTotals(m)
-    const commission = commissionFor(t.leads)
+    const valueSource: ValueSource = adsValuesInUse && t.adsValue != null ? 'googleAds' : 'estimate'
+    const value = valueSource === 'googleAds' ? t.adsValue ?? 0 : t.leads * estimatedLeadValue
     const cost = t.spend + settings.monthlyFee
-    return { ...m, ...t, commission, cost, roi: roiOf(commission, cost) }
+    return {
+      ...m,
+      ...t,
+      value,
+      valueSource,
+      avgLeadValue: t.leads ? value / t.leads : estimatedLeadValue,
+      cost,
+      roi: roiOf(value, t.spend),
+    }
   })
 
   const current = rows[rows.length - 1]
   const totalLeads = rows.reduce((s, r) => s + r.leads, 0)
   const totalSpend = rows.reduce((s, r) => s + r.spend, 0)
   const totalFees = settings.monthlyFee * rows.length
-  const totalCommission = commissionFor(totalLeads)
+  const totalValue = rows.reduce((s, r) => s + r.value, 0)
   const totalCost = totalSpend + totalFees
+  const adsMonths = rows.filter((r) => r.valueSource === 'googleAds').length
+  const launchLeadValue = totalLeads ? totalValue / totalLeads : estimatedLeadValue
+  /**
+   * The value the planner and break-even put on one lead: the selected month's
+   * average when it has leads, otherwise the since-launch average.
+   */
+  const leadValue = current?.leads ? current.avgLeadValue : launchLeadValue
 
   return {
     rows,
     current,
     valuePerClose,
+    estimatedLeadValue,
+    leadValue,
     launch: {
       firstMonth: rows[0]?.month,
       leads: totalLeads,
       spend: totalSpend,
       fees: totalFees,
-      closings: totalLeads * settings.closeRate,
-      commission: totalCommission,
+      value: totalValue,
+      avgLeadValue: launchLeadValue,
+      /** How many months' value came from Google Ads (the rest are estimates). */
+      adsMonths,
       cost: totalCost,
-      roi: roiOf(totalCommission, totalCost),
+      roi: roiOf(totalValue, totalSpend),
     },
-    breakEvenLeads: current
-      ? Math.ceil(current.cost / (settings.closeRate * valuePerClose))
-      : 0,
+    breakEvenLeads: current && leadValue ? Math.ceil(current.cost / leadValue) : 0,
     cplVsIndustry: current && settings.industryCpl
       ? 1 - current.cpl / settings.industryCpl
       : 0,

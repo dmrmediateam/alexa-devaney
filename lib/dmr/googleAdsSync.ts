@@ -11,7 +11,8 @@ import { envCustomerId, googleAdsConfigured, googleAdsSearch, listAccessibleCust
  * (Report Settings) on: ads that ran before DMR took over aren't ours. Each one's `campaigns`
  * array is replaced with what Ads reports; subtitles DMR typed by hand are
  * kept (matched by campaign id, then name), and so are the month's
- * overrides and footnote. "Leads" are Google Ads conversions, rounded.
+ * overrides and footnote. "Leads" are Google Ads conversions, rounded, and
+ * "value" is their Google Ads conversion value: the dashboard's ROI is built on it.
  */
 
 export const SETTINGS_ID = 'dmr-client-settings';
@@ -36,7 +37,7 @@ export interface SyncResult {
 interface CampaignRow {
   campaign?: { id?: string; name?: string };
   segments?: { month?: string };
-  metrics?: { costMicros?: string; conversions?: number };
+  metrics?: { costMicros?: string; conversions?: number; conversionsValue?: number };
 }
 
 interface StoredCampaign {
@@ -45,6 +46,8 @@ interface StoredCampaign {
   subtitle?: string;
   spend: number;
   leads: number;
+  /** Google Ads conversion value, in the account's currency. */
+  value: number;
   googleAdsCampaignId?: string;
 }
 
@@ -73,7 +76,7 @@ export async function syncGoogleAds(client: SanityClient, settings: SyncSettings
   try {
     rows = await googleAdsSearch<CampaignRow>(
       customerId,
-      'SELECT campaign.id, campaign.name, segments.month, metrics.cost_micros, metrics.conversions ' +
+      'SELECT campaign.id, campaign.name, segments.month, metrics.cost_micros, metrics.conversions, metrics.conversions_value ' +
         `FROM campaign WHERE segments.date BETWEEN '${isoDate(start)}' AND '${isoDate(now)}' ` +
         'AND metrics.impressions > 0',
     );
@@ -88,15 +91,16 @@ export async function syncGoogleAds(client: SanityClient, settings: SyncSettings
   }
 
   // month (YYYY-MM-01) -> campaign id -> totals
-  const byMonth = new Map<string, Map<string, { name: string; spend: number; leads: number }>>();
+  const byMonth = new Map<string, Map<string, { name: string; spend: number; leads: number; value: number }>>();
   for (const row of rows) {
     const month = row.segments?.month;
     const id = row.campaign?.id;
     if (!month || !id) continue;
     const campaigns = byMonth.get(month) ?? new Map();
-    const entry = campaigns.get(id) ?? { name: row.campaign?.name ?? `Campaign ${id}`, spend: 0, leads: 0 };
+    const entry = campaigns.get(id) ?? { name: row.campaign?.name ?? `Campaign ${id}`, spend: 0, leads: 0, value: 0 };
     entry.spend += Number(row.metrics?.costMicros ?? 0) / 1_000_000;
     entry.leads += Number(row.metrics?.conversions ?? 0);
+    entry.value += Number(row.metrics?.conversionsValue ?? 0);
     campaigns.set(id, entry);
     byMonth.set(month, campaigns);
   }
@@ -123,6 +127,7 @@ export async function syncGoogleAds(client: SanityClient, settings: SyncSettings
           ...(prior?.subtitle ? { subtitle: prior.subtitle } : {}),
           spend: Math.round(c.spend * 100) / 100,
           leads: Math.round(c.leads),
+          value: Math.round(c.value * 100) / 100,
           googleAdsCampaignId: id,
         };
       })

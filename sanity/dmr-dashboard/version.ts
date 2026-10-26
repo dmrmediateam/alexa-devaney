@@ -7,4 +7,4 @@
  * /api/dmr/version). The two drift apart because a git push redeploys the
  * site but not the hosted Studio, which needs `npm run sanity:deploy`.
  */
-export const DMR_PORTAL_VERSION = '1.1.2'
+export const DMR_PORTAL_VERSION = '1.3.0'

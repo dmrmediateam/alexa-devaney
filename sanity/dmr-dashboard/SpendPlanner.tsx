@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { CheckmarkCircleIcon, ControlsIcon, EnvelopeIcon, InfoOutlineIcon, WarningOutlineIcon } from '@sanity/icons'
 import { Badge, Box, Button, Card, Dialog, Flex, Stack, Text, TextArea } from '@sanity/ui'
-import { monthLabel, num, pct, usd, type ClientSettings, type computeDashboard } from './math'
+import { AverageLeadValue } from './AverageLeadValue'
+import { monthLabel, monthProgress, num, pct, usd, type ClientSettings, type computeDashboard } from './math'
 import { makePlanner, STEP_PCT, type Baseline } from './planner'
 import { SpendKnob, type KnobZone } from './SpendKnob'
 import { DMR_EMAIL } from './tokens'
@@ -23,12 +24,8 @@ export function SpendPlanner({
   submitBudgetRequest: SubmitBudgetRequest
 }) {
   const cur = d.current
-  // Anchor on the selected month; fall back to the since-launch monthly average if it has no data.
-  const base: Baseline =
-    cur.spend > 0 && cur.leads > 0
-      ? { spend: cur.spend, leads: cur.leads }
-      : { spend: d.launch.spend / d.rows.length, leads: d.launch.leads / d.rows.length }
-  const p = makePlanner(settings, base)
+  const { base, valuePerLead, basis } = plannerAnchor(d)
+  const p = makePlanner(settings, base, valuePerLead)
   const [value, setValue] = useState(base.spend)
   const [send, setSend] = useState<SendState>({ phase: 'idle' })
   const [note, setNote] = useState('')
@@ -60,17 +57,16 @@ export function SpendPlanner({
     { label: 'Leads per month', now: num(now.leads), next: num(next.leads), delta: signed(next.leads - now.leads, (n) => num(n)), good: next.leads >= now.leads },
     { label: 'Cost per lead', now: usd(now.cpl), next: usd(next.cpl), delta: signed(next.cpl - now.cpl, usd), good: next.cpl <= now.cpl },
     { label: 'Cost of the next lead', now: usd(now.marginalCpl), next: usd(next.marginalCpl) },
-    { label: 'Est. closings per month', now: num(now.closings, 2), next: num(next.closings, 2) },
-    { label: 'Est. commission', now: usd(now.commission), next: usd(next.commission), delta: signed(next.commission - now.commission, usd), good: next.commission >= now.commission },
+    { label: 'Lead value', now: usd(now.value), next: usd(next.value), delta: signed(next.value - now.value, usd), good: next.value >= now.value },
     { label: 'Invested (spend + fee)', now: usd(now.cost), next: usd(next.cost) },
-    { label: 'Est. return after costs', now: usd(now.commission - now.cost), next: usd(next.commission - next.cost), delta: signed(next.commission - next.cost - (now.commission - now.cost), usd), good: next.commission - next.cost >= now.commission - now.cost },
+    { label: 'Est. return after costs', now: usd(now.value - now.cost), next: usd(next.value - next.cost), delta: signed(next.value - next.cost - (now.value - now.cost), usd), good: next.value - next.cost >= now.value - now.cost },
   ]
 
   const guidelines = [
     {
       ok: next.leads >= breakEvenLeads,
       title: `Need ${num(breakEvenLeads)} leads at this budget`,
-      body: `That's what covers ${usd(next.cost)} in spend + fee at a ${pct(settings.closeRate)} close rate. Projected: ${num(next.leads)}.`,
+      body: `That's what covers ${usd(next.cost)} in spend + fee at ${usd(p.valuePerLead)} average lead value. Projected: ${num(next.leads)}.`,
     },
     {
       ok: Math.abs(change) <= STEP_PCT + 0.02, // small allowance for rounding to $50
@@ -120,7 +116,7 @@ export function SpendPlanner({
         currentSpend: Math.round(base.spend),
         requestedSpend: Math.round(value),
         baselineMonth: cur.month,
-        projection: { leads: next.leads, cpl: next.cpl, roi: next.roi, commission: next.commission },
+        projection: { leads: next.leads, cpl: next.cpl, roi: next.roi, commission: next.value },
         note,
       })
       setSend({ phase: 'done', status: res.status, spend: value })
@@ -208,7 +204,7 @@ export function SpendPlanner({
               <Card padding={3} radius={2} tone="transparent" border>
                 <Stack space={3}>
                   <Text size={1}>~{num(next.leads)} leads/mo · {usd(next.cpl)} cost per lead · {pct(next.roi)} est. ROI</Text>
-                  <Text size={1} muted>Projection from your {monthLabel(cur.month)} numbers.</Text>
+                  <Text size={1} muted>Projection from {basis}.</Text>
                 </Stack>
               </Card>
               <Stack space={2}>
@@ -270,7 +266,7 @@ export function SpendPlanner({
           <Box padding={4} paddingBottom={3}>
             <Flex align="baseline" justify="space-between" gap={3} wrap="wrap">
               <Text size={1} weight="semibold">Estimated ROI</Text>
-              <Text size={1} muted>based on {monthLabel(cur.month)}</Text>
+              <Text size={1} muted>based on {basis}</Text>
             </Flex>
             <Flex gap={5} marginTop={4} wrap="wrap" align="flex-end">
               <Stack space={3}>
@@ -350,12 +346,51 @@ export function SpendPlanner({
         <Text size={1} muted><InfoOutlineIcon /></Text>
         <Text size={1} muted>
           Projection assumes leads grow with budget at diminishing returns (efficiency {p.e}: doubling spend gives about {num(2 ** p.e, 1)}× the leads),
-          anchored on {monthLabel(cur.month)}. Commission uses the same low estimate as your report. Real results depend on search volume in your market;
+          anchored on {basis}. Each lead is valued at {usd(p.valuePerLead)}, your average lead value below. Real results depend on search volume in your market;
           your DMR team confirms any change before it goes live.
         </Text>
       </Flex>
+
+      <AverageLeadValue settings={settings} d={d} plannerValue={p.valuePerLead} />
     </Stack>
   )
+}
+
+const MIN_DAYS_TO_PACE = 7
+
+/**
+ * The full month the planner projects from. A month still in progress is
+ * paced out to the whole month (its spend and leads so far ÷ share of the
+ * month gone), since the dial is a monthly budget; with under a week of data
+ * that's too noisy, so the previous month is used instead. A month with no
+ * spend or leads falls back to the since-launch monthly average.
+ */
+function plannerAnchor(d: Dash): { base: Baseline; valuePerLead: number; basis: string } {
+  const cur = d.current
+  const prev = d.rows[d.rows.length - 2]
+  const { day, days } = monthProgress(cur.month)
+  const usable = (r?: Dash['current']) => Boolean(r && r.spend > 0 && r.leads > 0)
+
+  if (day < days && day < MIN_DAYS_TO_PACE && usable(prev)) {
+    return {
+      base: { spend: prev.spend, leads: prev.leads },
+      valuePerLead: prev.avgLeadValue,
+      basis: `${monthLabel(prev.month)} (${monthLabel(cur.month, 'short')} has under a week of data)`,
+    }
+  }
+  if (usable(cur)) {
+    const pace = days / day
+    return {
+      base: { spend: cur.spend * pace, leads: cur.leads * pace },
+      valuePerLead: cur.avgLeadValue,
+      basis: day < days ? `${monthLabel(cur.month)} so far, paced to a full month (day ${day} of ${days})` : monthLabel(cur.month),
+    }
+  }
+  return {
+    base: { spend: d.launch.spend / d.rows.length, leads: d.launch.leads / d.rows.length },
+    valuePerLead: d.launch.avgLeadValue,
+    basis: 'your since-launch monthly average',
+  }
 }
 
 function signed(n: number, fmt: (n: number) => string) {

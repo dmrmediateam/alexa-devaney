@@ -7,7 +7,7 @@ import { sampleMonths, sampleSettings } from './sampleData'
 const QUERY = `{
   "settings": *[_id == "dmr-client-settings"][0],
   "months": *[_type == "dmrMonthlyReport" && defined(month)] | order(month asc)[0...24]{
-    month, campaigns[]{name, subtitle, spend, leads}, spendOverride, leadsOverride, footnote
+    month, campaigns[]{name, subtitle, spend, leads, value}, spendOverride, leadsOverride, footnote
   },
   "leadMonths": *[_type == "dmrLead" && defined(month)].month
 }`
