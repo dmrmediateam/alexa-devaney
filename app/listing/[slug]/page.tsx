@@ -109,6 +109,7 @@ export default async function ListingPage({ params }: Params) {
           consent={site.footer.newsletter.consent}
           agentName={site.footer.agentName}
           photo={listing.photos[0]?.url}
+          listingUrl={listing.detailUrl}
           freeViews={site.listingGate.freeViews}
           dismissible={site.listingGate.dismissible}
           heading={site.listingGate.heading}

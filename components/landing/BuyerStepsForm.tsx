@@ -4,6 +4,7 @@ import { useState } from "react";
 import Honeypot from "@/components/leads/Honeypot";
 import { site } from "@/content/site";
 import { getAttribution } from "@/lib/attribution";
+import { formElapsedMs } from "@/lib/leads/phone";
 import { fireLeadConversion, parsePriceBand, setUserData, trackEvent } from "@/lib/analytics";
 
 /*
@@ -53,6 +54,7 @@ export default function BuyerStepsForm() {
           page: window.location.pathname + window.location.search,
           // Carries the gclid into the CRM so a closing can be reported back
           attribution: getAttribution(),
+          elapsedMs: formElapsedMs(),
         }),
       });
       if (!res.ok) throw new Error("request failed");

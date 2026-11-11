@@ -78,6 +78,22 @@ Honeypot decoys plus a heuristic filter (`lib/spam-filter.ts`) plus per-IP rate
 limiting in `middleware.ts`. Blocked submissions get the same success-shaped
 response as real ones, so a bot gets no signal to retune. No CAPTCHA.
 
+Beyond the honeypot, every lead is checked for:
+
+- **Fill timer.** Every form sends `elapsedMs` (time since page load,
+  `formElapsedMs()` in `lib/leads/phone.ts`). Under 2 seconds is a script;
+  missing entirely means something posted straight at the API without ever
+  loading the page. A new form that skips `useLeadSubmit` must send it too, or
+  every submission from it is dropped as spam.
+- **US / Canada phone on the listing gate** (`US_PHONE_FORMS`). The gate tells
+  a real visitor before submitting; the server silently drops anything that
+  gets past that. Other forms accept international numbers.
+- **Digits in the name** ("Br 2 Cola").
+- **Email domain that cannot receive mail** (`lib/leads/emailDomain.ts`, DNS
+  MX lookup). This one returns a 422 instead of a fake success, so a real
+  person who typed "gmial.con" is told to fix it. It fails open on DNS
+  trouble.
+
 The honeypot's hiding rule lives in `app/globals.css` and must stay global:
 the component renders on every page via the footer, and a page-scoped rule
 leaves the decoy "Company" and "Website" inputs visible to real visitors.

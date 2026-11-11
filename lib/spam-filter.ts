@@ -8,13 +8,29 @@
  */
 
 import "server-only";
+import { isUsPhone } from "@/lib/leads/phone";
 
 const MAX_FIELD_LENGTHS = { name: 120, email: 120, phone: 32, message: 5_000 };
 
 const DISPOSABLE_EMAIL_DOMAINS = new Set([
   "10minutemail.com", "guerrillamail.com", "mailinator.com",
   "tempmail.com", "temp-mail.org", "yopmail.com",
+  "bey2.com", // listing-gate spam, Nov 2026
 ]);
+
+/*
+ * Forms that only make sense for someone shopping homes here. A non-US/Canada
+ * phone on these is a junk fill: the form itself tells a real visitor so before
+ * it ever submits, so only scripts and hand-typed junk reach this check.
+ */
+const US_PHONE_FORMS = new Set(["listing-registration"]);
+
+/*
+ * Faster than this from page load to submit is a script, not a person typing a
+ * name, email and phone. Kept low on purpose: browser autofill is quick, and
+ * the timer starts at page load, not when the form opened.
+ */
+const MIN_FILL_MS = 2_000;
 
 const BLOCKED_TEXT_PATTERNS = [
   /\b(?:seo|backlinks?|guest post|crypto|forex|casino|viagra|porn|escort)\b/i,
@@ -88,6 +104,18 @@ export function isSpam(body: Record<string, unknown>): string[] {
   const digits = normalizeDigits(phone);
   if (phone && (digits.length < 7 || digits.length > 15 || /^(\d)\1+$/.test(digits)))
     reasons.push("bad-phone");
+
+  // Fill timer: sent by every form on the site. Missing means the request never
+  // came from our page at all (a script posting straight at the API).
+  const elapsed = body.elapsedMs;
+  if (typeof elapsed !== "number" || !Number.isFinite(elapsed)) reasons.push("no-fill-timer");
+  else if (elapsed < MIN_FILL_MS) reasons.push("filled-too-fast");
+
+  if (phone && US_PHONE_FORMS.has(asString(body.formType)) && !isUsPhone(phone))
+    reasons.push("non-us-phone");
+
+  // "Br 2 Cola": real names do not carry digits
+  if (/\d/.test(name)) reasons.push("digits-in-name");
 
   if (looksLikeSpamText(userText)) reasons.push("spam-text");
   if (looksLikeRandomToken(name)) reasons.push("random-token-name");

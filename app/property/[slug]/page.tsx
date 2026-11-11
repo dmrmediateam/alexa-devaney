@@ -148,20 +148,23 @@ export default async function PropertyPage({ params }: Params) {
           showPrices
         />
       )}
-      {/* Portfolio pages carry a heart too, so they need something to ask
-          with. Browsing a sold home is not gated: autoOpen stays off. */}
+      {/* Ask on arrival, same as a live listing: most homepage listing clicks
+          land here, and these were the pages letting every visitor through
+          unasked. A sold home is still a lead (a neighbour, a buyer who
+          missed it), and the gate's copy reads right for either. */}
       {site.listingGate?.enabled && (
         <ListingLeadGate
           address={listing.address}
           mlsNumber={detail.mlsNumber}
           price={detail.price}
           photo={detail.photos[0]?.url}
+          listingUrl={listing.href}
           consent={site.footer.newsletter.consent}
           agentName={site.footer.agentName}
           heading={site.listingGate.heading}
           subheading={site.listingGate.subheading}
+          freeViews={site.listingGate.freeViews}
           dismissible={site.listingGate.dismissible}
-          autoOpen={false}
         />
       )}
     </SiteChrome>

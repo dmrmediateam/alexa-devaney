@@ -10,7 +10,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const FORM_POST_ENDPOINTS = new Set<string>(["/api/lead"]);
+const FORM_POST_ENDPOINTS = new Set<string>(["/api/lead", "/api/dmr/budget-request"]);
 /* Activity beacons, not submissions: a visitor working through a results page
    fires these far faster than any form, so they get their own, looser bucket. */
 const TRACK_POST_ENDPOINTS = new Set<string>(["/api/track"]);
@@ -19,6 +19,7 @@ const RATE_LIMIT_MAX = 15;
 const TRACK_RATE_LIMIT_MAX = 120;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const formSubmissions = new Map<string, number[]>();
+const trackBeacons = new Map<string, number[]>();
 
 function getClientIp(request: NextRequest): string {
   const forwardedFor = request.headers.get("x-forwarded-for");
@@ -26,50 +27,38 @@ function getClientIp(request: NextRequest): string {
   return request.headers.get("x-real-ip")?.trim() || "unknown";
 }
 
-const trackBeacons = new Map<string, number[]>();
-
-function isFormRateLimited(ip: string): boolean {
+function isRateLimited(bucket: Map<string, number[]>, ip: string, max: number): boolean {
   const now = Date.now();
-  const history = (formSubmissions.get(ip) ?? []).filter(
-    (t) => now - t < RATE_LIMIT_WINDOW_MS,
-  );
+  const history = (bucket.get(ip) ?? []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
   history.push(now);
-  formSubmissions.set(ip, history);
+  bucket.set(ip, history);
 
-  if (formSubmissions.size > 2_000) {
-    formSubmissions.forEach((stamps, key) => {
-      if (stamps.every((t) => now - t >= RATE_LIMIT_WINDOW_MS)) formSubmissions.delete(key);
+  if (bucket.size > 2_000) {
+    bucket.forEach((stamps, key) => {
+      if (stamps.every((t) => now - t >= RATE_LIMIT_WINDOW_MS)) bucket.delete(key);
     });
   }
 
-  return history.length > RATE_LIMIT_MAX;
+  return history.length > max;
 }
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  /* A throttled beacon is dropped, never surfaced: the page it came from is
-     already on screen and an error here would be noise the visitor cannot act on. */
-  if (request.method === "POST" && TRACK_POST_ENDPOINTS.has(pathname)) {
-    const now = Date.now();
-    const ip = getClientIp(request);
-    const history = (trackBeacons.get(ip) ?? []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-    history.push(now);
-    trackBeacons.set(ip, history);
-    if (trackBeacons.size > 2_000) {
-      trackBeacons.forEach((stamps, key) => {
-        if (stamps.every((t) => now - t >= RATE_LIMIT_WINDOW_MS)) trackBeacons.delete(key);
-      });
-    }
-    if (history.length > TRACK_RATE_LIMIT_MAX) return new NextResponse(null, { status: 204 });
-  }
-
   if (request.method === "POST" && FORM_POST_ENDPOINTS.has(pathname)) {
-    if (isFormRateLimited(getClientIp(request))) {
+    if (isRateLimited(formSubmissions, getClientIp(request), RATE_LIMIT_MAX)) {
       return NextResponse.json(
         { error: "Too many submissions. Please wait a moment and try again." },
         { status: 429 },
       );
+    }
+  }
+
+  /* A throttled beacon is dropped, never surfaced: the page it came from is
+     already on screen and an error here would be noise the visitor cannot act on. */
+  if (request.method === "POST" && TRACK_POST_ENDPOINTS.has(pathname)) {
+    if (isRateLimited(trackBeacons, getClientIp(request), TRACK_RATE_LIMIT_MAX)) {
+      return new NextResponse(null, { status: 204 });
     }
   }
 

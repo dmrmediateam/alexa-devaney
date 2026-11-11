@@ -4,6 +4,7 @@ import { useState } from "react";
 import { getAttribution } from "@/lib/attribution";
 import { LEAD_VALUES, fireLeadConversion, setUserData, trackEvent, type ConversionEvent } from "@/lib/analytics";
 import { qualify } from "@/lib/leads/qualify";
+import { formElapsedMs } from "@/lib/leads/phone";
 
 export type LeadStatus = "idle" | "submitting" | "done" | "error";
 
@@ -17,10 +18,14 @@ export type LeadStatus = "idle" | "submitting" | "done" | "error";
  */
 export function useLeadSubmit(formType: string, event: ConversionEvent = "generate_lead") {
   const [status, setStatus] = useState<LeadStatus>("idle");
+  /* Set when the server rejected a field the visitor can fix (an email domain
+     that does not exist), so the form can say what to change. */
+  const [errorField, setErrorField] = useState<"email" | null>(null);
 
   /** homeValue: the price of the home this lead is about, when the form knows it */
   async function submit(fields: Record<string, unknown>, homeValue?: number): Promise<boolean> {
     setStatus("submitting");
+    setErrorField(null);
     const payload = { formType, ...fields };
     try {
       const res = await fetch("/api/lead", {
@@ -30,8 +35,14 @@ export function useLeadSubmit(formType: string, event: ConversionEvent = "genera
           ...payload,
           page: window.location.pathname + window.location.search,
           attribution: getAttribution(),
+          elapsedMs: formElapsedMs(),
         }),
       });
+      if (res.status === 422) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        if (body.error === "email") setErrorField("email");
+        throw new Error("rejected");
+      }
       if (!res.ok) throw new Error("request failed");
 
       const email = typeof fields.email === "string" ? fields.email : undefined;
@@ -55,5 +66,5 @@ export function useLeadSubmit(formType: string, event: ConversionEvent = "genera
     }
   }
 
-  return { status, submit };
+  return { status, submit, errorField };
 }

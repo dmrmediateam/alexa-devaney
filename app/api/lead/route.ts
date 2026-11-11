@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isSpam } from "@/lib/spam-filter";
 import { emailAgent, emailLead, smsAgent } from "@/lib/leads/notify";
+import { emailDomainAcceptsMail } from "@/lib/leads/emailDomain";
 import { LEAD_CAPTURED_COOKIE } from "@/lib/leads/captured";
 import { VISITOR_COOKIE } from "@/lib/tracking/visitor";
 import { identify } from "@/lib/tracking/store";
@@ -81,7 +82,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, filtered: true }, { status: 200 });
   }
 
-  const { company: _company, website: _website, attribution, ...lead } = body;
+  /*
+   * An email whose domain cannot receive mail is a typo or a made-up address.
+   * Unlike the spam checks above this one answers honestly, so a real person
+   * who fat-fingered "gmial.con" is told to fix it rather than vanishing.
+   */
+  if (typeof body.email === "string" && body.email.trim() && !(await emailDomainAcceptsMail(body.email))) {
+    console.warn("[Lead] rejected unreachable email domain", { formType: body.formType });
+    return NextResponse.json({ success: false, error: "email" }, { status: 422 });
+  }
+
+  const { company: _company, website: _website, elapsedMs: _elapsed, attribution, ...lead } = body;
 
   // Click ids are lifted to the top level: Zapier maps flat fields cleanly, and
   // the gclid is the one field that lets a closed deal be reported back to Ads.

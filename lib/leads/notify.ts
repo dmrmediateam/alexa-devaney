@@ -28,6 +28,7 @@ const FORM_LABELS: Record<string, string> = {
   "home-value": "Seller / home value",
   buyer: "Buyer enquiry",
   "listing-inquiry": "Listing enquiry",
+  "listing-registration": "Listing registration",
   contact: "Contact form",
   "experience-inquiry": "Experience enquiry",
   newsletter: "Newsletter signup",

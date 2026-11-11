@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Honeypot from "@/components/leads/Honeypot";
 import { useLeadSubmit } from "@/lib/leads/useLeadSubmit";
+import { isUsPhone } from "@/lib/leads/phone";
 import {
   LISTING_VIEWS_STORAGE,
   hasCapturedFlag,
@@ -112,7 +113,7 @@ export default function ListingLeadGate({
   /* Set when a heart opened this rather than the view counter: the modal then
      shows the home they just tried to save, not whatever page they are on. */
   const [pending, setPending] = useState<TrackedListing | null>(null);
-  const { status, submit } = useLeadSubmit("listing-registration", "listing_registration");
+  const { status, submit, errorField } = useLeadSubmit("listing-registration", "listing_registration");
   const dialogRef = useRef<HTMLDivElement | null>(null);
   /* Read once per mount: reading it during render would flip the escape hatch
      on mid-modal if another tab wrote to storage. */
@@ -178,7 +179,17 @@ export default function ListingLeadGate({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    /* US / Canada numbers only: this is for people shopping homes here, and
+       the server drops anything else silently. Saying so here is what keeps a
+       real visitor from losing their registration to that rule. */
+    const phoneInput = form.elements.namedItem("phone") as HTMLInputElement | null;
+    if (phoneInput && !isUsPhone(phoneInput.value)) {
+      phoneInput.setCustomValidity("Please enter a 10-digit US phone number.");
+      phoneInput.reportValidity();
+      return;
+    }
+    const data = new FormData(form);
     const ok = await submit({
       name: String(data.get("name") ?? "").trim(),
       email: String(data.get("email") ?? "").trim(),
@@ -249,7 +260,15 @@ export default function ListingLeadGate({
             <Honeypot idSuffix="listing-gate" />
             <input name="name" type="text" placeholder="Full Name" autoComplete="name" required />
             <input name="email" type="email" placeholder="Email" autoComplete="email" required />
-            <input name="phone" type="tel" placeholder="Phone" autoComplete="tel" required />
+            <input
+              name="phone"
+              type="tel"
+              placeholder="Phone"
+              autoComplete="tel"
+              inputMode="tel"
+              required
+              onInput={(e) => e.currentTarget.setCustomValidity("")}
+            />
             <label className="gate__consent">
               <input type="checkbox" name="termsAccepted" required />
               <span>{consent}</span>
@@ -258,7 +277,11 @@ export default function ListingLeadGate({
               {status === "submitting" ? "Just a moment…" : shownSubmit}
             </button>
             {status === "error" && (
-              <p className="gate__error">Something went wrong. Please try again.</p>
+              <p className="gate__error" role="alert">
+                {errorField === "email"
+                  ? "That email address doesn\u2019t look right. Please check it and try again."
+                  : "Something went wrong. Please try again."}
+              </p>
             )}
             <p className="gate__trust">Your details stay with {agentName}. Never sold, never shared.</p>
           </form>
